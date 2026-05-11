@@ -292,8 +292,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV4020();
         case '4.0.2':
           $this->instalarV4100();
-        case '4.1.0':
-          $this->instalarV4110();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2710,112 +2708,107 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objBD->alterar($objTarefaOrdemArvoreDTO);
       }
       
-      $this->atualizarNumeroVersao("4.1.0");
-  }
-
-  protected function instalarV4110()
-    {
-      $objMetaBanco = $this->inicializarObjMetaBanco();
       $objInfraBanco = BancoSEI::getInstance();
 
-    if (!$objMetaBanco->isTabelaExiste('md_pen_anexo_documento')) {
-      $objMetaBanco->criarTabela([
-        'tabela' => 'md_pen_anexo_documento',
-        'cols' => [
-          'id_anexo' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-          'nome' => [$objMetaBanco->tipoTextoVariavel(255), PenMetaBD::NNULLO],
-          'id_protocolo' => [$objMetaBanco->tipoNumeroGrande(), PenMetaBD::SNULLO],
-          'sin_ativo' => [$objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO],
-          'id_unidade' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-          'id_usuario' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-          'tamanho' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-          'dth_inclusao' => [$objMetaBanco->tipoDataHora(), PenMetaBD::NNULLO],
-          'id_base_conhecimento' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
-          'id_projeto' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
-          'hash' => [$objMetaBanco->tipoTextoFixo(32), PenMetaBD::NNULLO]
-        ],
-        'pk' => ['cols' => ['id_anexo']]
-      ]);
-    
-      $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from md_pen_anexo_documento');
-      $numMaxId = $rs[0]['total'] ?? 0;
-      $objInfraBanco->criarSequencialNativa('md_pen_seq_anexo_documento', $numMaxId + 1);
-
-      $objInfraSequenciaRN = new InfraSequenciaRN();
-      $objInfraSequenciaDTO = new InfraSequenciaDTO();
-      $objInfraSequenciaDTO->setStrNome('md_pen_anexo_documento');
-      $objInfraSequenciaDTO->retStrNome();
-      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-      if (!empty($arrObjInfraSequenciaDTO)) {
-        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-      }
-        $arrObjAnexoDocumentosInternosDTO = $this->listarAnexoDocumentosInternos();
-      if (!empty($arrObjAnexoDocumentosInternosDTO)) {
-        $objPenAnexoDocumentoRN = new PenAnexoDocumentoRN();
-        $objAnexoRN = new AnexoRN();
-        $objAnexoBD = new AnexoBD(BancoSEI::getInstance());
-        foreach($arrObjAnexoDocumentosInternosDTO as $objAnexoDocumentoInternoDTO) {
-          $objPenAnexoDocumentoDTO = new PenAnexoDocumentoDTO();
-          $objPenAnexoDocumentoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
-          $objPenAnexoDocumentoDTO->setStrNome($objAnexoDocumentoInternoDTO['nome']);
-          $objPenAnexoDocumentoDTO->setDblIdProtocolo($objAnexoDocumentoInternoDTO['id_protocolo']);
-          $objPenAnexoDocumentoDTO->setStrSinAtivo($objAnexoDocumentoInternoDTO['sin_ativo']);
-          $objPenAnexoDocumentoDTO->setNumIdUnidade($objAnexoDocumentoInternoDTO['id_unidade']);
-          $objPenAnexoDocumentoDTO->setNumIdUsuario($objAnexoDocumentoInternoDTO['id_usuario']);
-          $objPenAnexoDocumentoDTO->setNumTamanho($objAnexoDocumentoInternoDTO['tamanho']);
-          $objPenAnexoDocumentoDTO->setDthInclusao(DateTime::createFromFormat('Y-m-d H:i:s', $objAnexoDocumentoInternoDTO['dth_inclusao'])->format('d/m/Y H:i:s'));
-          $objPenAnexoDocumentoDTO->setNumIdBaseConhecimento($objAnexoDocumentoInternoDTO['id_base_conhecimento']);
-          $objPenAnexoDocumentoDTO->setNumIdProjeto($objAnexoDocumentoInternoDTO['id_projeto']);
-          $objPenAnexoDocumentoDTO->setStrHash($objAnexoDocumentoInternoDTO['hash']);
-              
-          $objPenAnexoDocumentoRN->cadastrar($objPenAnexoDocumentoDTO);
-
-          $objAnexoDTO = new AnexoDTO();
-          $objAnexoDTO->retNumIdAnexo();
-          $objAnexoDTO->retDblIdProtocolo();
-          $objAnexoDTO->retNumIdUnidade();
-          $objAnexoDTO->retNumIdUsuario();
-          $objAnexoDTO->retStrNome();
-          $objAnexoDTO->retDblIdProtocolo();
-          $objAnexoDTO->retDthInclusao();
-          $objAnexoDTO->retNumTamanho();
-          $objAnexoDTO->retStrHash();
-          $objAnexoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
-
-          $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
-            
-          $strCaminhoNomeArquivo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
-          $objPenAnexoDocumentoRN->consolidarAnexoFilesystemModuloPen($objPenAnexoDocumentoDTO, $strCaminhoNomeArquivo);
-          $objAnexoBD->excluir($objAnexoDTO);
+      if (!$objMetaBanco->isTabelaExiste('md_pen_anexo_documento')) {
+        $objMetaBanco->criarTabela([
+          'tabela' => 'md_pen_anexo_documento',
+          'cols' => [
+            'id_anexo' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+            'nome' => [$objMetaBanco->tipoTextoVariavel(255), PenMetaBD::NNULLO],
+            'id_protocolo' => [$objMetaBanco->tipoNumeroGrande(), PenMetaBD::SNULLO],
+            'sin_ativo' => [$objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO],
+            'id_unidade' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+            'id_usuario' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+            'tamanho' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+            'dth_inclusao' => [$objMetaBanco->tipoDataHora(), PenMetaBD::NNULLO],
+            'id_base_conhecimento' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
+            'id_projeto' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
+            'hash' => [$objMetaBanco->tipoTextoFixo(32), PenMetaBD::NNULLO]
+          ],
+          'pk' => ['cols' => ['id_anexo']]
+        ]);
+      
+        $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from md_pen_anexo_documento');
+        $numMaxId = $rs[0]['total'] ?? 0;
+        $objInfraBanco->criarSequencialNativa('md_pen_seq_anexo_documento', $numMaxId + 1);
+  
+        $objInfraSequenciaRN = new InfraSequenciaRN();
+        $objInfraSequenciaDTO = new InfraSequenciaDTO();
+        $objInfraSequenciaDTO->setStrNome('md_pen_anexo_documento');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        if (!empty($arrObjInfraSequenciaDTO)) {
+          $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
         }
+          $arrObjAnexoDocumentosInternosDTO = $this->listarAnexoDocumentosInternos();
+        if (!empty($arrObjAnexoDocumentosInternosDTO)) {
+          $objPenAnexoDocumentoRN = new PenAnexoDocumentoRN();
+          $objAnexoRN = new AnexoRN();
+          $objAnexoBD = new AnexoBD(BancoSEI::getInstance());
+          foreach($arrObjAnexoDocumentosInternosDTO as $objAnexoDocumentoInternoDTO) {
+            $objPenAnexoDocumentoDTO = new PenAnexoDocumentoDTO();
+            $objPenAnexoDocumentoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
+            $objPenAnexoDocumentoDTO->setStrNome($objAnexoDocumentoInternoDTO['nome']);
+            $objPenAnexoDocumentoDTO->setDblIdProtocolo($objAnexoDocumentoInternoDTO['id_protocolo']);
+            $objPenAnexoDocumentoDTO->setStrSinAtivo($objAnexoDocumentoInternoDTO['sin_ativo']);
+            $objPenAnexoDocumentoDTO->setNumIdUnidade($objAnexoDocumentoInternoDTO['id_unidade']);
+            $objPenAnexoDocumentoDTO->setNumIdUsuario($objAnexoDocumentoInternoDTO['id_usuario']);
+            $objPenAnexoDocumentoDTO->setNumTamanho($objAnexoDocumentoInternoDTO['tamanho']);
+            $objPenAnexoDocumentoDTO->setDthInclusao(DateTime::createFromFormat('Y-m-d H:i:s', $objAnexoDocumentoInternoDTO['dth_inclusao'])->format('d/m/Y H:i:s'));
+            $objPenAnexoDocumentoDTO->setNumIdBaseConhecimento($objAnexoDocumentoInternoDTO['id_base_conhecimento']);
+            $objPenAnexoDocumentoDTO->setNumIdProjeto($objAnexoDocumentoInternoDTO['id_projeto']);
+            $objPenAnexoDocumentoDTO->setStrHash($objAnexoDocumentoInternoDTO['hash']);
+                
+            $objPenAnexoDocumentoRN->cadastrar($objPenAnexoDocumentoDTO);
+  
+            $objAnexoDTO = new AnexoDTO();
+            $objAnexoDTO->retNumIdAnexo();
+            $objAnexoDTO->retDblIdProtocolo();
+            $objAnexoDTO->retNumIdUnidade();
+            $objAnexoDTO->retNumIdUsuario();
+            $objAnexoDTO->retStrNome();
+            $objAnexoDTO->retDblIdProtocolo();
+            $objAnexoDTO->retDthInclusao();
+            $objAnexoDTO->retNumTamanho();
+            $objAnexoDTO->retStrHash();
+            $objAnexoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
+  
+            $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
+              
+            $strCaminhoNomeArquivo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+            $objPenAnexoDocumentoRN->consolidarAnexoFilesystemModuloPen($objPenAnexoDocumentoDTO, $strCaminhoNomeArquivo);
+            $objAnexoBD->excluir($objAnexoDTO);
+          }
+        }
+  
+          // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
+          $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
+          $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos mod-sei-pen excluídos.');
+          $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosExcluidosModSeiPen');
+          $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
+          $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('4');
+          $objInfraAgendamentoDTO->setStrSinAtivo('S');
+          $objInfraAgendamentoDTO->setStrSinSucesso('S');
+  
+          $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
+          $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
+  
+          // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
+          $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
+          $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos com mais de 24 horas criados pelo e que ainda não foram utilizados.');
+          $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosNaoUtilizadosModSeiPen');
+          $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
+          $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('5');
+          $objInfraAgendamentoDTO->setStrSinAtivo('S');
+          $objInfraAgendamentoDTO->setStrSinSucesso('S');
+  
+          $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
+          $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
+  
       }
-
-        // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
-        $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
-        $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos mod-sei-pen excluídos.');
-        $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosExcluidosModSeiPen');
-        $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
-        $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('4');
-        $objInfraAgendamentoDTO->setStrSinAtivo('S');
-        $objInfraAgendamentoDTO->setStrSinSucesso('S');
-
-        $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
-        $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
-
-        // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
-        $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
-        $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos com mais de 24 horas criados pelo e que ainda não foram utilizados.');
-        $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosNaoUtilizadosModSeiPen');
-        $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
-        $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('5');
-        $objInfraAgendamentoDTO->setStrSinAtivo('S');
-        $objInfraAgendamentoDTO->setStrSinSucesso('S');
-
-        $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
-        $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
-
-    }
-    $this->atualizarNumeroVersao("4.1.1");
+      
+      $this->atualizarNumeroVersao("4.1.0");
   }
 
   private function listarAnexoDocumentosInternos()
