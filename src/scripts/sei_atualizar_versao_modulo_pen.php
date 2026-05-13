@@ -290,6 +290,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV4010();
         case '4.0.1':
           $this->instalarV4020();
+        case '4.0.2':
+          $this->instalarV4030();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2617,6 +2619,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Reprodução de último trâmite finalizado para o protocolo @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO');
 
       $this->atualizarNumeroVersao("4.0.2");
+  }
+
+  protected function instalarV4030()
+  {
+    $this->atualizarNumeroVersao("4.0.3");
   }
 
 
