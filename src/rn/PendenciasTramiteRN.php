@@ -164,7 +164,6 @@ class PendenciasTramiteRN extends InfraRN
     }
 
       $objAtividadeDTO = new AtividadeDTO();
-      $objAtividadeDTO->setDthConclusao(null);
       $objAtividadeDTO->setNumIdTarefa($arrIdTarefaSincronizacaoPendente, InfraDTO::$OPER_IN);
       $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objAtividadeDTO->retNumIdAtividade();
