@@ -1768,17 +1768,19 @@ class PENIntegracao extends SeiIntegracao
    */
   public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
-    $numIdAtividadeAnexacao = $this->retornarIdAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
-    if ($numIdAtividadeAnexacao === null) {
+    $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
+    if ($objAtividadeAnexacaoDTO === null) {
       return null;
     }
+
+    $numIdAtividadeAnexacao = $objAtividadeAnexacaoDTO->getNumIdAtividade();
 
     $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $numIdAtividadeAnexacao);
     if ($numIdAtividadeTramitacaoExterna === null) {
       return null;
     }
 
-    if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal)) {
+    if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
       return null;
     }
 
@@ -1797,21 +1799,22 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Retorna o id da atividade de anexacao no processo pai referente ao processo anexado informado.
+   * Retorna o DTO da atividade de anexacao no processo pai referente ao processo anexado informado.
    *
    * A busca e feita no historico do processo pai pela tarefa de anexacao e pelo atributo
    * PROCESSO contendo o numero do protocolo do processo filho.
    *
    * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
    * @param ProcedimentoAPI $objProcedimentoAPIAnexado
-   * @return int|null
+   * @return AtividadeDTO|null
    */
-  private function retornarIdAtividadeAnexacaoProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+  private function retornarAtividadeAnexacaoProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
     $objAtividadeDTO = new AtividadeDTO();
     $objAtividadeDTO->setDblIdProtocolo($objProcedimentoAPIPrincipal->getIdProcedimento());
     $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ANEXADO_PROCESSO);
     $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retDthAbertura();
     $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_DESC);
 
     $objAtividadeRN = new AtividadeRN();
@@ -1839,7 +1842,12 @@ class PENIntegracao extends SeiIntegracao
 
     foreach ($arrObjAtributoAndamentoDTO as $objAtributoDTO) {
       if ($objAtributoDTO->getStrValor() == $objProcedimentoAPIAnexado->getNumeroProtocolo()) {
-        return $objAtributoDTO->getNumIdAtividade();
+        $numIdAtividade = $objAtributoDTO->getNumIdAtividade();
+        foreach ($arrObjAtividadeDTO as $atividadeDTO) {
+          if ($atividadeDTO->getNumIdAtividade() == $numIdAtividade) {
+            return $atividadeDTO;
+          }
+        }
       }
     }
 
@@ -1881,11 +1889,13 @@ class PENIntegracao extends SeiIntegracao
    *
    * Para esta regra, sucesso significa encontrar em qualquer momento do historico um tramite
    * com situacaoAtual igual a 6, correspondente ao recibo recebido pelo remetente.
+   * Os tramites avaliados devem ter ocorrido apos a anexacao do processo (comparando a dataHora das suboperacoes e a dataHora da atividade de anexacao).
    *
    * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return bool
    */
-  private function processoPaiJaFoiTramitadoComSucesso(ProcedimentoAPI $objProcedimentoAPIPrincipal)
+  private function processoPaiJaFoiTramitadoComSucesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
   {
     $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
     $objProcessoEletronicoDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
@@ -1904,9 +1914,27 @@ class PENIntegracao extends SeiIntegracao
       return false;
     }
 
+    $situacoesPermitidas = [
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+    ];
+
+    $strDataAberturaFormatada = str_replace('/', '-', $objAtividadeAnexacaoDTO->getDthAbertura());
+    $numTimestampAnexacao = strtotime($strDataAberturaFormatada);
+
     foreach ($arrObjTramite as $objTramite) {
-      if (isset($objTramite->situacaoAtual) && (int) $objTramite->situacaoAtual === ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
-        return true;
+      if (isset($objTramite->situacaoAtual) && in_array((int) $objTramite->situacaoAtual, $situacoesPermitidas)) {
+        if (!empty($objTramite->itensHistorico) && !empty($objTramite->itensHistorico->operacao[0]->dataHora)) {
+          $numTimestampTramite = strtotime($objTramite->itensHistorico->operacao[0]->dataHora);
+          if ($numTimestampTramite !== false && $numTimestampAnexacao !== false && $numTimestampTramite >= $numTimestampAnexacao) {
+            return true;
+          }
+        }
       }
     }
 
