@@ -119,7 +119,11 @@ try {
         $bolManterProcessoAberto = false;
 
         try {
-          $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramite->IDT);
+          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramite->IDT);
+          if (empty($arrObjTramites)) {
+              continue;
+          }
+          $objMetadados = $arrObjTramites[0];
           $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais) ? ($objMetadados->propriedadesAdicionais ?: []) : [];
 
           if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
@@ -225,18 +229,21 @@ try {
 
           $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
         if ($objTramiteDTO && $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
-          $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
-          $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
-          $numIdRepositorio = $repositorioMultiplosOrgaos;
-          $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
-          $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
-          $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
-          $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
-          $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
+          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+          if (!empty($arrObjTramites)) {
+            $objMetadados = $arrObjTramites[0];
+            $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
+            $numIdRepositorio = $repositorioMultiplosOrgaos;
+            $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+            $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
+            $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
+            $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
+            $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
 
-          $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
-          $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
-          $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+            $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
+            $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
+            $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+          }
         }
       }
 
