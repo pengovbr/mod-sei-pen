@@ -434,7 +434,9 @@ class PenBlocoProcessoRN extends InfraRN
       $objProcedimentoRN = new ProcedimentoRN();
       $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
 
-      return "Prezado(a) usuario(a), o processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} foi tramitado com a funcionalidade de manter aberto e sincronizado entre multiplos orgaos e, por isso, nao pode ser incluido em bloco de tramite externo.";
+      return "Prezado(a) usuário(a), o processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} "
+        . "foi tramitado por meio da funcionalidade manter aberto e sincronizado. "
+        . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
   }
 
   public function validarQuantidadeDeItensNoBloco($dblIdbloco, $arrProtocolosOrigem)

@@ -165,7 +165,6 @@ class PendenciasTramiteRN extends InfraRN
     }
 
       $objAtividadeDTO = new AtividadeDTO();
-      $objAtividadeDTO->setDthConclusao(null);
       $objAtividadeDTO->setNumIdTarefa($arrIdTarefaSincronizacaoPendente, InfraDTO::$OPER_IN);
       $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objAtividadeDTO->retNumIdAtividade();
@@ -254,11 +253,28 @@ class PendenciasTramiteRN extends InfraRN
           continue;
       }
 
-        $strMotivo = isset($objUltimoTramite->justificativaDaRecusa)
-            ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
-            : 'Pedido de sincronização não concluído, pois foi cancelado ou recusado na plataforma de tramitação.';
+        if ($objUltimoTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO) {
+          $strNumeroProcesso = $dblIdProcedimento;
+          try {
+            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+            $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
+            if (!empty($objProcedimentoDTO) && !empty($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado())) {
+              $strNumeroProcesso = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+            }
+          } catch (Exception $e) {
+            $this->gravarLogDebug(InfraException::inspecionar($e), 2);
+          }
 
-        $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+          $strMotivo = "A sincronização do processo $strNumeroProcesso foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.";
+        } else {
+          $strMotivo = isset($objUltimoTramite->justificativaDaRecusa)
+              ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
+              : 'Pedido de sincronização não concluído, pois foi cancelado ou recusado na plataforma de tramitação.';
+
+          if (mb_stripos($strMotivo, 'OBS:') === false) {
+            $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+          }
+        }
 
         $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $strMotivo);
 

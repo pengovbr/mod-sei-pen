@@ -38,6 +38,10 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       //Busca metadados do processo registrado em trâmite anterior
       $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
 
+      if ($this->objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($dblIdProcedimento)) {
+        throw new InfraException('Módulo do Tramita: Sincronização não permitida para processos com documentos internos não assinados.');
+      }
+
       // Solicitar sincronização do documentos pendentes
       $numIdTramite = $this->objProcessoEletronicoRN->solicitarSincronizarTramite($objMetadadosProcessoTramiteAnterior->IDT);
       
@@ -100,6 +104,10 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       //Apresentao da mensagens de validao na janela da barra de progresso
       if ($objInfraException->contemValidacoes() && $objExpedirProcedimentoDTO->getBolSinEnvioAutoMultiplosOrgaos() === false) {
         $objInfraException->lancarValidacoes();
+      }
+
+      if ($this->objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($dblIdProcedimento)) {
+        throw new InfraException('Módulo do Tramita: Envio não permitido para processos com documentos internos não assinados.');
       }
 
       //Busca metadados do processo registrado em trâmite anterior
@@ -305,6 +313,10 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       
       $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
       $this->validarSincronizacaoProcessoSigiloso($dblIdProcedimento);
+      
+      if ($this->objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($dblIdProcedimento)) {
+        throw new InfraException('Módulo do Tramita: Sincronização não permitida para processos com documentos internos não assinados.');
+      }
 
       //Busca metadados do processo registrado em trâmite anterior
       $objMetadadosProcessoTramiteAnterior = $objExpedirProcedimentoDTO->getObjMetadadosProcedimento();
@@ -426,6 +438,23 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
       if (!empty($objProtocoloDTO)){
         $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+
+        if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($objProtocoloDTO->getDblIdProtocolo())) {
+          $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
+          
+          $objProcessoEletronicoRN->cancelarTramite($idTramite);
+          $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
+            $objProcedimentoDTO,
+            $idTramite,
+            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO,
+            $numIdUnidadeProcesso
+          );
+
+          $strMensagemErro = "Tramitação externa do processo $protocolo cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.";
+          LogSEI::getInstance()->gravar($strMensagemErro, InfraLog::$ERRO);
+          $this->gravarLogDebug($strMensagemErro, 0, true);
+          return;
+        }
 
         $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
         $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);

@@ -39,6 +39,7 @@ class ProcessoEletronicoRN extends InfraRN
 
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA = 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA';
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO';
   
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO';
@@ -3090,9 +3091,13 @@ class ProcessoEletronicoRN extends InfraRN
 
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+        if (empty($arrObjTramites)) {
+            return false;
+        }
+        $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
-      LogSEI::getInstance()->gravar("Erro ao solicitar metadados para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
       return false;
     }
 
@@ -3140,9 +3145,13 @@ class ProcessoEletronicoRN extends InfraRN
 
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+        if (empty($arrObjTramites)) {
+            return false;
+        }
+        $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
-      LogSEI::getInstance()->gravar("Erro ao solicitar metadados para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
       return false;
     }
 
@@ -3330,6 +3339,50 @@ class ProcessoEletronicoRN extends InfraRN
       $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
     }
       
+  }
+
+  /**
+   * Verifica se o processo possui documento interno não assinado, ou seja, documento com status de editor interno e que não esteja cancelado, e que não possua assinatura cadastrada
+   *
+   * @param int $dblIdProcedimento
+   * @return bool
+   */
+  public function possuiDocumentoInternoNaoAssinado($dblIdProcedimento)
+  {
+    $objDocumentoDTO = new DocumentoDTO();
+    $objDocumentoDTO->setDblIdProcedimento($dblIdProcedimento);
+    $objDocumentoDTO->retDblIdDocumento();
+    $objDocumentoDTO->retStrStaDocumento();
+    $objDocumentoDTO->retStrStaEstadoProtocolo();
+
+    $objDocumentoRN = new DocumentoRN();
+    $arrObjDocumentoDTO = (array)$objDocumentoRN->listarRN0008($objDocumentoDTO);
+
+    if (empty($arrObjDocumentoDTO)) {
+      return false;
+    }
+
+    $objAssinaturaDTO = new AssinaturaDTO();
+    $objAssinaturaDTO->setDistinct(true);
+    $objAssinaturaDTO->retDblIdDocumento();
+
+    $objAssinaturaRN = new AssinaturaRN();
+    foreach ($arrObjDocumentoDTO as $objDocumentoDTO) {
+      if ($objDocumentoDTO->getStrStaDocumento() != DocumentoRN::$TD_EDITOR_INTERNO) {
+        continue;
+      }
+
+      if ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+        continue;
+      }
+
+      $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+      if ($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function cadastrarAtividadePedidoSincronizacao(ProcedimentoDTO $objProcedimentoDTO, string $tarefa)
