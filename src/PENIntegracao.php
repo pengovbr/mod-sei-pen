@@ -53,21 +53,21 @@ class PENIntegracao extends SeiIntegracao
     {
       $numIdAndamento = $this->consultarStatusTramitaGovBrProcesso($objProcedimentoAPIAnexado->getIdProcedimento());
 
-      if ($this->possuiTramitacaoEmAndamento($numIdAndamento)) {
-        $this->lancarValidacaoImpedimentoAnexacao(
-          $objProcedimentoAPIPrincipal,
-          $objProcedimentoAPIAnexado,
-          'andamento'
-        );
-      }
+    if ($this->possuiTramitacaoEmAndamento($numIdAndamento)) {
+      $this->lancarValidacaoImpedimentoAnexacao(
+        $objProcedimentoAPIPrincipal,
+        $objProcedimentoAPIAnexado,
+        'andamento'
+      );
+    }
 
-      if ($this->possuiTramitacaoConcluidaComSucesso($numIdAndamento)) {
-        $this->lancarValidacaoImpedimentoAnexacao(
-          $objProcedimentoAPIPrincipal,
-          $objProcedimentoAPIAnexado,
-          'sucesso'
-        );
-      }
+    if ($this->possuiTramitacaoConcluidaComSucesso($numIdAndamento)) {
+      $this->lancarValidacaoImpedimentoAnexacao(
+        $objProcedimentoAPIPrincipal,
+        $objProcedimentoAPIAnexado,
+        'sucesso'
+      );
+    }
 
       return null;
   }
@@ -80,9 +80,9 @@ class PENIntegracao extends SeiIntegracao
    */
   private function consultarStatusTramitaGovBrProcesso($dblIdProcedimento)
     {
-      if (empty($dblIdProcedimento)) {
-        return null;
-      }
+    if (empty($dblIdProcedimento)) {
+      return null;
+    }
 
       $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
       $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
@@ -90,26 +90,26 @@ class PENIntegracao extends SeiIntegracao
       $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
       $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO);
 
-      if ($objTramiteDTO == null) {
-        return null;
-      }
+    if ($objTramiteDTO == null) {
+      return null;
+    }
 
       $numIdTramite = $objTramiteDTO->getNumIdTramite();
-      if (empty($numIdTramite)) {
-        return null;
-      }
+    if (empty($numIdTramite)) {
+      return null;
+    }
 
       // aqui consulta o tramite
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
       $objTramiteTramitaGovBr = $objProcessoEletronicoRN->consultarTramites($numIdTramite);
 
-      if (empty($objTramiteTramitaGovBr) || !isset($objTramiteTramitaGovBr[0])) {
-        return null;
-      }
+    if (empty($objTramiteTramitaGovBr) || !isset($objTramiteTramitaGovBr[0])) {
+      return null;
+    }
 
-      if (!isset($objTramiteTramitaGovBr[0]->situacaoAtual)) {
-        return null;
-      }
+    if (!isset($objTramiteTramitaGovBr[0]->situacaoAtual)) {
+      return null;
+    }
 
       return $objTramiteTramitaGovBr[0]->situacaoAtual;
   }
@@ -184,9 +184,9 @@ class PENIntegracao extends SeiIntegracao
       $strMensagem = 'Tramita GOV.BR: O processo ' . $objProcedimentoAPIAnexado->getNumeroProtocolo()
         . ' não pode ser anexado ao processo ' . $objProcedimentoAPIPrincipal->getNumeroProtocolo();
 
-      if ($strTipoImpedimento == 'andamento') {
-        return $strMensagem . ' pois encontra-se com tramitação em andamento para outro órgão.';
-      }
+    if ($strTipoImpedimento == 'andamento') {
+      return $strMensagem . ' pois encontra-se com tramitação em andamento para outro órgão.';
+    }
 
       return $strMensagem . ' pois já foi tramitado, com sucesso, para outro órgão.';
   }
@@ -253,6 +253,7 @@ class PENIntegracao extends SeiIntegracao
       return [$strAcoesProcedimento];
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
     {
     if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()) {
@@ -290,25 +291,25 @@ class PENIntegracao extends SeiIntegracao
       // Em processo de múltiplos órgãos, somente a unidade que recebeu o processo pode expedir.
       $bolUnidadeAtualPodeExpedirProcessoMultiplosOrgaos = true;
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-      if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
-        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+    if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
 
-        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+      $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
-        if (!is_null($objTramiteDTO)) {
-          $objPenUnidadeDTO = new PenUnidadeDTO();
-          $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
-          $objPenUnidadeDTO->retNumIdUnidadeRH();
+      if (!is_null($objTramiteDTO)) {
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+        $objPenUnidadeDTO->retNumIdUnidadeRH();
 
-          $objPenUnidadeRN = new PenUnidadeRN();
-          $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
 
-          $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
-          $bolUnidadeAtualPodeExpedirProcessoMultiplosOrgaos = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
-        }
+        $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
+        $bolUnidadeAtualPodeExpedirProcessoMultiplosOrgaos = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
       }
+    }
     
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
       $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
@@ -318,40 +319,40 @@ class PENIntegracao extends SeiIntegracao
       $bolAcaoAcessarTramiteEmBloco = $objSessaoSEI->verificarPermissao('md_pen_tramita_em_bloco');
       $bolBlocoAbertoUnidade = false;
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-      if ($bolAcaoAcessarTramiteEmBloco) {
-        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objTramiteEmBlocoDTO->retNumId();
-        $objTramiteEmBlocoDTO->retNumIdUnidade();
-        $objTramiteEmBlocoDTO->retStrDescricao();
-        PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+    if ($bolAcaoAcessarTramiteEmBloco) {
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+      $objTramiteEmBlocoDTO->retNumId();
+      $objTramiteEmBlocoDTO->retNumIdUnidade();
+      $objTramiteEmBlocoDTO->retStrDescricao();
+      PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
     
-        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-            $bolBlocoAbertoUnidade = true;
-        }
+      if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+          $bolBlocoAbertoUnidade = true;
       }
+    }
 
       $bolAcaoAcessarTramiteEmBlocoProtocoloListar = $objSessaoSEI->verificarPermissao('pen_tramita_em_bloco_protocolo_listar');
       $bolProcessoEmBloco = false;
-      if ($bolAcaoAcessarTramiteEmBlocoProtocoloListar) {
-        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
-        $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objPenBlocoProcessoDTO->retNumIdAndamento();
-        $objPenBlocoProcessoDTO->retNumIdBloco();
+    if ($bolAcaoAcessarTramiteEmBlocoProtocoloListar) {
+      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+      $objPenBlocoProcessoDTO->retNumIdAndamento();
+      $objPenBlocoProcessoDTO->retNumIdBloco();
 
-        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-        $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-        if (count($arrObjPenBlocoProcessoDTO) > 0) {
-            $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
-          foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
-            if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
-              $bolProcessoEmBloco = true;
-            }
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+      if (count($arrObjPenBlocoProcessoDTO) > 0) {
+          $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
+        foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
+          if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+            $bolProcessoEmBloco = true;
           }
         }
       }
+    }
 
       // Verifica se existe uma unidade mapeada
       $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();

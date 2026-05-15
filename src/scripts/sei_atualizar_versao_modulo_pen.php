@@ -2651,6 +2651,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("4.1.0");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV4200_Beta()
   {
     $objMetaBanco = $this->inicializarObjMetaBanco();
@@ -2724,11 +2725,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objTarefaOrdemArvoreDTO->retStrSinHistoricoCompleto();
       $objTarefaOrdemArvoreDTO = $objBD->consultar($objTarefaOrdemArvoreDTO);
 
-      if ($objTarefaOrdemArvoreDTO !== null) {
-        $objTarefaOrdemArvoreDTO->setStrSinHistoricoResumido('S');
-        $objTarefaOrdemArvoreDTO->setStrSinHistoricoCompleto('S');
-        $objBD->alterar($objTarefaOrdemArvoreDTO);
-      }
+    if ($objTarefaOrdemArvoreDTO !== null) {
+      $objTarefaOrdemArvoreDTO->setStrSinHistoricoResumido('S');
+      $objTarefaOrdemArvoreDTO->setStrSinHistoricoCompleto('S');
+      $objBD->alterar($objTarefaOrdemArvoreDTO);
+    }
       
       $this->atualizarNumeroVersao("4.2.0-Beta");
   }

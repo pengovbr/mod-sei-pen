@@ -249,9 +249,9 @@ class PendenciasTramiteRN extends InfraRN
           ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA
         ];
 
-      if (!in_array($objUltimoTramite->situacaoAtual, $arrSituacoesRejeicao)) {
+        if (!in_array($objUltimoTramite->situacaoAtual, $arrSituacoesRejeicao)) {
           continue;
-      }
+        }
 
         if ($objUltimoTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO) {
           $strNumeroProcesso = $dblIdProcedimento;
@@ -278,12 +278,12 @@ class PendenciasTramiteRN extends InfraRN
 
         $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $strMotivo);
 
-      try {
+        try {
           ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
           $this->gravarLogDebug(sprintf('Processo %s desbloqueado após rejeição/cancelamento da sincronização.', $dblIdProcedimento), 2);
-      } catch (Exception $e) {
+        } catch (Exception $e) {
           $this->gravarLogDebug(InfraException::inspecionar($e), 2);
-      }
+        }
     }
 
       return $arrProcessosPendentes;

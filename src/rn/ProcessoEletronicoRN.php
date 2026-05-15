@@ -3092,9 +3092,9 @@ class ProcessoEletronicoRN extends InfraRN
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
-        if (empty($arrObjTramites)) {
-            return false;
-        }
+      if (empty($arrObjTramites)) {
+          return false;
+      }
         $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
       LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
@@ -3146,9 +3146,9 @@ class ProcessoEletronicoRN extends InfraRN
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
-        if (empty($arrObjTramites)) {
-            return false;
-        }
+      if (empty($arrObjTramites)) {
+          return false;
+      }
         $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
       LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);

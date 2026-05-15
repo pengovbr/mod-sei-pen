@@ -9,6 +9,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     parent::__construct();
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function sincronizarControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
   {
     $numIdTramite = 0;
@@ -63,6 +64,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     }
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function expedirAutoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
   {
     $numIdTramite = 0;

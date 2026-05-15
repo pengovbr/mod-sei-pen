@@ -2194,6 +2194,7 @@ class PenAtualizarSipRN extends InfraRN
     $this->atualizarNumeroVersao("4.1.0");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV4200_Beta()
   {
     $this->atualizarNumeroVersao("4.2.0-Beta");

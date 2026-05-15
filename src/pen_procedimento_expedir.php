@@ -291,9 +291,9 @@ try {
       }
 
       if(isset($_POST['sbmExpedir'])) {
-          if ($bloquearEnvioSemMapeamentoParcial) {
-            throw new InfraException(strip_tags($strMensagemBloqueioEnvio));
-          }
+        if ($bloquearEnvioSemMapeamentoParcial) {
+          throw new InfraException(strip_tags($strMensagemBloqueioEnvio));
+        }
 
           $multiplosOrgaos = filter_var($_POST['multiplosOrgaos'], FILTER_VALIDATE_BOOLEAN);
 
@@ -320,11 +320,11 @@ try {
           $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
-          if ($devolucaoOrgaoOrigemMultiplosOrgaos) {
-            $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
-          } else {
-            $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos || $processoRecebidoMultiplosOrgaos);
-          }
+        if ($devolucaoOrgaoOrigemMultiplosOrgaos) {
+          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
+        } else {
+          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos || $processoRecebidoMultiplosOrgaos);
+        }
           $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
           $arrTiProcessoEletronico = [
