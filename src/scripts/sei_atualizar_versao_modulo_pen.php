@@ -2702,9 +2702,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
       $fnCadastrar('A sincronização foi concluída com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO');
 
-      $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
+      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
+      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
       $fnCadastrar('A sincronização foi interrompida, após o sistema de destino rejeitar a tramitação. @MOTIVO_RECUSA@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA');
-      $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
       $fnCadastrar('Tramitação externa do processo @PROTOCOLO_FORMATADO@ cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO');
 
       $fnCadastrar('Pedido de sincronização múltiplos órgãos recebida - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO');
