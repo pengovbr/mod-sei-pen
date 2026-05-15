@@ -294,6 +294,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV4030();
         case '4.0.3':
           $this->instalarV4100();
+        case '4.1.0':
+          $this->instalarV4200_Beta();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2645,7 +2647,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
   protected function instalarV4100()
-    {
+  {
+      $this->atualizarNumeroVersao("4.1.0");
+  }
+
+  protected function instalarV4200_Beta()
+  {
     $objMetaBanco = $this->inicializarObjMetaBanco();
 
     // Adicionar coluna para controle de múltiplos órgãos
@@ -2695,9 +2702,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
       $fnCadastrar('A sincronização foi concluída com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO');
 
-      $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
+      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
+      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
       $fnCadastrar('A sincronização foi interrompida, após o sistema de destino rejeitar a tramitação. @MOTIVO_RECUSA@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA');
-      $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
+      $fnCadastrar('Tramitação externa do processo @PROTOCOLO_FORMATADO@ cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO');
 
       $fnCadastrar('Pedido de sincronização múltiplos órgãos recebida - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO');
       $fnCadastrar('Pedido envio de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS');
@@ -2705,9 +2713,22 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
       $fnCadastrar('Envio de processo múltiplos órgãos para o remetente - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE');
 
-      $fnCadastrar('A ordem dos documentos foi alterada automaticamente para a ordem original devido a sincronização de processo para múltiplos órgãos', 'N', 'S', 'N', 'S', 'N', 'PEN_REORDENACAO_AUTOMATICA_PROCESSO');
+      $fnCadastrar('A ordem dos documentos foi alterada automaticamente para a ordem original devido a sincronização de processo para múltiplos órgãos', 'S', 'S', 'N', 'S', 'N', 'PEN_REORDENACAO_AUTOMATICA_PROCESSO');
+
+      $objTarefaOrdemArvoreDTO = new TarefaDTO();
+      $objTarefaOrdemArvoreDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
+      $objTarefaOrdemArvoreDTO->retNumIdTarefa();
+      $objTarefaOrdemArvoreDTO->retStrSinHistoricoResumido();
+      $objTarefaOrdemArvoreDTO->retStrSinHistoricoCompleto();
+      $objTarefaOrdemArvoreDTO = $objBD->consultar($objTarefaOrdemArvoreDTO);
+
+      if ($objTarefaOrdemArvoreDTO !== null) {
+        $objTarefaOrdemArvoreDTO->setStrSinHistoricoResumido('S');
+        $objTarefaOrdemArvoreDTO->setStrSinHistoricoCompleto('S');
+        $objBD->alterar($objTarefaOrdemArvoreDTO);
+      }
       
-      $this->atualizarNumeroVersao("4.1.0");
+      $this->atualizarNumeroVersao("4.2.0-Beta");
   }
 
     /**

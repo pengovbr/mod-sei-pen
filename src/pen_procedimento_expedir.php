@@ -45,7 +45,106 @@ try {
   }
 
   
-    $arrIdsMultiplosOrgaos = [];
+    $arrDestinosMultiplosOrgaos = [];
+
+    $filtrarDestinosMultiplosOrgaosDisponiveis = function ($numIdProcedimento, $strProtocoloProcedimentoFormatado, array $arrDestinosMultiplosOrgaos): array {
+      if (empty($numIdProcedimento) || empty($strProtocoloProcedimentoFormatado) || empty($arrDestinosMultiplosOrgaos)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      try {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (is_null($objTramiteDTO)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      $strNumeroRegistro = $objTramiteDTO->getStrNumeroRegistro();
+
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+      try {
+        $arrTramiteSucesso = $objProcessoEletronicoRN->consultarTramites(
+          null,
+          $strNumeroRegistro,
+          null,
+          null,
+          empty($strNumeroRegistro) ? $strProtocoloProcedimentoFormatado : null,
+          null,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+          1
+        );
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (empty($arrTramiteSucesso)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      try {
+        $arrObjTramite = $objProcessoEletronicoRN->consultarTramitesTodos(
+          null,
+          null,
+          null,
+          null,
+          $strProtocoloProcedimentoFormatado,
+          null,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+        );
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (empty($arrObjTramite)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      foreach ($arrObjTramite as $objTramite) {
+        if (!isset($objTramite->destinatario->identificacaoDoRepositorioDeEstruturas) || !isset($objTramite->destinatario->numeroDeIdentificacaoDaEstrutura)) {
+          continue;
+        }
+
+        $strChaveDestino = $objTramite->destinatario->identificacaoDoRepositorioDeEstruturas . ':' . $objTramite->destinatario->numeroDeIdentificacaoDaEstrutura;
+        if (!isset($arrDestinosMultiplosOrgaos[$strChaveDestino]) || !isset($objTramite->IDT)) {
+          continue;
+        }
+
+        $bolManterProcessoAberto = false;
+
+        try {
+          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramite->IDT);
+          if (empty($arrObjTramites)) {
+              continue;
+          }
+          $objMetadados = $arrObjTramites[0];
+          $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais) ? ($objMetadados->propriedadesAdicionais ?: []) : [];
+
+          if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+            foreach ($propriedadesAdicionais as $valor) {
+              if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+                $bolManterProcessoAberto = true;
+                break;
+              }
+            }
+          }
+        } catch (Exception $e) {
+          continue;
+        }
+
+        if (!$bolManterProcessoAberto) {
+          unset($arrDestinosMultiplosOrgaos[$strChaveDestino]);
+        }
+      }
+
+      return $arrDestinosMultiplosOrgaos;
+    };
 
     $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
     $strLinkProcedimento = $objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=procedimento_controlar&acao_retorno=procedimento_controlar&id_procedimento='.$idProcedimento);
@@ -130,18 +229,21 @@ try {
 
           $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
         if ($objTramiteDTO && $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
-          $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
-          $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
-          $numIdRepositorio = $repositorioMultiplosOrgaos;
-          $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
-          $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
-          $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
-          $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
-          $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
+          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+          if (!empty($arrObjTramites)) {
+            $objMetadados = $arrObjTramites[0];
+            $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
+            $numIdRepositorio = $repositorioMultiplosOrgaos;
+            $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+            $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
+            $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
+            $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
+            $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
 
-          $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
-          $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
-          $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+            $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
+            $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
+            $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+          }
         }
       }
 
@@ -249,6 +351,10 @@ try {
           $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($numIdProcedimento);
 
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+          if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($numIdProcedimento)) {
+            throw new InfraException('Não é possível tramitar um processos com documentos gerados e não assinados');
+          }
+
           $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, null, null, null, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
           $enviarDireto = true;
           if (count($tramitePendencia) > 0) {
@@ -319,6 +425,7 @@ try {
       if (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
         $podeManterProcessoAberto = true;
         $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+        $objPenEnvioParcialDTO->retNumIdEstrutura();
         $objPenEnvioParcialDTO->retNumIdUnidadePen();
         $objPenEnvioParcialDTO->setStrSinMultiplosOrgaos('S');
 
@@ -327,8 +434,11 @@ try {
 
         if (count($objPenEnvioParcialDTO) > 0) {
           foreach ($objPenEnvioParcialDTO as $dto) {
-              $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
+              $strChaveDestino = $dto->getNumIdEstrutura() . ':' . $dto->getNumIdUnidadePen();
+              $arrDestinosMultiplosOrgaos[$strChaveDestino] = true;
           }
+
+          $arrDestinosMultiplosOrgaos = $filtrarDestinosMultiplosOrgaosDisponiveis($numIdProcedimento, $strProtocoloProcedimentoFormatado, $arrDestinosMultiplosOrgaos);
         }
       }
 
@@ -432,8 +542,9 @@ function inicializar() {
         $('#multiplosOrgaos').prop('checked', false);
         if (id!=''){
           <?php if ($podeManterProcessoAberto) { ?>
-            $arrIdsMultiplosOrgaos = ('<?php echo implode(',', $arrIdsMultiplosOrgaos); ?>').split(',');
-            if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
+            $arrDestinosMultiplosOrgaos = <?php echo json_encode(array_keys($arrDestinosMultiplosOrgaos)); ?>;
+            $strChaveDestino = $('#selRepositorioEstruturas').val() + ':' + id;
+            if ($arrDestinosMultiplosOrgaos.indexOf($strChaveDestino) !== -1) {
               $('#divSinMultiplosOrgaos').css('display', 'block');
               $('#multiplosOrgaos').prop('checked', true);
             }

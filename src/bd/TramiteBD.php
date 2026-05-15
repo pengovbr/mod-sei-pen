@@ -13,7 +13,8 @@ class TramiteBD extends InfraBD
     /**
      * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
      *
-     * @return void
+     * @return TramiteDTO|null
+     * @throws InfraException
      */
   public function consultarUltimoTramite(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO, $parStrStaTipoTramite = null)
     {
