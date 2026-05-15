@@ -345,9 +345,9 @@ class PenBlocoProcessoRN extends InfraRN
         $objInfraException = new InfraException();
 
         $validacaoMultiplosOrgaos = $this->validarProcessoMultiplosOrgaosParaBloco($objPenBlocoProcessoDTO->getDblIdProtocolo());
-        if ($validacaoMultiplosOrgaos !== false) {
-            throw new InfraException($validacaoMultiplosOrgaos);
-        }
+      if ($validacaoMultiplosOrgaos !== false) {
+          throw new InfraException($validacaoMultiplosOrgaos);
+      }
 
         $objPenBlocoProcessoBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
 

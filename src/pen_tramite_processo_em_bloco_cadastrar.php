@@ -207,9 +207,9 @@ try {
           }
 
           if (count($arrMensagensErros) === count($arrProtocolosOrigemProtocolo)) {
-              foreach ($arrMensagensErros as $mensagemErro) {
-                  $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
-              }
+            foreach ($arrMensagensErros as $mensagemErro) {
+                $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
+            }
 
               header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao']));
               exit(0);

@@ -35,6 +35,7 @@ class ProcessoEletronicoRN extends InfraRN
   public static $TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS = 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS';
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS';
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR';
 
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA = 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA';
@@ -44,6 +45,7 @@ class ProcessoEletronicoRN extends InfraRN
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO';
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS';
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR = 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR';
   public static $TI_PROCESSO_ELETRONICO_AUTO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS';
   public static $TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE = 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE';
   public static $TI_PROCESSO_ELETRONICO_REORDENACAO_AUTOMATICA_PROCESSO = 'PEN_REORDENACAO_AUTOMATICA_PROCESSO';
@@ -3090,9 +3092,9 @@ class ProcessoEletronicoRN extends InfraRN
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
-        if (empty($arrObjTramites)) {
-            return false;
-        }
+      if (empty($arrObjTramites)) {
+          return false;
+      }
         $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
       LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
@@ -3144,9 +3146,9 @@ class ProcessoEletronicoRN extends InfraRN
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
-        if (empty($arrObjTramites)) {
-            return false;
-        }
+      if (empty($arrObjTramites)) {
+          return false;
+      }
         $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
       LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
@@ -3185,8 +3187,10 @@ class ProcessoEletronicoRN extends InfraRN
     if ($objTramiteDTO) {
       $arrTiProcessoEletronico = [
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO),
@@ -3210,7 +3214,11 @@ class ProcessoEletronicoRN extends InfraRN
 
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
 
-      if ($objAtividadeDTO !== null && in_array($objAtividadeDTO->getNumIdTarefa(), [ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS)])) {
+      if ($objAtividadeDTO !== null && in_array($objAtividadeDTO->getNumIdTarefa(), [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR)
+      ])) {
         $tramiteCanceladoRecusa = $this->consultarTramitesTodos(null, $objTramiteDTO->getStrNumeroRegistro());
         if (count($tramiteCanceladoRecusa) > 0) {
           $tramiteRecusa = $tramiteCanceladoRecusa[count($tramiteCanceladoRecusa) - 1]->situacaoAtual;

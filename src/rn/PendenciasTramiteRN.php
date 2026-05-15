@@ -105,7 +105,7 @@ class PendenciasTramiteRN extends InfraRN
             }
           }
 
-          $this->processarSolicitacoesSincronizacaoPendentesConectado();
+          $this->processarSolicitacoesSincronizacaoPendentes();
 
         } catch(ModuloIncompativelException $e) {
             // Sai loop de eventos para finalizar o script e subir uma nova versão atualizada
@@ -156,7 +156,8 @@ class PendenciasTramiteRN extends InfraRN
     {
       $arrIdTarefaSincronizacaoPendente = array_filter([
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS) //PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS)
       ]);
 
     if (empty($arrIdTarefaSincronizacaoPendente)) {
@@ -198,7 +199,7 @@ class PendenciasTramiteRN extends InfraRN
    */
   protected function processarSolicitacoesSincronizacaoPendentesConectado()
     {
-      $arrProcessosPendentes = $this->listarProcessosComSolicitacaoSincronizacaoPendenteConectado();
+      $arrProcessosPendentes = $this->listarProcessosComSolicitacaoSincronizacaoPendente();
 
     if (count($arrProcessosPendentes) === 0) {
         $this->gravarLogDebug('Nenhum processo com solicitação de sincronização pendente foi localizado.', 2);
@@ -248,9 +249,9 @@ class PendenciasTramiteRN extends InfraRN
           ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA
         ];
 
-      if (!in_array($objUltimoTramite->situacaoAtual, $arrSituacoesRejeicao)) {
+        if (!in_array($objUltimoTramite->situacaoAtual, $arrSituacoesRejeicao)) {
           continue;
-      }
+        }
 
         if ($objUltimoTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO) {
           $strNumeroProcesso = $dblIdProcedimento;
@@ -270,17 +271,19 @@ class PendenciasTramiteRN extends InfraRN
               ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
               : 'Pedido de sincronização não concluído, pois foi cancelado ou recusado na plataforma de tramitação.';
 
-          $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+          if (mb_stripos($strMotivo, 'OBS:') === false) {
+            $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+          }
         }
 
         $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $strMotivo);
 
-      try {
+        try {
           ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
           $this->gravarLogDebug(sprintf('Processo %s desbloqueado após rejeição/cancelamento da sincronização.', $dblIdProcedimento), 2);
-      } catch (Exception $e) {
+        } catch (Exception $e) {
           $this->gravarLogDebug(InfraException::inspecionar($e), 2);
-      }
+        }
     }
 
       return $arrProcessosPendentes;

@@ -222,6 +222,7 @@ try {
         $repositorioMultiplosOrgaos = false;
         $unidadeDestinatarioMultiplosOrgaos = false;
         $nomeUnidadeDestinatarioMultiplosOrgaos = false;
+        $devolucaoOrgaoOrigemMultiplosOrgaos = false;
       if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProcedimento)) {
           $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
           $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
@@ -243,6 +244,7 @@ try {
             $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
             $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
             $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+            $devolucaoOrgaoOrigemMultiplosOrgaos = true;
           }
         }
       }
@@ -289,9 +291,9 @@ try {
       }
 
       if(isset($_POST['sbmExpedir'])) {
-          if ($bloquearEnvioSemMapeamentoParcial) {
-            throw new InfraException(strip_tags($strMensagemBloqueioEnvio));
-          }
+        if ($bloquearEnvioSemMapeamentoParcial) {
+          throw new InfraException(strip_tags($strMensagemBloqueioEnvio));
+        }
 
           $multiplosOrgaos = filter_var($_POST['multiplosOrgaos'], FILTER_VALIDATE_BOOLEAN);
 
@@ -318,13 +320,18 @@ try {
           $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
+        if ($devolucaoOrgaoOrigemMultiplosOrgaos) {
+          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
+        } else {
           $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos || $processoRecebidoMultiplosOrgaos);
+        }
           $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
           $arrTiProcessoEletronico = [
             ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
             ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO),
-            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS)
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
           ];
     
           $objAtividadeDTO = new AtividadeDTO();
@@ -362,8 +369,10 @@ try {
 
             $arrTiProcessoEletronico = [
               ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR),
               ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS),
               ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR),
               ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
               ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
               ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE),
@@ -382,7 +391,8 @@ try {
             $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
             $arrIdTarefaPedisoSincronizacao = [
-              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS)
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
             ];
             if ($objAtividadeDTO !== null && in_array($objAtividadeDTO->getNumIdTarefa(), $arrIdTarefaPedisoSincronizacao)) {
               $enviarDireto = true;
@@ -422,7 +432,10 @@ try {
       $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
       $podeManterProcessoAberto = false;
-      if (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+      if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) {
+        // Devolução ao órgão que criou o processo: sempre exibe a opção de manter aberto.
+        $podeManterProcessoAberto = true;
+      } elseif (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
         $podeManterProcessoAberto = true;
         $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
         $objPenEnvioParcialDTO->retNumIdEstrutura();
@@ -899,6 +912,11 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
         $('#txtUnidade').val($nomeUnidadeDestinatarioMultiplosOrgaos).prop('disabled', true).addClass('infraReadOnly');
         $('#btnIdUnidade').prop('disabled', true).css('display', 'none');
         $('#imgPesquisaAvancada').css('display', 'none');
+
+        <?php if ($podeManterProcessoAberto) { ?>
+          $('#divSinMultiplosOrgaos').css('display', 'block');
+          $('#multiplosOrgaos').prop('checked', true);
+        <?php } ?>
     }
   });
 </script>

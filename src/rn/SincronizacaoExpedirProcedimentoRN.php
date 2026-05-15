@@ -9,6 +9,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     parent::__construct();
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function sincronizarControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
   {
     $numIdTramite = 0;
@@ -47,7 +48,10 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
       $objProcessoEletronicoRN->bloquearProcesso($dblIdProcedimento);
-      $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objMetadadosProcessoTramiteAnterior->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS);
+      $idTarefaPedidoSincronizacao = $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()
+        ? ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS
+        : ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR;
+      $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objMetadadosProcessoTramiteAnterior->IDT, $idTarefaPedidoSincronizacao);
 
       $this->gravarLogDebug("Solicitação de sincronização de trâmite para o processo {$objMetadadosProcessoTramiteAnterior->IDT} foi realizada.", 0, true);
       $this->barraProgresso->mover($this->barraProgresso->getNumMax());
@@ -60,14 +64,34 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     }
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function expedirAutoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
   {
     $numIdTramite = 0;
     $dblIdProcedimento = null;
+    $deveConcluirProcessoNoFinal = false;
     try {
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
       $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
+
+      $arrIdTarefaAutoEnvio = [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
+      ];
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objAtividadeDTO->setNumIdTarefa($arrIdTarefaAutoEnvio, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdTarefa();
+
+      $objAtividadeRN = new AtividadeRN();
+      $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+      $idTarefaAutoEnvioConcluir = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR);
+      $deveConcluirProcessoNoFinal = !empty($objAtividadeDTO) && $objAtividadeDTO->getNumIdTarefa() == $idTarefaAutoEnvioConcluir;
 
       $numIdUnidade = $objExpedirProcedimentoDTO->getNumIdUnidade();
 
@@ -251,9 +275,17 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
             SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);
           }
 
-          ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+          if ($deveConcluirProcessoNoFinal) {
+            $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+            $objEntradaConcluirProcessoAPI->setIdProcedimento($dblIdProcedimento);
+
+            $objSeiRN = new SeiRN();
+            $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
+          } else {
+            ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+          }
         } catch (\Exception $e) {
-          $this->gravarLogDebug("Processo $dblIdProcedimento nao pode ser desbloqueado automaticamente", 2);
+          $this->gravarLogDebug("Processo $dblIdProcedimento nao pode ser finalizado automaticamente", 2);
         } finally {
           try {
             SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoOriginal);
