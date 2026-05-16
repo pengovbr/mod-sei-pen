@@ -74,7 +74,7 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
       $this->paginaTramiteEmBloco->clicarSalvar();
 
       // Espera para a mensagem de sucesso aparecer
-      sleep(2);
+      sleep(1);
       $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
       $this->assertStringContainsString(
           mb_convert_encoding('Processo(s) incluído(s) com sucesso no bloco ' . $objBlocoDeTramiteDTO->getNumOrdem(), 'UTF-8', 'ISO-8859-1'),

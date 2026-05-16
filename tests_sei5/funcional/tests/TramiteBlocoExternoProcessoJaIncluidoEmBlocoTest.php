@@ -44,7 +44,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBas
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
-      sleep(2);
+      sleep(1);
       $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
       $this->assertStringContainsString(
           mb_convert_encoding('Processo(s) incluído(s) com sucesso no bloco ' . self::$objBlocoDeTramiteDTO->getNumOrdem(), 'UTF-8', 'ISO-8859-1'),
@@ -73,7 +73,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBas
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
-      sleep(2);
+      sleep(1);
       $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         
       $this->assertStringContainsString(

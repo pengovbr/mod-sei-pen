@@ -138,7 +138,7 @@ class MapeamentoDeUnidadesTest extends FixtureCenarioBaseTestCase
     $this->paginaMapUnidades->selecionarUnidadePenCadastro(CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA);
     $this->paginaMapUnidades->salvar();
 
-    sleep(2);
+    sleep(1);
 
     $mensagem = $this->paginaMapUnidades->buscarMensagemAlerta();
     $this->assertStringContainsString(
@@ -167,7 +167,7 @@ class MapeamentoDeUnidadesTest extends FixtureCenarioBaseTestCase
 
     $this->paginaMapUnidades->excluirMapeamentosExistentes();
 
-    sleep(2);
+    sleep(1);
     
     $this->assertFalse($this->paginaMapUnidades->existeTabela());
     

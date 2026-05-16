@@ -54,8 +54,7 @@ class PaginaControleProcesso extends PaginaTeste
    */
   public function abrirProcesso(string $strProtocolo): void
   {
-      sleep(1);
-      $this->elByLinkText($strProtocolo)->click();
+      $this->elByPartialLinkText($strProtocolo)->click();
   }
 
   protected function listarProcessos($processosGerados, $processosRecebidos)

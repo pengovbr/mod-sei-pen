@@ -28,6 +28,9 @@
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
     <const name="ENVIO_PARCIAL" value="true" />
+
+    <!-- Flag para desativar agendamento, de modo que o comando de tramitação aconteça sob demanda, e não pelo prazo configurado no SEI -->
+    <const name="DESATIVAR_AGENDAMENTO" value="true" />
  
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de
     Serviços do PEN -->

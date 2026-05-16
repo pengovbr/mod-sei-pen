@@ -53,8 +53,14 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
       $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
     try {
       $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
-          self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+          self::$destinatario['REP_ESTRUTURAS'], 
+          self::$destinatario['NOME_UNIDADE'],
+          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+          false,
+          null,
+          PEN_WAIT_TIMEOUT,
+          true
+      );
     } catch (Exception $ex) {
       $this->assertStringContainsString(
           utf8_encode('Não é possível tramitar um processo aberto em mais de uma unidade.'),

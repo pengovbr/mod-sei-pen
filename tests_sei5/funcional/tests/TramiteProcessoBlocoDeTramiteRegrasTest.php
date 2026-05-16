@@ -47,14 +47,13 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
-      sleep(2);
 
       $mensagem = "Prezado(a) usuário(a), o processo " . $objProtocoloDTO->getStrProtocoloFormatado()
           . " possui documentos gerados não assinados. "
           . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
       $this->assertStringContainsString(
           mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1'),
-          $this->paginaTramiteEmBloco->buscarMensagemAlerta()
+          $this->aguardarEBuscarMensagemAlerta()
       );
   }
 
@@ -89,9 +88,8 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
-      sleep(2);
 
-      $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+      $mensagem = $this->aguardarEBuscarMensagemAlerta();
       $this->assertStringContainsString(
           mb_convert_encoding('Prezado(a) usuário(a), o processo ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' encontra-se bloqueado. Dessa forma, não foi possível realizar a sua inserção no bloco selecionado.', 'UTF-8', 'ISO-8859-1'),
           $mensagem
@@ -130,9 +128,8 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
-      sleep(2);
 
-      $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+      $mensagem = $this->aguardarEBuscarMensagemAlerta();
       $this->assertStringContainsString(
           mb_convert_encoding('Não é possível tramitar um processo aberto em mais de uma unidade.', 'UTF-8', 'ISO-8859-1'),
           $mensagem
@@ -165,13 +162,26 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
-      sleep(2);
 
       $mensagem = "Prezado(a) usuário(a), o processo " . $objProtocoloDTO->getStrProtocoloFormatado()
           . " não possui documentos. Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
       $this->assertStringContainsString(
           mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1'),
-          $this->paginaTramiteEmBloco->buscarMensagemAlerta()
+          $this->aguardarEBuscarMensagemAlerta()
       );
+  }
+
+  private function aguardarEBuscarMensagemAlerta(): string
+  {
+      $this->waitUntil(function() {
+          try {
+              $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+              return !empty($mensagem);
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
+      return $this->paginaTramiteEmBloco->buscarMensagemAlerta();
   }
 }
