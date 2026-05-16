@@ -289,15 +289,15 @@ tramitar-pendencias:
   	done
 
 tramitar-pendencias-simples: tramitar-pendencias-simples-org1 tramitar-pendencias-simples-org2
-	@$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
+	@$(CMD_COMPOSE_FUNC) exec -e XDEBUG_MODE=off org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
 
 tramitar-pendencias-simples-org1:
-	@$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
-	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
+	@$(CMD_COMPOSE_FUNC) exec -e XDEBUG_MODE=off org1-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
+	$(CMD_COMPOSE_FUNC) exec -e XDEBUG_MODE=off org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
 
 tramitar-pendencias-simples-org2:
-	@$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
-	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
+	@$(CMD_COMPOSE_FUNC) exec -e XDEBUG_MODE=off org2-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
+	$(CMD_COMPOSE_FUNC) exec -e XDEBUG_MODE=off org2-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
 
 tramitar-pendencias-silent:
 	@echo 'Executando monitoramento de pendências do Org1 e Org2'
