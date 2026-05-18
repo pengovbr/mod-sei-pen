@@ -109,6 +109,7 @@ dist: cria_json_compatibilidade
 	@mkdir -p $(SIP_SCRIPTS_DIR)
 	@php composer.phar install --no-dev
 	@cp -R src/* $(SEI_MODULO_DIR)/
+	touch docs/INSTALL.md docs/UPGRADE.md docs/changelogs/CHANGELOG-$(VERSAO_MODULO).md
 	@cp docs/INSTALL.md dist/INSTALACAO.md
 	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
 	@cp docs/changelogs/CHANGELOG-$(VERSAO_MODULO).md dist/NOTAS_VERSAO.md
