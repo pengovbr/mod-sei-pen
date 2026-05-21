@@ -38,9 +38,11 @@ class ProcessoEletronicoRN extends InfraRN
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR';
 
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO';
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA = 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO';
   
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO';
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS';
@@ -3195,7 +3197,8 @@ class ProcessoEletronicoRN extends InfraRN
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO)
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM)
       ];
 
       $objAtividadeDTO = new AtividadeDTO();
@@ -3303,8 +3306,15 @@ class ProcessoEletronicoRN extends InfraRN
     $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
 
     if (!empty($motivoRecusa)) {
+      $eRecusaSincronizacao = $penTarefa == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA;
+      $temObsRecusa = strpos($motivoRecusa, '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.') !== false;
+      if ($eRecusaSincronizacao && $temObsRecusa) {
+        $motivoRecusa = str_replace('. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', '', $motivoRecusa);
+      }
+      $atributoNome = $penTarefa == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM
+          ? 'MOTIVO_CANCELAMENTO' : 'MOTIVO_RECUSA';
       $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-      $objAtributoAndamentoDTO->setStrNome('MOTIVO_RECUSA');
+      $objAtributoAndamentoDTO->setStrNome($atributoNome);
       $objAtributoAndamentoDTO->setStrValor($motivoRecusa);
       $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
       $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());

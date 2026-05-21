@@ -189,6 +189,11 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
       foreach ($arrAtividadeDTO as $objAtividadeDTO) {
         $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
         $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($objAtividadeDTO->getDblIdProtocolo());
+
+        if ($this->possuiTramiteEmAndamento($objProcedimentoDTO)) {
+          continue;
+        }
+
         $pendendciasAutomaticas[] = $objProcedimentoDTO;
         
         $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
@@ -197,6 +202,43 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
       }
     }
 
+  }
+
+  /**
+   * Verifica se o protocolo possui algum trâmite ainda em andamento.
+   *
+   * @param ProcedimentoDTO $objProcedimentoDTO
+   * @return bool
+   */
+  private function possuiTramiteEmAndamento(ProcedimentoDTO $objProcedimentoDTO)
+  {
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $arrTramites = (array)$objProcessoEletronicoRN->consultarTramitesTodos(
+      null,
+      null,
+      null,
+      null,
+      $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()
+    );
+
+    $arrSituacoesConcluidas = [
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
+    ];
+
+    foreach ($arrTramites as $objTramite) {
+      if (!isset($objTramite->situacaoAtual) || !in_array($objTramite->situacaoAtual, $arrSituacoesConcluidas)) {
+        $this->gravarLogDebug(
+          'Envio automático ignorado para o protocolo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ': existe trâmite em andamento.',
+          2
+        );
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

@@ -2715,6 +2715,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR');
       $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
       $fnCadastrar('Envio de processo múltiplos órgãos para o remetente - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE');
+      $fnCadastrar('A sincronização foi interrompida, após o sistema de destino cancelar a tramitação. @MOTIVO_CANCELAMENTO@', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos realizada com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO');
 
       $fnCadastrar('A ordem dos documentos foi alterada automaticamente para a ordem original devido a sincronização de processo para múltiplos órgãos', 'S', 'S', 'N', 'S', 'N', 'PEN_REORDENACAO_AUTOMATICA_PROCESSO');
 

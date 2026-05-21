@@ -3029,6 +3029,30 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
+  /**
+   * Validação das pré-condições necessárias para que um processo e seus documentos possam ser sincronizados para outra entidade
+   *
+   * @param InfraException $objInfraException Instância da classe de exceção para registro dos erros
+   * @param ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser sincronizado
+   * @param string $strAtributoValidacao Índice para o InfraException separar os processos
+   * @param bool $sinProcessoEmBloco Indica se o processo está sendo processado em bloco, para adequação das mensagens de validação
+   * @return void
+   * @throws InfraException Exceção lançada caso alguma pré-condição não seja atendida
+   */
+  public function validarPreCondicoesSincronizarProcedimento(
+      InfraException $objInfraException,
+      ProcedimentoDTO $objProcedimentoDTO,
+      $strAtributoValidacao = null,
+      $sinProcessoEmBloco = false
+  ) {
+    $this->validarDadosProcedimento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
+    $this->validarDocumentacaoExistende($objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco);
+    $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco);
+  }
+
   public function verificarProcessosAbertoNaUnidade(InfraException $objInfraException, array $arrProtocolosOrigem)
     {
       $naoAbertoUnidadeAtual = false;
@@ -3084,17 +3108,18 @@ class ExpedirProcedimentoRN extends InfraRN
     {
     if ($objInfraException->contemValidacoes()) {
         $arrErros = [];
-        $message = "";
-      foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+        $mensagem = "";
+        $listaValidacoes = $objInfraException->getArrObjInfraValidacao();
+      foreach ($listaValidacoes as $index => $objInfraValidacao) {
         $strAtributo = $objInfraValidacao->getStrAtributo();
         if (!array_key_exists($strAtributo, $arrErros)) {
             $arrErros[$strAtributo] = [];
         }
         $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
-        $message .= $objInfraValidacao->getStrDescricao() . "\n";
+        $mensagem .= ($index + 1) . ". " . mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1') . "; ";
       }
 
-        return $message;
+        return $mensagem;
     }
 
       return null;

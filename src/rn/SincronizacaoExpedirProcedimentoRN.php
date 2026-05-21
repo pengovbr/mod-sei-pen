@@ -313,7 +313,6 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
       
-      $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
       $this->validarSincronizacaoProcessoSigiloso($dblIdProcedimento);
       
       if ($this->objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($dblIdProcedimento)) {
@@ -439,16 +438,52 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProtocoloRN = new ProtocoloRN();
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
       if (!empty($objProtocoloDTO)){
+        $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
         $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
 
+        $objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
+
+        $dblIdProcedimento = $objProtocoloDTO->getDblIdProtocolo();
+        $objInfraException = new InfraException();
+        $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
+        $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
+        $objExpedirProcedimentosRN->validarPreCondicoesSincronizarProcedimento($objInfraException, $objProcedimentoDTO, $protocolo);
+
+        if ($objInfraException->contemValidacoes()) {
+          $strValidacoes = rtrim($this->trazerTextoSeContemValidacoes($objInfraException));
+          $strMensagemErro = "";
+
+          if ($strValidacoes !== '') {
+            $strMensagemErro .= mb_convert_encoding($strValidacoes, 'ISO-8859-1', 'UTF-8');
+          }
+
+          $cabecalhoMsg = "Tramitação externa do processo $protocolo cancelada. ";
+          LogSEI::getInstance()->gravar($cabecalhoMsg . $strMensagemErro, InfraLog::$ERRO);
+          $this->gravarLogDebug($cabecalhoMsg . $strMensagemErro, 0, true);
+
+          $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
+
+          $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
+            $objProcedimentoDTO,
+            $idTramite,
+            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM,
+            $numIdUnidadeProcesso,
+            $strMensagemErro
+          );
+
+          $objProcessoEletronicoRN->cancelarTramite($idTramite);
+          return;
+        }
+
         if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($objProtocoloDTO->getDblIdProtocolo())) {
-          $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
-          
+          $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
+
           $objProcessoEletronicoRN->cancelarTramite($idTramite);
           $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
             $objProcedimentoDTO,
             $idTramite,
-            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO,
+            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM,
             $numIdUnidadeProcesso
           );
 
@@ -487,6 +522,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
         $numIDT = $objProtocoloDTO->getDblIdProtocolo();
         $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
         $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
+        $objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO);
+        $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
       } else {
         $objProcessoEletronicoRN->cancelarTramite($idTramite);
         $this->gravarLogDebug("Sincronismo do $protocolo: Protocolo não encontrado. Tramite $idTramite cancelado", 0, true);
@@ -494,6 +531,23 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     } catch (\Exception $e) {
       if (!empty($objProtocoloDTO) && $objProtocoloDTO->getDblIdProtocolo()) {
         $this->reabrirProcessoSeBloqueado($objProtocoloDTO->getDblIdProtocolo());
+
+        try {
+          $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
+          $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+
+          $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
+
+          $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
+            $objProcedimentoDTO,
+            $idTramite,
+            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA,
+            $numIdUnidadeProcesso,
+            'Erro no processamento da sincronização: ' . $e->getMessage()
+          );
+        } catch (\Exception $ex) {
+          $this->gravarLogDebug("Erro ao gravar atividade de falha na sincronizacao de tramite: $ex", 2, true);
+        }
       }
 
       //Nao recusa tramite caso o processo atual nao possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
@@ -507,6 +561,41 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
       $this->gravarLogDebug("Erro processando envio de sincronizacao de tramite: $e", 0, true);
       throw new InfraException('M\363dulo do Tramita: Falha de comunica\347\343o com o servi\347os de integra\347\343o. Por favor, tente novamente mais tarde.', $e);
+    }
+  }
+
+  /**
+   * Conclui a atividade pendente de sincronização para evitar que ela permaneça
+   * como status mais recente quando o trâmite é cancelado por erro.
+   *
+   * @param mixed $dblIdProcedimento
+   * @return void
+   */
+  private function concluirAtividadePendenteSincronizacao($dblIdProcedimento)
+  {
+    if (empty($dblIdProcedimento)) {
+      return;
+    }
+
+    try {
+      $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objAtividadeDTO->setDthConclusao(null);
+      $objAtividadeDTO->setDistinct(true);
+      $objAtividadeDTO->setNumIdTarefa($idTarefa);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retTodos();
+
+      $objAtividadeRN = new AtividadeRN();
+      $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+      if ($objAtividadeDTO) {
+        $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
+      }
+    } catch (\Exception $e) {
+      $this->gravarLogDebug("Erro ao concluir atividade pendente de sincronizacao do processo $dblIdProcedimento: $e", 2, true);
     }
   }
 
