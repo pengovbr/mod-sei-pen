@@ -1,8 +1,14 @@
 <?php
-
 require_once DIR_SEI_WEB . '/SEI.php';
 
 session_start();
+
+$objPaginaSEI = null;
+$objSessaoSEI = null;
+$strParametros = '';
+$idProcedimento = '';
+
+$objInfraException = new InfraException();
 
 try {
     InfraDebug::getInstance()->setBolLigado(false);
@@ -16,7 +22,6 @@ try {
 
     $sincronizado = filter_var($_GET['sincronizado'], FILTER_SANITIZE_NUMBER_INT);
     $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
-    
 
     $strParametros = '';
   if (isset($_GET['arvore'])) {
@@ -27,7 +32,6 @@ try {
   if (isset($_GET['id_procedimento'])) {
       $strParametros .= '&id_procedimento=' . $_GET['id_procedimento'];
   }
-
   if (is_null($sincronizado) || $sincronizado == '') {
     $objSincronizacaoExpedirProcedimentoRN = new SincronizacaoExpedirProcedimentoRN();
     $objSincronizacaoExpedirProcedimentoRN->validarSincronizacaoProcessoSigiloso($idProcedimento);
@@ -51,8 +55,28 @@ try {
         $objTramiteDTO->getNumIdRepositorioDestino()
       );
       if (count($tramitePendencia) == 0) {
-        throw new InfraException('Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.');
+        $mensagem = "Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.";
+        $objInfraException->adicionarValidacao($mensagem);
+        throw new InfraException($mensagem);
       }
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDistinct(true);
+      $objAtividadeDTO->retStrSiglaUnidade();
+      $objAtividadeDTO->setOrdStrSiglaUnidade(InfraDTO::$TIPO_ORDENACAO_ASC);
+      $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+      $objAtividadeDTO->setDthConclusao(null);
+
+      $objAtividadeRN = new AtividadeRN();
+      $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+    if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
+        $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
+        $mensagem = "Atenção! Não é possível iniciar a sincronização de processos abertos em mais de uma unidade. "
+          . "Conclua o processo nas demais unidades antes de solicitar uma nova sincronia. (Processo aberto em: $strSiglaUnidade)";
+        $objInfraException->adicionarValidacao($mensagem);
+        throw new InfraException($mensagem);
+    }
 
       $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($idProcedimento);
       $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, $numNRE, null, null, null, null, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA);
@@ -68,7 +92,6 @@ try {
         $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
         $objAtividadeDTO->retTodos();
 
-        $objAtividadeRN = new AtividadeRN();
         $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
         if($objAtividadeDTO) {
@@ -76,8 +99,8 @@ try {
           $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
         }
 
-        $objProcessoEletronicoRN->solicitarSincronizarTramite($objTramiteDTO->getNumIdTramite());
         $objProcessoEletronicoRN->bloquearProcesso($idProcedimento);
+        $objProcessoEletronicoRN->solicitarSincronizarTramite($objTramiteDTO->getNumIdTramite());
         // Atividade de pedido de sincronização para múltiplos órgãos manual - só adicionada após sucesso na solicitação de sincronização
         $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS);
       } else {
@@ -85,32 +108,64 @@ try {
       }
     }
 
-    $objPaginaSEI->setStrMensagem('Solicitação de sincronização realizada com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
-    header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem='.$_GET['acao'].'&arvore='.$_GET['arvore'].'&sincronizado=1'.$objPaginaSEI->montarAncora($idProcedimento).$strParametros));
+    $objPaginaSEI->setStrMensagem('Solicitação de sincronização realizada com sucesso.', 5);
+    header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem='.$_GET['acao'].'&arvore='.$_GET['arvore'].'&sincronizado=1'.$strParametros.$objPaginaSEI->montarAncora($idProcedimento)));
     exit(0);
 
   } else {
-    $mensagem = $objPaginaSEI->getStrMensagens();
+    $mensagem = '';
+    if (isset($_GET['mensagem']) && $_GET['mensagem'] !== '') {
+      $mensagem = urldecode($_GET['mensagem']);
+    } else {
+      $mensagem = $objPaginaSEI->getStrMensagens();
+    }
     if ($mensagem !== '') {
       $objPaginaSEI->setStrMensagem('');
       ?>
-      <script type="text/javascript">
-        alert('<?php echo $mensagem ?>');
-        parent.parent.location.reload();
-      </script>
+      <div class="infraAreaAviso" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+          <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Aviso" class="infraImg" />
+          <span style="color: #856404; font-weight: bold;">
+              <?php echo PaginaSEI::tratarHTML($mensagem); ?></strong>
+          </span>
+      </div>
       <?php
     }
-    // echo 'A sincronização do processo foi solicitada com sucesso.';
     exit(0);
   }
   
 } catch (InfraException $e) {
-  $objPaginaSEI->setStrMensagem($e->getMessage(), InfraPagina::$TIPO_MSG_AVISO);
-  header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem='.$_GET['acao'].'&arvore='.$_GET['arvore'].'&sincronizado=1'.$objPaginaSEI->montarAncora($idProcedimento).$strParametros));
+  $mensagem = 'Ocorreu um erro na sincronização do processo para múltiplos órgãos.';
+  if ($objInfraException->contemValidacoes()) {
+    $validacao = $objInfraException->getArrObjInfraValidacao();
+    $mensagem = $validacao[0]->getStrDescricao();
+  }
+  if ($objPaginaSEI !== null) {
+    $objPaginaSEI->setStrMensagem($mensagem, InfraPagina::$TIPO_MSG_AVISO);
+  }
+  $strAcao = isset($_GET['acao']) ? $_GET['acao'] : '';
+  $strArvore = isset($_GET['arvore']) ? $_GET['arvore'] : '';
+  $strAncora = ($objPaginaSEI !== null && $idProcedimento !== '') ? $objPaginaSEI->montarAncora($idProcedimento) : '';
+  $strParametrosErro = $strParametros . '&mensagem=' . urlencode($mensagem);
+  $strUrl = 'controlador.php?acao=pen_procedimento_sincronizar&acao_origem=' . $strAcao . '&arvore=' . $strArvore . '&sincronizado=1' . $strParametrosErro . $strAncora;
+  if ($objSessaoSEI !== null) {
+    $strUrl = $objSessaoSEI->assinarLink($strUrl);
+  }
+  header('Location: '.$strUrl);
   exit(0);
 } catch (Exception $e) {
-  $objPaginaSEI->setStrMensagem($e->getMessage(), InfraPagina::$TIPO_MSG_AVISO);
-  header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem='.$_GET['acao'].'&arvore='.$_GET['arvore'].'&sincronizado=1'.$objPaginaSEI->montarAncora($idProcedimento).$strParametros));
+  $mensagem = 'Ocorreu um erro na sincronização do processo para múltiplos órgãos.';
+  if ($objPaginaSEI !== null) {
+    $objPaginaSEI->setStrMensagem($mensagem, InfraPagina::$TIPO_MSG_AVISO);
+  }
+  $strAcao = isset($_GET['acao']) ? $_GET['acao'] : '';
+  $strArvore = isset($_GET['arvore']) ? $_GET['arvore'] : '';
+  $strAncora = ($objPaginaSEI !== null && $idProcedimento !== '') ? $objPaginaSEI->montarAncora($idProcedimento) : '';
+  $strParametrosErro = $strParametros . '&mensagem=' . urlencode($mensagem);
+  $strUrl = 'controlador.php?acao=pen_procedimento_sincronizar&acao_origem=' . $strAcao . '&arvore=' . $strArvore . '&sincronizado=1' . $strParametrosErro . $strAncora;
+  if ($objSessaoSEI !== null) {
+    $strUrl = $objSessaoSEI->assinarLink($strUrl);
+  }
+  header('Location: '.$strUrl);
   exit(0);
 }
 

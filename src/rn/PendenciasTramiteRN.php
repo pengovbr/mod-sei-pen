@@ -165,6 +165,7 @@ class PendenciasTramiteRN extends InfraRN
 
       $objAtividadeDTO = new AtividadeDTO();
       $objAtividadeDTO->setNumIdTarefa($arrIdTarefaSincronizacaoPendente, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setDthConclusao(null);
       $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objAtividadeDTO->retNumIdAtividade();
       $objAtividadeDTO->retNumIdTarefa();
@@ -556,6 +557,10 @@ class PendenciasTramiteRN extends InfraRN
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
             $client->addTaskBackground("receberTramitesRecusados", $numIDT, null, $numIDT);
+            break;
+
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA:
+            $client->addTaskBackground("enviarSincronizacaoTramite", $numIDT, null, $numIDT);
             break;
 
         default:
