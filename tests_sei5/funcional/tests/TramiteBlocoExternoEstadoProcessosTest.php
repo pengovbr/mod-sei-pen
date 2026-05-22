@@ -173,8 +173,21 @@ class TramiteBlocoExternoEstadoProcessosTest extends FixtureCenarioBaseTestCase
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
       $this->paginaTramiteEmBloco->selecionarBloco($numIdBloco);
       $this->paginaTramiteEmBloco->clicarSalvar();
-
-      sleep(2);
-      return $this->paginaCadastrarProcessoEmBloco->buscarMensagemAlerta();
+      
+      return $this->aguardarEBuscarMensagemAlerta();
   }
+
+  private function aguardarEBuscarMensagemAlerta(): string
+    {
+        $this->waitUntil(function() {
+            try {
+                $mensagem = $this->paginaCadastrarProcessoEmBloco->buscarMensagemAlerta();
+                return !empty($mensagem);
+            } catch (\Exception $e) {
+                return false;
+            }
+        }, PEN_WAIT_TIMEOUT);
+
+        return $this->paginaCadastrarProcessoEmBloco->buscarMensagemAlerta();
+    }
 }

@@ -56,7 +56,10 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
       self::$destinatario['REP_ESTRUTURAS'],
       self::$destinatario['NOME_UNIDADE'],
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-      false
+      false,
+      null,
+      PEN_WAIT_TIMEOUT,
+      true
     );
 
     $this->sairSistema();
@@ -83,7 +86,6 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->paginaBase->navegarParaControleProcesso();
     $this->waitUntil(function() use ($strProtocoloTeste) {
-        sleep(5);
         try {
             $this->paginaBase->refresh();
             $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
@@ -140,14 +142,15 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
-    sleep(5);
-
     $this->tramitarProcessoExternamente(
       self::$protocoloTestePrincipal,
       self::$remetente['REP_ESTRUTURAS'],
       self::$remetente['NOME_UNIDADE'],
       self::$remetente['SIGLA_UNIDADE_HIERARQUIA'],
-      false
+      false,
+      null,
+      PEN_WAIT_TIMEOUT,
+      true
     );
 
     $this->sairSistema();

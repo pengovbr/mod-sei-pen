@@ -67,7 +67,11 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
       $novoTramite = $this->enviarMetadadosProcesso(self::$remetente, self::$destinatario, $processoTeste);
       $this->enviarComponentesDigitaisDoTramite($novoTramite, $processoTeste);
       $reciboTramiteEnvio = $this->receberReciboEnvio($novoTramite);
-         
+
+      // Processar pendências para que o processo chegue ao destinatário
+      if (DESATIVAR_AGENDAMENTO == 'true') {
+        $this->executarTramitarPendenciasSimples();
+      }
 
       //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
       $this->assertNotNull($novoTramite);
@@ -94,7 +98,13 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
       self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
       $arrDocumentosSegundoEnvio = array(self::$documentoTeste4, self::$documentoTeste5);
-      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $arrDocumentosSegundoEnvio, self::$remetente, self::$destinatario);
+      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(
+        self::$processoTeste, 
+        $arrDocumentosSegundoEnvio, 
+        self::$remetente, 
+        self::$destinatario,
+        true        
+      );
   }
 
     /**

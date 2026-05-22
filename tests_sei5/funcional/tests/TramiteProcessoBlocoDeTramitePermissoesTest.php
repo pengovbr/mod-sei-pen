@@ -96,7 +96,6 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
 
       $this->paginaProcesso->selecionarProcesso();
       $this->paginaProcesso->navegarParaOrdenarDocumentos();
-      sleep(1);
       $this->paginaProcesso->trocarOrdenacaoDocumentos();
 
       // Validação dos dados do processo principal
@@ -109,7 +108,6 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
         // Ignora a exceção se a imagem não for encontrada]
         print_r($listaDocumentosProcesso);
     }
-      sleep(1);
       $this->sairSistema();
 
   }
@@ -163,7 +161,6 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
 
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
       $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
-      sleep(1);
         
       // Executa remoção de protocolos do bloco e verifica status
       $this->paginaCadastrarProcessoEmBloco->btnSelecionarTodosProcessos();
@@ -171,7 +168,6 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
       $qtdProcessoBloco = $this->paginaCadastrarProcessoEmBloco->retornarQuantidadeDeProcessosNoBloco();
       $this->assertEquals($qtdProcessoBloco, 0);
       $this->paginaCadastrarProcessoEmBloco->btnComandoSuperiorFechar();
-      sleep(1);
 
       // $linhasDaTabela = $this->elements($this->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
 
@@ -253,7 +249,7 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
       $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
 
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
           $selector = sprintf(
               '#tblBlocos tbody tr td:nth-child(7) img[title="%s"]',
@@ -295,8 +291,6 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
       $qtdProcessoBlocoPos = $this->paginaCadastrarProcessoEmBloco->retornarQuantidadeDeProcessosNoBloco(); 
 
       $this->assertEquals($qtdProcessoBloco, $qtdProcessoBlocoPos);
-
-      sleep(2);
 
       $this->sairSistema();
   }

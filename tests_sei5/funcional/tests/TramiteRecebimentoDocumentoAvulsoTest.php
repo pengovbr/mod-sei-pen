@@ -65,6 +65,11 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
       $this->enviarComponentesDigitaisDoTramite($novoTramite, $metadadosDocumentoTeste);
       $reciboTramite = $this->receberReciboEnvio($novoTramite);
 
+      // Processar pendências para que o processo chegue ao destinatário
+      if (DESATIVAR_AGENDAMENTO == 'true') {
+        $this->executarTramitarPendenciasSimples();
+      }
+
       //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
       $this->assertNotNull($novoTramite);
       $this->assertNotNull($reciboTramite);
@@ -89,7 +94,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
       self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
       $documentos = array(self::$documentoTeste2, self::$documentoTeste3);
-      putenv("DATABASE_HOST=org1-database");
+      putenv("DATABASE_HOST=org1-database");      
+      
       $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
   }
 

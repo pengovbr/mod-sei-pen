@@ -45,14 +45,14 @@ class MapeamentoDeUnidadesComUnidadeNaoVinculadaARepositorioSelecionadoTest exte
     );
     $this->paginaMapUnidades->navegarPenMapeamentoUnidades();
     $this->paginaMapUnidades->pesquisarUnidade(self::$remetente['SIGLA_UNIDADE']);
-    sleep(2);
+    sleep(1);
 
     $this->paginaMapUnidades->selecionarEditar();
     $this->paginaMapUnidades->limparRestricoes();
 
     $this->paginaMapUnidades->selecionarRepoEstruturas(self::$remetente['REP_ESTRUTURAS']);
     $this->paginaMapUnidades->selecionarUnidadeComAlert(1234567);
-    sleep(2);
+    sleep(1);
     $mensagem = $this->paginaBase->alertTextAndClose();
     $mensagemEsperada = mb_convert_encoding(
       "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: ".self::$remetente['REP_ESTRUTURAS'].". "

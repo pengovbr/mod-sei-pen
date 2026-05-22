@@ -86,7 +86,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends FixtureCenarioBaseTestCase
               return true;
             }
         );
-        sleep(10);
+        sleep(1);
     } else {
         $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
         $qtyProcessos = $this->paginaCadastrarProcessoEmBloco->retornarQuantidadeDeProcessosNoBloco();

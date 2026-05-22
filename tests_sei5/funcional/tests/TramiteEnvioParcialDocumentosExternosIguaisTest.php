@@ -59,7 +59,10 @@ class TramiteEnvioParcialDocumentosExternosIguaisTest extends FixtureCenarioBase
       self::$destinatario['REP_ESTRUTURAS'],
       self::$destinatario['NOME_UNIDADE'],
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-      false
+      false,
+      null,
+      PEN_WAIT_TIMEOUT,
+      true
     );
 
     $this->sairSistema();
@@ -145,14 +148,15 @@ class TramiteEnvioParcialDocumentosExternosIguaisTest extends FixtureCenarioBase
 
     $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
-    sleep(5);
-
     $this->tramitarProcessoExternamente(
       self::$protocoloTestePrincipal,
       self::$remetente['REP_ESTRUTURAS'],
       self::$remetente['NOME_UNIDADE'],
       self::$remetente['SIGLA_UNIDADE_HIERARQUIA'],
-      false
+      false,
+      null,
+      PEN_WAIT_TIMEOUT,
+      true
     );
 
     $this->sairSistema();

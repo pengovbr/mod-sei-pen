@@ -110,11 +110,14 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends FixtureCenario
       $this->abrirProcesso(self::$protocoloTestePrincipal);
 
       $this->tramitarProcessoExternamente(
-          self::$protocoloTestePrincipal,
-          self::$destinatario['REP_ESTRUTURAS'],
-          self::$destinatario['NOME_UNIDADE'],
-          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-          false
+        self::$protocoloTestePrincipal,
+        self::$destinatario['REP_ESTRUTURAS'],
+        self::$destinatario['NOME_UNIDADE'],
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
       );
   }
 

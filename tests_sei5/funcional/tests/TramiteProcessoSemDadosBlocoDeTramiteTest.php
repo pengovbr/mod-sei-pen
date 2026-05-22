@@ -48,7 +48,11 @@ class TramiteProcessoSemDadosBlocoDeTramiteTest extends FixtureCenarioBaseTestCa
       $this->paginaTramiteEmBloco->selecionarBloco($objBlocoDeTramiteDTO->getNumId());
       $this->paginaTramiteEmBloco->clicarSalvar();
 
-      sleep(2);
+      $this->waitUntil(function() {
+          $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+          return !empty($mensagem);
+      }, PEN_WAIT_TIMEOUT);
+
 
       $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         

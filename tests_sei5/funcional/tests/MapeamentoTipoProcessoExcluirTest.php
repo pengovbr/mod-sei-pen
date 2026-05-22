@@ -59,10 +59,21 @@ class MapeamentoTipoProcessoExcluirTest extends FixtureCenarioBaseTestCase
       );
 
       $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
-      sleep(5);
+
+
+
       $this->paginaCadastroOrgaoExterno->selecionarExcluirMapOrgao(self::$penOrgaoExternoId);
-      sleep(1);
-      $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+
+      $mensagem = null;
+      $this->waitUntil(function() use (&$mensagem) {
+          try {
+              $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+              return !empty($mensagem);
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
       $this->assertStringContainsString(
           mb_convert_encoding('Relacionamento entre unidades foi excluído com sucesso.', 'UTF-8', 'ISO-8859-1'),
           $mensagem

@@ -94,7 +94,6 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
     $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
 
     $this->waitUntil(function () {
-      sleep(5);
       $this->paginaBase->refresh();
       $linhasDaTabela = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr');
 
@@ -184,8 +183,17 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
     $this->paginaTramiteEmBloco->clicarSalvar();
 
     // Espera para a mensagem de sucesso aparecer
-    sleep(2);
-    $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+    $mensagem = null;
+
+    $this->waitUntil(function() use (&$mensagem) {
+        try {
+            $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+            return !empty($mensagem);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }, PEN_WAIT_TIMEOUT);
+    
     $this->assertStringContainsString(
       mb_convert_encoding('Processo(s) incluído(s) com sucesso no bloco ' . self::$objBlocoDeTramiteDTO2->getNumOrdem(), 'UTF-8', 'ISO-8859-1'),
       $mensagem
