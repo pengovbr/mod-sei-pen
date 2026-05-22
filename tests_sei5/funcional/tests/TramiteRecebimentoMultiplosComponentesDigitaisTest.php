@@ -78,7 +78,11 @@ class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioB
 
       $this->enviarComponentesDigitaisDoProcesso($novoTramite, $metadadosProcessoTeste);
       $reciboTramite = $this->receberReciboEnvio($novoTramite);
-         
+
+       // Processar pendências para que o processo chegue ao destinatário
+      if (DESATIVAR_AGENDAMENTO == 'true') {
+        $this->executarTramitarPendenciasSimples();
+      }         
 
       //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
       $this->assertNotNull($novoTramite);
@@ -238,9 +242,12 @@ class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioB
       $metadadosDocumentoTeste = $this->construirMetadadosDocumentoAvulsoTeste($documentoTeste);
       $novoTramite = $this->enviarMetadadosDocumento($remetente, $destinatario, $metadadosDocumentoTeste);
       $this->enviarComponentesDigitaisDoDocumentoAvulso($novoTramite, $metadadosDocumentoTeste);
-      sleep(5);
       $reciboTramite = $this->receberReciboEnvio($novoTramite);
-         
+
+      // Processar pendências para que o processo chegue ao destinatário
+      if (DESATIVAR_AGENDAMENTO == 'true') {
+        $this->executarTramitarPendenciasSimples();
+      }         
 
       //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
       $this->assertNotNull($novoTramite);

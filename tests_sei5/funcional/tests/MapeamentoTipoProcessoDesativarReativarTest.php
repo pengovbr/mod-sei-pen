@@ -96,17 +96,24 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
       $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
       $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamento();
 
-      $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+
+
+
+
+
+
       $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-      $this->waitUntil(
-          fn() => mb_strpos(
-                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
-                $mensagemValidacao
-            ) !== false,
-          PEN_WAIT_TIMEOUT
-      );
-        
+
       // ao final garante de fato que a mensagem existe
+      $this->waitUntil(function() use ($mensagemValidacao) {
+          try {
+              $mensagem = $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta();
+              return !empty($mensagem) && mb_strpos($mensagem, $mensagemValidacao) !== false;
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
       $this->assertStringContainsString(
           $mensagemValidacao,
           $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
@@ -131,21 +138,24 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
       );
       $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
 
-      $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
+      $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");      
       $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
-      $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+      
       $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-      $this->waitUntil(
-          fn() => mb_strpos(
-                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
-                $mensagemValidacao
-            ) !== false,
-          PEN_WAIT_TIMEOUT
-      );
-      $this->assertStringContainsString(
-          $mensagemValidacao,
-          $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
-      );
+
+      $this->waitUntil(function() use ($mensagemValidacao) {
+          try {
+              $mensagem = $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta();
+              return !empty($mensagem) && mb_strpos($mensagem, $mensagemValidacao) !== false;
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
+        );
         
       $this->sairSistema();
   }
@@ -168,17 +178,18 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
       $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
 
       $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
-      $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();
-      $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+      $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();     
       $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-      $this->waitUntil(
-          fn() => mb_strpos(
-                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
-                $mensagemValidacao
-            ) !== false,
-          PEN_WAIT_TIMEOUT
-      );
       // ao final garante de fato que a mensagem existe
+      $this->waitUntil(function() use ($mensagemValidacao) {
+          try {
+              $mensagem = $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta();
+              return !empty($mensagem) && mb_strpos($mensagem, $mensagemValidacao) !== false;
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
       $this->assertStringContainsString(
           $mensagemValidacao,
           $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()

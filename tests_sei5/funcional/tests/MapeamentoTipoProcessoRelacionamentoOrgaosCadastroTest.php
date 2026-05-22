@@ -46,13 +46,21 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
           self::$remetente['NOME_UNIDADE']
       );
       $this->paginaCadastroOrgaoExterno->salvar();
-      // sleep(10);
+
+      $mensagem = null;
+      $this->waitUntil(function() use (&$mensagem) {
+          try {
+              $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+              return !empty($mensagem);
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
       $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
       $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$remetente['NOME_UNIDADE']);
-      // var_dump($orgaoDestino,$orgaoDestino);
       $this->assertNotNull($orgaoOrigem);
-      $this->assertNotNull($orgaoDestino);
-      sleep(1);
+      $this->assertNotNull($orgaoDestino);      
       $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
       $this->assertStringContainsString(
           mb_convert_encoding('Relacionamento entre Unidades cadastrado com sucesso.', 'UTF-8', 'ISO-8859-1'),

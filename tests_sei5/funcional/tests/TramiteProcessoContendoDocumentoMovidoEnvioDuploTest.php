@@ -94,14 +94,17 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
             self::$destinatario['REP_ESTRUTURAS'],
             self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-            false
+            false,
+            null,
+            PEN_WAIT_TIMEOUT,
+            true
         );
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
         
         $this->waitUntil(function () {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try {
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -140,13 +143,16 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
             self::$remetente['REP_ESTRUTURAS'],
             self::$remetente['NOME_UNIDADE'],
             self::$remetente['SIGLA_UNIDADE_HIERARQUIA'],
-            false
+            false,
+            null,
+            PEN_WAIT_TIMEOUT,
+            true
         );
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
         $this->waitUntil(function () {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try {
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -179,13 +185,16 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
             self::$destinatario['REP_ESTRUTURAS'],
             self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-            false
+            false,
+            null,
+            PEN_WAIT_TIMEOUT,
+            true
         );
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
         $this->waitUntil(function () {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try {
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());

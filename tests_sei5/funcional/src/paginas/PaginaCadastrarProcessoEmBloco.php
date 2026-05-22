@@ -165,12 +165,13 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
       string $unidadeDestinoHierarquia,
       bool $urgente = false,
       ?callable $callbackEnvio = null,
-      int $timeout = PEN_WAIT_TIMEOUT
+      int $timeout = PEN_WAIT_TIMEOUT,
+      bool $executarTramitarPendencias = true
   ): void {
     // 1) Executa os selects e o botão Enviar
     $this->selectRepositorio($repositorio);
     $this->selectUnidade($unidadeDestino, 'origem', $unidadeDestinoHierarquia);
-    $this->btnEnviar();
+    $this->btnEnviar();    
   
     // 2) Captura (e fecha) o alerta inicial, mas só lança exceção
     //    se veio texto e não foi passado callback personalizado
@@ -214,6 +215,12 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         // Sempre restaura o frame principal e a visualização
         $this->frame(null);
         // $this->frame('ifrVisualizacao');
+    }
+
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' && $executarTramitarPendencias) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->test->executarTramitarPendenciasSimples();
     }
   
     // 5) Pausa curta para dar tempo de estabilizar a UI
@@ -298,5 +305,5 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
   public function btnEnviar(): void
     {
       $this->elByXPath("//button[@type='button' and @value='Enviar']")->click();
-  }
+    }
 }

@@ -51,6 +51,10 @@ services:
       - org2-database
       - selenium
     volumes:
+      #Permite o container de teste se comunicar com o Docker da máquina que subiu o ambiente, para que ele possa mandar comandos aos outros containers (org1-http-1, org2-http-1)
+      - /var/run/docker.sock:/var/run/docker.sock
+      #Para que o comando docker esteja disponível dentro do container de teste
+      - /usr/bin/docker:/usr/bin/docker
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra

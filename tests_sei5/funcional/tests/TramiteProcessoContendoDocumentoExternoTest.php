@@ -16,6 +16,26 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
   public static $documentoTeste;
   public static $protocoloTeste;
 
+
+
+   /**
+     * @inheritdoc
+     * @return void
+     */
+    function setUp(): void
+    {
+        parent::setUp();
+
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+        $bancoOrgaoA->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasEnvioPEN'));
+        $bancoOrgaoA->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasRecebimentoPEN'));
+
+        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+        $bancoOrgaoB->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasEnvioPEN'));
+        $bancoOrgaoB->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasRecebimentoPEN'));
+
+    }
+
     /**
      * Teste de trâmite externo de processo contendo apenas um documento externo
      *
@@ -34,7 +54,7 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
       self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
       self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);  
       self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
   }
 
@@ -59,7 +79,7 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
 
       // 6 - Verificar se situação atual do processo está como bloqueado
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
