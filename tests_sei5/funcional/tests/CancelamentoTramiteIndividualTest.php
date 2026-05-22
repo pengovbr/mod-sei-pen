@@ -64,6 +64,9 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
             self::$destinatario['REP_ESTRUTURAS'],
             self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
+            false,
+            null,
+            PEN_WAIT_TIMEOUT,
             false
         );
 
@@ -77,7 +80,6 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         $this->paginaProcesso->cancelarTramitacaoExterna();
-        sleep(5);
         $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
         $mensagemEsperada = mb_convert_encoding("O trâmite externo do processo foi cancelado com sucesso!", 'UTF-8', 'ISO-8859-1');
         $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta);
@@ -98,6 +100,9 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
             self::$destinatario['REP_ESTRUTURAS'],
             self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
+            false,
+            null,
+            PEN_WAIT_TIMEOUT,
             false
         );
 
@@ -106,11 +111,9 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         $this->paginaAgendamentos->navegarAgendamento();
         $this->paginaAgendamentos->executarAgendamento('PENAgendamentoRN :: processarTarefasRecebimentoPEN');
-        sleep(5);
 
         $this->paginaBase->navegarParaControleProcesso();
         $this->waitUntil(function() use ($strProtocoloTeste) {
-            sleep(5);
             try {
                 $this->paginaBase->refresh();
                 $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
@@ -121,8 +124,7 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
 
         }, PEN_WAIT_TIMEOUT);
 
-        // Esperar o processo tramitar
-        // sleep(20);
+        
         $this->sairSistema();
         
 
@@ -131,7 +133,6 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         $this->paginaProcesso->cancelarTramitacaoExterna();
-        sleep(5);
         $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
         $mensagemEsperada = mb_convert_encoding('O sistema destinatário já iniciou o recebimento desse processo, portanto não é possível realizar o cancelamento', 'UTF-8', 'ISO-8859-1');
         $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta);

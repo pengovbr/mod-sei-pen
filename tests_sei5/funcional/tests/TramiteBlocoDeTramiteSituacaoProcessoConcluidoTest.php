@@ -70,7 +70,6 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
     $estadoEsperado = mb_convert_encoding('Concluído', 'UTF-8', 'ISO-8859-1');
 
     $this->waitUntil(function() use ($objProtocoloDTO, $estadoEsperado) {
-      sleep(5);
       $this->paginaBase->refresh();
 
       $colunasEstado = $this->paginaCadastrarProcessoEmBloco->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
@@ -138,8 +137,10 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
     $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
     $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
     $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
-      self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-      self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
+      self::$destinatario['REP_ESTRUTURAS'], 
+      self::$destinatario['NOME_UNIDADE'],
+      self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+      false,
       function () {
         try {
             $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
@@ -156,7 +157,9 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
         }
 
         return true;
-      }
+      },
+    PEN_WAIT_TIMEOUT,
+    false 
     );
 
     $this->paginaBase->navegarParaControleProcesso();
@@ -167,7 +170,6 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
     $this->paginaBase->navegarParaControleProcesso();
     $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
     $this->waitUntil(function() use ($objProtocoloDTO) {
-      sleep(5);
       $this->paginaBase->refresh();
       $colunaEstado = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
       $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->getText());
@@ -240,7 +242,6 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
     $estadoEsperado = mb_convert_encoding('Concluído', 'UTF-8', 'ISO-8859-1');
 
     $this->waitUntil(function() use ($objProtocoloDTO, $estadoEsperado) {
-      sleep(5);
       $this->paginaBase->refresh();
 
       $colunasEstado = $this->paginaCadastrarProcessoEmBloco->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');

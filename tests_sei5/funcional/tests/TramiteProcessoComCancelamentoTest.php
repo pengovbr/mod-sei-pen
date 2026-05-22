@@ -34,7 +34,13 @@ class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
       self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
       self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(
+        self::$processoTeste, 
+        self::$documentoTeste, 
+        self::$remetente, 
+        self::$destinatario, 
+        false
+      );
       self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
       $this->paginaProcesso->cancelarTramitacaoExterna();
@@ -90,7 +96,13 @@ class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
       self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
       self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_001.pdf');
 
-      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(
+        self::$processoTeste, 
+        self::$documentoTeste, 
+        self::$remetente, 
+        self::$destinatario,
+        false
+      );
       self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
       $this->paginaProcesso->cancelarTramitacaoExterna();

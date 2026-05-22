@@ -54,8 +54,15 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
 
       // Trâmitar Externamento processo para órgão/unidade destinatária
       $this->tramitarProcessoExternamente(
-              self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-              self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+        self::$protocoloTeste, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'],
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
+      );
   }
 
 
@@ -79,7 +86,7 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
 
       // 6 - Verificar se situação atual do processo está como bloqueado
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());

@@ -67,7 +67,10 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
       self::$destinatario['REP_ESTRUTURAS'],
       self::$destinatario['NOME_UNIDADE'],
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-      false
+      false,
+      null,
+      PEN_WAIT_TIMEOUT,
+      true
     );
 
 

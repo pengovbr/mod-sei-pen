@@ -18,6 +18,16 @@ class PaginaTramitarProcesso extends PaginaTeste
      */
   public function repositorio(string $siglaRepositorio = null): ?string
     {
+      // Aguarda o select de repositório estar disponível
+      $this->waitUntil(function() {
+          try {
+              $this->elById('selRepositorioEstruturas');
+              return true;
+          } catch (\Exception $e) {
+              return false;
+          }
+      }, PEN_WAIT_TIMEOUT);
+
       $select = new WebDriverSelect(
           $this->elById('selRepositorioEstruturas')
       );

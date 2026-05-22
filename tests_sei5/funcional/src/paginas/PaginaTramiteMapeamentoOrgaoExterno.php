@@ -83,11 +83,19 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
     /**
      * Trata o alerta padrão e confirma via ENTER se houver texto.
      */
-  private function handleAlert(): void
+    private function handleAlert(): void
     {
-      $msg = parent::alertTextAndClose();
-    if ($msg !== null) {
-        $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+      try {
+          $this->test->waitUntil(function() {
+              try {
+                  $this->driver->switchTo()->alert()->accept();
+                  return true;
+              } catch (\Exception $e) {
+                  return false;
+              }
+          }, PEN_WAIT_TIMEOUT);
+      } catch (\Exception $e) {
+          // sem alert, segue em frente
+      }
     }
-  }
 }

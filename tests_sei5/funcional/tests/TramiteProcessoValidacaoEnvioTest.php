@@ -53,10 +53,14 @@ class TramiteProcessoValidacaoEnvioTest extends FixtureCenarioBaseTestCase
 
       $this->expectExceptionMessage(mb_convert_encoding("Não é possível tramitar um processo sem documentos", 'UTF-8', 'ISO-8859-1'));
       $this->tramitarProcessoExternamente(
-          self::$protocoloTeste,
-          self::$destinatario['REP_ESTRUTURAS'],
-          self::$destinatario['NOME_UNIDADE'],
-          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+        self::$protocoloTeste,
+        self::$destinatario['REP_ESTRUTURAS'],
+        self::$destinatario['NOME_UNIDADE'],
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
       );
   }
 }

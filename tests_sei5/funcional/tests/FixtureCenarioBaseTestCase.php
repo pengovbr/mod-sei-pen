@@ -183,7 +183,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
       return $objProtocoloDTO[0];
   }
 
-  protected function realizarTramiteExternoFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite)
+  protected function realizarTramiteExternoFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite, $executarTramitarPendencias = true)
     {
       $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
@@ -216,12 +216,21 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
       $this->abrirProcesso($strProtocoloTeste);
         
       // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
-      $this->tramitarProcessoExternamente($strProtocoloTeste, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+        $strProtocoloTeste, 
+        $destinatario['REP_ESTRUTURAS'], 
+        $destinatario['NOME_UNIDADE'], 
+        $destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false, 
+        null, 
+        PEN_WAIT_TIMEOUT, 
+        $executarTramitarPendencias
+      );
 
     if ($validarTramite) {
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function() use (&$orgaosDiferentes) {
-            sleep(5);
+            sleep(1);
             $this->paginaProcesso->refresh();
           try {
               $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -247,14 +256,14 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
     }
   }
     
-  public function realizarTramiteExternoComValidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario)
+  public function realizarTramiteExternoComValidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario, $executarTramitarPendencias = true)
     {
-      $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, true);
+      $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, true, $executarTramitarPendencias);
   }
 
-  public function realizarTramiteExternoSemValidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario)
+  public function realizarTramiteExternoSemValidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario, $executarTramitarPendencias = true)
     {
-      $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, false);
+      $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, false, $executarTramitarPendencias);
   }
 
   protected function buscarIdSerieDoDocumento($tipoDocumento)

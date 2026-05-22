@@ -55,8 +55,10 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
     $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
     $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
     $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
-      self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-      self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
+      self::$destinatario['REP_ESTRUTURAS'], 
+      self::$destinatario['NOME_UNIDADE'],
+      self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+      false,
       function () {
         try {
             $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
@@ -73,11 +75,12 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
         }
 
         return true;
-      }
+      },
+      PEN_WAIT_TIMEOUT,
+      true
     );
 
     $this->waitUntil(function() use ($objProtocoloDTO) {
-      sleep(5);
       $this->paginaBase->refresh();
       $colunaEstado = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
       $this->assertEquals("Aguardando Processamento", $colunaEstado[0]->getText());

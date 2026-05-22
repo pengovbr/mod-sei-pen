@@ -226,6 +226,16 @@ class CenarioBaseTestCase extends TestCase
         $strTarja = stream_get_contents($result[0]["TEXTO"]);
         $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja, "V", "S"));
     }
+
+    if (DESATIVAR_AGENDAMENTO == 'true') {
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+        $bancoOrgaoA->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasEnvioPEN'));
+        $bancoOrgaoA->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasRecebimentoPEN'));
+
+        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+        $bancoOrgaoB->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasEnvioPEN'));
+        $bancoOrgaoB->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('N', 'PENAgendamentoRN::processarTarefasRecebimentoPEN'));
+      }
   }
 
   public static function tearDownAfterClass(): void
@@ -233,6 +243,20 @@ class CenarioBaseTestCase extends TestCase
     if (self::$driver) {
         self::$driver->quit();
     }
+
+    if (DESATIVAR_AGENDAMENTO == 'true') {
+        
+            parent::tearDownAfterClass();
+            $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+            $bancoOrgaoA->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('S', 'PENAgendamentoRN::processarTarefasEnvioPEN'));
+            $bancoOrgaoA->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('S', 'PENAgendamentoRN::processarTarefasRecebimentoPEN'));
+
+            $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+            $bancoOrgaoB->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('S', 'PENAgendamentoRN::processarTarefasEnvioPEN'));
+            $bancoOrgaoB->execute("update infra_agendamento_tarefa set sin_ativo = ? where comando = ?", array('S', 'PENAgendamentoRN::processarTarefasRecebimentoPEN'));
+
+        }
+
   }
 
   public function setUp(): void
@@ -247,15 +271,6 @@ class CenarioBaseTestCase extends TestCase
   protected function url(string $url): void
     {
       self::$driver->get($url);
-  }
-
-    /**
-     * Espera até a condição ser verdadeira
-     */
-  protected function waitUntil(callable $condition, int $timeout = PEN_WAIT_TIMEOUT): void
-    {
-      $wait = new WebDriverWait(self::$driver, $timeout);
-      $wait->until($condition);
   }
 
   protected function definirContextoTeste($nomeContexto)
@@ -333,8 +348,8 @@ class CenarioBaseTestCase extends TestCase
         $this->paginaControleProcesso->abrirProcesso($protocolo);
     } catch (\Exception $e) {
         $this->paginaBase->pesquisar($protocolo);
-        sleep(2);
-        $this->paginaBase->elByXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
+        sleep(1);
+        $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
     }
   }
 
@@ -411,7 +426,11 @@ class CenarioBaseTestCase extends TestCase
       }
     }
 
-      sleep(1);
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' && $executarTramitarPendencias) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
   }
 
   /**
@@ -507,9 +526,18 @@ class CenarioBaseTestCase extends TestCase
 
   protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
-      $this->tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente, $callbackEnvio, $timeout);
+      $this->tramitarProcessoExternamente(
+        $protocolo, 
+        $repositorio, 
+        $unidadeDestino, 
+        $unidadeDestinoHierarquia, 
+        $urgente, 
+        $callbackEnvio, 
+        $timeout, 
+        $executarTramitarPendencias
+      );
       $this->waitUntil(function() {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try {
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -526,7 +554,7 @@ class CenarioBaseTestCase extends TestCase
       $this->validarRecibosTramite($mensagemRecibo, true, true);
       $this->validarHistoricoTramite($unidadeDestino, true, true);
       $this->validarProcessosTramitados($protocolo, true);
-  }
+  } 
 
   protected function tramitarProcessoInternamente($unidadeDestino, $manterAbertoNaUnidadeAtual = false)
     {
@@ -539,7 +567,6 @@ class CenarioBaseTestCase extends TestCase
         $this->paginaTramitar->manterAbertoNaUnidadeAtual();
     }
       $this->paginaTramitar->tramitarInterno();
-
       sleep(1);
   }
 
@@ -569,15 +596,13 @@ class CenarioBaseTestCase extends TestCase
     if ($protocolo) {
         $this->paginaControleProcesso->abrirProcesso($protocolo['PROTOCOLO']);
     }
-
-      sleep(1);
   }
 
   protected function validarRecibosTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao)
     {
       $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
       $this->waitUntil(function() use ($mensagem, $verificarReciboEnvio, $verificarReciboConclusao) {
-          sleep(5);
+          sleep(2);
           $this->paginaProcesso->refresh();
           $this->paginaProcesso->navegarParaConsultarRecibos();
         if($this->paginaReciboTramite->contemTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao)) {
@@ -607,9 +632,7 @@ class CenarioBaseTestCase extends TestCase
     if ($verificarProcessoRejeitado) {
 
         $this->waitUntil(function() use ($unidadeDestino, $motivoRecusa) {
-            sleep(2);
             $this->paginaProcesso->refresh();
-            sleep(2);
             $this->paginaProcesso->navegarParaConsultarAndamentos();
             $andamento = $this->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, $motivoRecusa);
           if ($andamento){
@@ -625,7 +648,6 @@ class CenarioBaseTestCase extends TestCase
 
   protected function validarDadosProcesso($descricao, $restricao, $observacoes, $listaInteressados, $hipoteseLegal = null)
     {
-      sleep(2);
       $this->paginaProcesso->navegarParaEditarProcesso();
       $this->assertEquals(mb_convert_encoding($descricao, 'UTF-8', 'ISO-8859-1'), $this->paginaEditarProcesso->descricao());
       $this->assertEquals($restricao, $this->paginaEditarProcesso->restricao());
@@ -647,19 +669,16 @@ class CenarioBaseTestCase extends TestCase
 
   protected function validarDocumentoCancelado($nomeDocArvore)
     {
-      sleep(2);
       $this->assertTrue($this->paginaProcesso->ehDocumentoCancelado($nomeDocArvore));
   }
 
   protected function validarDocumentoMovido($nomeDocArvore)
     {
-      sleep(2);
       $this->assertTrue($this->paginaProcesso->ehDocumentoMovido($nomeDocArvore));
   }
 
   protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria = false, $hipoteseLegal = null)
     {
-      sleep(2);
 
       // Verifica se documento possui marcação de documento anexado
       $bolPossuiDocumentoReferenciado = !is_null($dadosDocumento['ORDEM_DOCUMENTO_REFERENCIADO']);
@@ -698,7 +717,7 @@ class CenarioBaseTestCase extends TestCase
       $this->paginaBase->navegarParaControleProcesso();
       $txtPesquisaMenu = $this->paginaBase->elById("txtInfraPesquisarMenu");
       if (!$txtPesquisaMenu->isDisplayed()) {
-          $this->paginaBase->elByXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
+          $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click();//ícone de 3 risquinhos horizontais que abre/fecha o menu
       }
       $this->paginaBase->navegarPara("Processos em Tramitação Externa");
       $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
@@ -710,6 +729,27 @@ class CenarioBaseTestCase extends TestCase
       $this->assertTrue($this->paginaControleProcesso->contemProcesso(self::$protocoloTeste));
       $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
   }
+
+  /**
+   * Espera até a condição ser verdadeira
+   */
+  public function waitUntil(callable $condition, int $timeout = PEN_WAIT_TIMEOUT): void
+  {
+    $wait = new WebDriverWait(self::$driver, $timeout);
+    $wait->until($condition);
+  }
+
+  public function executarTramitarPendenciasSimples(): void
+    {
+        $scriptEnvio       = 'php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php';
+        $scriptRecebimento = 'php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php';
+
+        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptEnvio}");
+        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptRecebimento}");
+        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org2-http-1 {$scriptEnvio}");
+        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org2-http-1 {$scriptRecebimento}");
+        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptRecebimento}");
+    }
 
   public function gerarDadosProcessoTeste($contextoProducao)
     {
@@ -793,7 +833,6 @@ class CenarioBaseTestCase extends TestCase
 
       // 11 - Abrir protocolo na tela de controle de processos
       $this->waitUntil(function() use ($strProtocoloTeste) {
-          sleep(5);
           $this->abrirProcessoControleProcesso($strProtocoloTeste);
           return true;
       }, PEN_WAIT_TIMEOUT);
@@ -829,7 +868,7 @@ class CenarioBaseTestCase extends TestCase
 
       // Abrir protocolo na tela de controle de processos pelo texto da descrição
       $this->waitUntil(function() use ($strDescricao, &$strProtocoloTeste) {
-        sleep(5);
+        sleep(2);
         try {
             $this->paginaBase->refresh();
             $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);    

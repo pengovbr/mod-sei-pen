@@ -47,7 +47,7 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
     );
     $this->paginaMapUnidades->navegarPenMapeamentoUnidades();
     $this->paginaMapUnidades->pesquisarUnidade(self::$remetente['SIGLA_UNIDADE']);
-    sleep(2);
+    sleep(1);
 
     $this->paginaMapUnidades->selecionarEditar();
     $this->paginaMapUnidades->limparRestricoes();
@@ -56,7 +56,7 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
     $this->paginaMapUnidades->selecionarUnidade(self::$remetente['NOME_UNIDADE']);
 
     $this->paginaMapUnidades->salvar();
-    sleep(2);
+    sleep(1);
     $mensagem = $this->paginaMapUnidades->buscarMensagemAlerta();
     $this->assertStringContainsString(
       'Mapeamento de Unidade gravado com sucesso.',
