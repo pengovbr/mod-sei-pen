@@ -1,6 +1,8 @@
 name: Testes funcionais para MySQL
 
-on: [pull_request]
+on:
+  pull_request:
+  workflow_call:
 env: # Or as an environment variable
   CERTIFICADO_ORG1: ${{ secrets.CERTIFICADO_ORG1 }}
   CERTIFICADO_ORG2: ${{ secrets.CERTIFICADO_ORG2 }}
