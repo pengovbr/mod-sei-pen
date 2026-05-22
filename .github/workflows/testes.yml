@@ -17,16 +17,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Pull Request branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
             repository: pengovbr/sei
             token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
             path: sei
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
             path: sei/src/sei/web/modulos/mod-sei-pen
-
+      - name: Cache tmp files
+        uses: actions/cache@v4
+        with:
+          # Caminho onde os arquivos tmp estão armazenados
+          path: |
+            sei/src/sei/web/modulos/mod-sei-pen/src/tests_sei5/funcional/.tmp
+          # Chave única baseada no sistema operacional e no hash do arquivo de lock
+          key: ${{ runner.os }}-node-${{ hashFiles('sei/src/sei/web/modulos/mod-sei-pen/src/tests_sei5/funcional/.tmp/**') }}
+          # Chaves de fallback caso a chave exata não seja encontrada
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Configura e sobe o ambiente
         run: | 
              cd sei/src/sei/web/modulos/mod-sei-pen
@@ -45,11 +55,11 @@ jobs:
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org2.pem
              make up
 
-      - name: Executa update, install e tramita silent
+      - name: Executa update, install
         run: |
              cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
 
       - name: Testes funcionais
-        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-parallel-otimizado
+        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional
