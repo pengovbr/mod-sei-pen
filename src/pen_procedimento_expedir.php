@@ -894,7 +894,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
         <label id="lblSinMultiplosOrgaos" for="multiplosOrgaos" class="infraLabelCheckbox">
           Manter o processo aberto na unidade atual?
           <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
-          <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getDiretorioImagensGlobal() ?>/ajuda.gif" class='infraImg'/></a>
+          <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getIconeAjuda() ?>" class='infraImg'/></a>
         </label>
       </div>
     <?php } ?>
