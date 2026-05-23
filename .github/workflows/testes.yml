@@ -27,6 +27,8 @@ jobs:
         uses: actions/checkout@v6
         with:
             path: sei/src/sei/web/modulos/mod-sei-pen
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5
       - name: Cache tmp files
         uses: actions/cache@v4
         with:
