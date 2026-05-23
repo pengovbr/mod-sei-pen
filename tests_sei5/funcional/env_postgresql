@@ -2,7 +2,7 @@
 SEI_PATH=../../../../../../
 ENVIRONMENT_VERSION=3.6.11
 
-HTTP_IMAGE=processoeletronico/app-dev-php8
+HTTP_IMAGE=processoeletronico/sei5-alpine
 SOLR_IMAGE=processoeletronico/solr9.6.1
 
 SEI_CONFIG=./assets/config/ConfiguracaoSEI.php
