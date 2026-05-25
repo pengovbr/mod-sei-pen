@@ -112,7 +112,7 @@ class CenarioBaseTestCase extends TestCase
       case 'chrome':
           $options = new ChromeOptions();
           $options->addArguments([
-              'disable-features=AvoidFlashBetweenNavigation,PaintHolding',
+              'disable-features=AvoidFlashBetweenNavigation,PaintHolding', '--headless',
           ]);
           $options->setExperimentalOption('w3c', false);
 
