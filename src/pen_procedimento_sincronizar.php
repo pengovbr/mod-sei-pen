@@ -10,6 +10,38 @@ $idProcedimento = '';
 
 $objInfraException = new InfraException();
 
+$montarUrlRetorno = static function ($objSessaoSEI, $objPaginaSEI, $idProcedimento) {
+    $strUrl = 'controlador.php?acao=procedimento_visualizar&acao_origem=' . ($_GET['acao'] ?? 'pen_procedimento_sincronizar');
+
+    if ($idProcedimento !== null && $idProcedimento !== '') {
+        $strUrl .= '&id_procedimento=' . $idProcedimento . '&montar_visualizacao=1';
+    }
+
+    if (!empty($_GET['arvore'])) {
+        $strUrl .= '&arvore=' . $_GET['arvore'];
+    }
+
+    if ($objPaginaSEI !== null && $idProcedimento !== null && $idProcedimento !== '') {
+        $strUrl .= $objPaginaSEI->montarAncora($idProcedimento);
+    }
+
+    return $objSessaoSEI !== null ? $objSessaoSEI->assinarLink($strUrl) : $strUrl;
+};
+
+$atualizarTelaProcesso = static function ($strUrlRetorno) {
+    ?>
+    <script>
+      if (window.parent && window.parent.parent && window.parent.parent.document.getElementById('ifrArvore')) {
+        window.parent.parent.document.getElementById('ifrArvore').src = '<?= $strUrlRetorno ?>';
+      } else if (window.parent && window.parent.location) {
+        window.parent.location = '<?= $strUrlRetorno ?>';
+      } else {
+        window.location = '<?= $strUrlRetorno ?>';
+      }
+    </script>
+    <?php
+};
+
 try {
     InfraDebug::getInstance()->setBolLigado(false);
     InfraDebug::getInstance()->setBolDebugInfra(false);
@@ -104,12 +136,14 @@ try {
         // Atividade de pedido de sincronização para múltiplos órgãos manual - só adicionada após sucesso na solicitação de sincronização
         $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS);
       } else {
-        // Já existe uma pendência de sincronização para esse processo. Aguarde a finalização da sincronização.
+        $mensagem = 'Já existe uma solicitação de sincronização em andamento para este processo. Aguarde a conclusão antes de tentar novamente.';
+        $objInfraException->adicionarValidacao($mensagem);
+        throw new InfraException($mensagem);
       }
     }
 
     $objPaginaSEI->setStrMensagem('Solicitação de sincronização realizada com sucesso.', 5);
-    header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem='.$_GET['acao'].'&arvore='.$_GET['arvore'].'&sincronizado=1'.$strParametros.$objPaginaSEI->montarAncora($idProcedimento)));
+    $atualizarTelaProcesso($montarUrlRetorno($objSessaoSEI, $objPaginaSEI, $idProcedimento));
     exit(0);
 
   } else {
@@ -120,16 +154,9 @@ try {
       $mensagem = $objPaginaSEI->getStrMensagens();
     }
     if ($mensagem !== '') {
-      $objPaginaSEI->setStrMensagem('');
-      ?>
-      <div class="infraAreaAviso" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
-          <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Aviso" class="infraImg" />
-          <span style="color: #856404; font-weight: bold;">
-              <?php echo PaginaSEI::tratarHTML($mensagem); ?></strong>
-          </span>
-      </div>
-      <?php
+      $objPaginaSEI->setStrMensagem($mensagem, InfraPagina::$TIPO_MSG_AVISO);
     }
+    $atualizarTelaProcesso($montarUrlRetorno($objSessaoSEI, $objPaginaSEI, $idProcedimento));
     exit(0);
   }
   
@@ -142,30 +169,14 @@ try {
   if ($objPaginaSEI !== null) {
     $objPaginaSEI->setStrMensagem($mensagem, InfraPagina::$TIPO_MSG_AVISO);
   }
-  $strAcao = isset($_GET['acao']) ? $_GET['acao'] : '';
-  $strArvore = isset($_GET['arvore']) ? $_GET['arvore'] : '';
-  $strAncora = ($objPaginaSEI !== null && $idProcedimento !== '') ? $objPaginaSEI->montarAncora($idProcedimento) : '';
-  $strParametrosErro = $strParametros . '&mensagem=' . urlencode($mensagem);
-  $strUrl = 'controlador.php?acao=pen_procedimento_sincronizar&acao_origem=' . $strAcao . '&arvore=' . $strArvore . '&sincronizado=1' . $strParametrosErro . $strAncora;
-  if ($objSessaoSEI !== null) {
-    $strUrl = $objSessaoSEI->assinarLink($strUrl);
-  }
-  header('Location: '.$strUrl);
+  $atualizarTelaProcesso($montarUrlRetorno($objSessaoSEI, $objPaginaSEI, $idProcedimento));
   exit(0);
 } catch (Exception $e) {
   $mensagem = 'Ocorreu um erro na sincronização do processo para múltiplos órgãos.';
   if ($objPaginaSEI !== null) {
     $objPaginaSEI->setStrMensagem($mensagem, InfraPagina::$TIPO_MSG_AVISO);
   }
-  $strAcao = isset($_GET['acao']) ? $_GET['acao'] : '';
-  $strArvore = isset($_GET['arvore']) ? $_GET['arvore'] : '';
-  $strAncora = ($objPaginaSEI !== null && $idProcedimento !== '') ? $objPaginaSEI->montarAncora($idProcedimento) : '';
-  $strParametrosErro = $strParametros . '&mensagem=' . urlencode($mensagem);
-  $strUrl = 'controlador.php?acao=pen_procedimento_sincronizar&acao_origem=' . $strAcao . '&arvore=' . $strArvore . '&sincronizado=1' . $strParametrosErro . $strAncora;
-  if ($objSessaoSEI !== null) {
-    $strUrl = $objSessaoSEI->assinarLink($strUrl);
-  }
-  header('Location: '.$strUrl);
+  $atualizarTelaProcesso($montarUrlRetorno($objSessaoSEI, $objPaginaSEI, $idProcedimento));
   exit(0);
 }
 

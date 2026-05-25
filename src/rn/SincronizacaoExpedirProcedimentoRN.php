@@ -541,7 +541,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
           $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
             $objProcedimentoDTO,
             $idTramite,
-            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA,
+            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM,
             $numIdUnidadeProcesso,
             'Erro no processamento da sincronização: ' . $e->getMessage()
           );
