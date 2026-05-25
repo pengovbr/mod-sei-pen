@@ -1,4 +1,4 @@
-name: Testes funcionais para Postgresql
+name: Testes funcionais para MySQL
 
 on:
   workflow_dispatch:
@@ -43,7 +43,7 @@ jobs:
       - name: Configura e sobe o ambiente
         run: | 
              cd sei/src/sei/web/modulos/mod-sei-pen
-             make config base=postgresql
+             make config
              sed -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/155275/' tests_sei5/funcional/phpunit.xml
              sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GIT\_ACTION\_ORG1/' tests_sei5/funcional/phpunit.xml
              sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GIT\_ACTION\_ORG1/' tests_sei5/funcional/phpunit.xml
