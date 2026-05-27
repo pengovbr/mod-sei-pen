@@ -2700,8 +2700,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Recebimento de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS');
 
       $fnCadastrar('Pedido de sincronização manual múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR');
       $fnCadastrar('A sincronização foi concluída com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO');
 
       $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
