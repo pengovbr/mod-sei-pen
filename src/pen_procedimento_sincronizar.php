@@ -13,23 +13,23 @@ $objInfraException = new InfraException();
 $montarUrlRetorno = static function ($objSessaoSEI, $objPaginaSEI, $idProcedimento) {
     $strUrl = 'controlador.php?acao=procedimento_visualizar&acao_origem=' . ($_GET['acao'] ?? 'pen_procedimento_sincronizar');
 
-    if ($idProcedimento !== null && $idProcedimento !== '') {
-        $strUrl .= '&id_procedimento=' . $idProcedimento . '&montar_visualizacao=1';
-    }
+  if ($idProcedimento !== null && $idProcedimento !== '') {
+      $strUrl .= '&id_procedimento=' . $idProcedimento . '&montar_visualizacao=1';
+  }
 
-    if (!empty($_GET['arvore'])) {
-        $strUrl .= '&arvore=' . $_GET['arvore'];
-    }
+  if (!empty($_GET['arvore'])) {
+      $strUrl .= '&arvore=' . $_GET['arvore'];
+  }
 
-    if ($objPaginaSEI !== null && $idProcedimento !== null && $idProcedimento !== '') {
-        $strUrl .= $objPaginaSEI->montarAncora($idProcedimento);
-    }
+  if ($objPaginaSEI !== null && $idProcedimento !== null && $idProcedimento !== '') {
+      $strUrl .= $objPaginaSEI->montarAncora($idProcedimento);
+  }
 
     return $objSessaoSEI !== null ? $objSessaoSEI->assinarLink($strUrl) : $strUrl;
 };
 
 $atualizarTelaProcesso = static function ($strUrlRetorno) {
-    ?>
+  ?>
     <script>
       if (window.parent && window.parent.parent && window.parent.parent.document.getElementById('ifrArvore')) {
         window.parent.parent.document.getElementById('ifrArvore').src = '<?= $strUrlRetorno ?>';
@@ -102,13 +102,13 @@ try {
       $objAtividadeRN = new AtividadeRN();
       $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
 
-    if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
+      if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
         $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
         $mensagem = "Atenção! Não é possível iniciar a sincronização de processos abertos em mais de uma unidade. "
           . "Conclua o processo nas demais unidades antes de solicitar uma nova sincronia. (Processo aberto em: $strSiglaUnidade)";
         $objInfraException->adicionarValidacao($mensagem);
         throw new InfraException($mensagem);
-    }
+      }
 
       $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($idProcedimento);
       $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, $numNRE, null, null, null, null, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA);

@@ -1791,23 +1791,23 @@ class PENIntegracao extends SeiIntegracao
         $objComponentesDigital = new ComponenteDigitalDTO();
         $objComponentesDigital->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
         $objComponentesDigital->setStrProtocoloProcedimentoAnexado($objProcedimentoAPIAnexado->getNumeroProtocolo());
-        $objComponentesDigital->setStrNumeroRegistro(null,InfraDTO::$OPER_DIFERENTE);
+        $objComponentesDigital->setStrNumeroRegistro(null, InfraDTO::$OPER_DIFERENTE);
         $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
-        if ($objComponenteDigitalBD->contar($objComponentesDigital) == 0) {
-          $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
-          if ($objAtividadeAnexacaoDTO === null) {
-            return null;
-          }
-
-          $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
-          if ($numIdAtividadeTramitacaoExterna === null) {
-            return null;
-          }
-          if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
-            return null;
-          }
-          $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+      if ($objComponenteDigitalBD->contar($objComponentesDigital) == 0) {
+        $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
+        if ($objAtividadeAnexacaoDTO === null) {
+          return null;
         }
+
+        $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+        if ($numIdAtividadeTramitacaoExterna === null) {
+          return null;
+        }
+        if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
+          return null;
+        }
+        $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+      }
     }
     $nomeModulo = $this->getNome();
     $mensagem = $nomeModulo . ': Prezado(a) usuário(a), não é possível desanexar o processo '
