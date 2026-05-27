@@ -1209,7 +1209,9 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
-      $objInfraParametro->setValor('SEI_FEDERACAO_NUMERO_PROCESSO', 0);
+      if($objInfraParametro->getValor('SEI_FEDERACAO_NUMERO_PROCESSO')){
+        $objInfraParametro->setValor('SEI_FEDERACAO_NUMERO_PROCESSO', 0);
+      }
       $objProcedimentoDTOGerado = $objProcedimentoRN->gerarRN0156($objProcedimentoDTO);
 
     if ($alterouTipoProcesso) {
