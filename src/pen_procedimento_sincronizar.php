@@ -87,7 +87,7 @@ try {
         $objTramiteDTO->getNumIdRepositorioDestino()
       );
       if (count($tramitePendencia) == 0) {
-        $mensagem = "Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.";
+        $mensagem = "Ainda não é possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.";
         $objInfraException->adicionarValidacao($mensagem);
         throw new InfraException($mensagem);
       }
@@ -132,7 +132,13 @@ try {
         }
 
         $objProcessoEletronicoRN->bloquearProcesso($idProcedimento);
-        $objProcessoEletronicoRN->solicitarSincronizarTramite($objTramiteDTO->getNumIdTramite());
+        try {
+           $objProcessoEletronicoRN->solicitarSincronizarTramite($objTramiteDTO->getNumIdTramite());
+        } catch (Exception $e) {
+          $objProcessoEletronicoRN->desbloquearProcesso($idProcedimento);
+          $objInfraException->adicionarValidacao('Ocorreu um erro na solicitação de sincronização do processo para múltiplos órgãos.');
+          throw new InfraException($e->getMessage());
+        }
         // Atividade de pedido de sincronização para múltiplos órgãos manual - só adicionada após sucesso na solicitação de sincronização
         $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS);
       } else {
