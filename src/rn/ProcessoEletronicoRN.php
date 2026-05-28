@@ -3114,9 +3114,12 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
       // Verificar se o processo é de múltiplos órgãos
-      $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais)
-              ? ($objMetadados->propriedadesAdicionais ?: [])
-              : [];
+      $propriedadesAdicionais = (
+          isset($objMetadados->propriedadesAdicionais) &&
+          is_array($objMetadados->propriedadesAdicionais)
+      )
+          ? $objMetadados->propriedadesAdicionais
+          : [];
     if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
       foreach ($propriedadesAdicionais as $valor) {
         if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
@@ -3158,9 +3161,12 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
       // Verificar se o processo é de múltiplos órgãos
-      $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais)
-              ? ($objMetadados->propriedadesAdicionais ?: [])
-              : [];
+      $propriedadesAdicionais = (
+          isset($objMetadados->propriedadesAdicionais) &&
+          is_array($objMetadados->propriedadesAdicionais)
+      )
+          ? $objMetadados->propriedadesAdicionais
+          : [];
     if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
       foreach ($propriedadesAdicionais as $valor) {
         if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {

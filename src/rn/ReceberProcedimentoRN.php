@@ -3126,8 +3126,11 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
       
       $multiplosOrgaos = false;
-      $propriedadesAdicionais = isset($parObjMetadadosProcedimento->propriedadesAdicionais)
-          ? ($parObjMetadadosProcedimento->propriedadesAdicionais ?: [])
+      $propriedadesAdicionais = (
+          isset($parObjMetadadosProcedimento->propriedadesAdicionais) &&
+          is_array($parObjMetadadosProcedimento->propriedadesAdicionais)
+      )
+          ? $parObjMetadadosProcedimento->propriedadesAdicionais
           : [];
     if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
       foreach ($propriedadesAdicionais as $key => $valor) {
