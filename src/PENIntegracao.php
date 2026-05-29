@@ -515,6 +515,8 @@ class PENIntegracao extends SeiIntegracao
         $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
     }
 
+      $arrDblIdProcedimento = array_unique($arrDblIdProcedimento);
+
       $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
       $arrStrIcone = $this->montarIconeTramite($arrDblIdProcedimento, $arrStrIcone);
       $arrStrIcone = $this->montarIconeSincronizacao($arrDblIdProcedimento, $arrStrIcone);
@@ -553,9 +555,14 @@ class PENIntegracao extends SeiIntegracao
 
   private function montarIconeTramite($arrDblIdProcedimento = [], $arrStrIcone = [])
     {
-      $arrTiProcessoEletronico = [ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO)];
+      $arrTiProcessoEletronico = [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), 
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO), 
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO), 
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), 
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO)];
     
-    foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
+      foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
         $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
@@ -566,43 +573,42 @@ class PENIntegracao extends SeiIntegracao
         $objAtividadeDTO->retDblIdProcedimentoProtocolo();
       
         $objAtividadeRN = new AtividadeRN();
-        $ObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-      
-      if (!empty($ObjAtividadeDTO)) {
-        switch ($ObjAtividadeDTO->getNumIdTarefa()) {
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
-                $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trâmite para esse processo foi enviado" />'];
-            if (!isset($arrStrIcone[$dblIdProcedimento])) {
-              $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
-            } else {
-              $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
-            }
-              break;
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
-              $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />'];
-            if (!isset($arrStrIcone[$dblIdProcedimento])) {
-              $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
-            } else {
-                $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
-            }
-              break;
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
-            if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
-                          $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />'];
+        $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+        if (!empty($objAtividadeDTO)) {
+          switch ($objAtividadeDTO->getNumIdTarefa()) {
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
+              $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trâmite para esse processo foi enviado" />'];
               if (!isset($arrStrIcone[$dblIdProcedimento])) {
                 $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
               } else {
                 $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
               }
-            }
-              break;
-          default:
-              break;
+                break;
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
+              $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />'];
+              if (!isset($arrStrIcone[$dblIdProcedimento])) {
+                $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
+              } else {
+                $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
+              }
+                break;
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
+              if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
+                $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />'];
+                if (!isset($arrStrIcone[$dblIdProcedimento])) {
+                  $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
+                } else {
+                  $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
+                }
+              }
+                break;
+            default:
+                break;
+          }
         }
       }
-    }
 
       return $arrStrIcone;
   }
@@ -617,12 +623,9 @@ class PENIntegracao extends SeiIntegracao
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO)
       ];
 
       $objAtividadeDTO = new AtividadeDTO();
@@ -646,14 +649,12 @@ class PENIntegracao extends SeiIntegracao
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO):
             $title = "Pedido de sincronização realizado em " . $objAtividadeDTO->getDthAbertura();
             $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/sincronizar_processo_pendente.png" title="'.$title.'" />'];
               break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO):
             $dataAbertura = $objAtividadeDTO->getDthConclusao() !== null ? $objAtividadeDTO->getDthConclusao() : $objAtividadeDTO->getDthAbertura();
             $title = "Sincronizado com sucesso em " . $dataAbertura;
             $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/sincronizar_sucesso.png" title="'.$title.'" />'];
@@ -661,7 +662,6 @@ class PENIntegracao extends SeiIntegracao
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM):
             $title = "A sincronização não foi concluída em " . $objAtividadeDTO->getDthConclusao();
             $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/sincronizar_falha.png" title="'.$title.'" />'];
               break;
@@ -797,12 +797,10 @@ class PENIntegracao extends SeiIntegracao
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO)
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM)
       ];
 
       $objAtividadeDTO = new AtividadeDTO();
@@ -830,13 +828,11 @@ class PENIntegracao extends SeiIntegracao
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO):
             $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizadoPendente($dblIdProcedimento, $objAtividadeDTO->getDthAbertura());
               break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS):
-          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO):
             $dataAbertura = $objAtividadeDTO->getDthConclusao() !== null ? $objAtividadeDTO->getDthConclusao() : $objAtividadeDTO->getDthAbertura();
             $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizadoFinalizado($dblIdProcedimento, $dataAbertura);
               break;
@@ -848,7 +844,9 @@ class PENIntegracao extends SeiIntegracao
               ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
               echo "<script>window.location.reload();</script>";
             }
-            $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizacaoFalha($dblIdProcedimento, $objAtividadeDTO->getDthConclusao());
+            if ($objAtividadeDTO->getNumIdTarefa() != ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM)) {
+              $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizacaoFalha($dblIdProcedimento, $objAtividadeDTO->getDthConclusao());
+            }
               break;
           default:
               break;
