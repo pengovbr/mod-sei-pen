@@ -277,6 +277,7 @@ Para Solr com usuário adequado (geralmente solr):
 $ mkdir -p <PASTADECORESDOSOLR>/mod-sei-pen
 $ cp <PASTADESCOMPACTADADOMODULO>/solr <PASTADECORESDOSOLR>/mod-sei-pen/conf
 $ SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=LOGINADMINDOSOLR:SENHAADMINDOSOLR" <CAMINHODO>/bin/solr create -c mod-sei-pen -d <PASTADECORESDOSOLR>/mod-sei-pen/conf
+```
 ---
 
 Depois de criado o core deve-se habilitar criando um parâmetro **MOD_SEI_PEN_SALVA_HTTP_LOGS** com valor '1'. Para desabilitar colocar o valor '0'.
