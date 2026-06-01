@@ -7,6 +7,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Handler\CurlHandler;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Solarium\Client as SolrClient;
 
 class ProcessoNaoPodeSerDesbloqueadoException extends Exception
 {
@@ -127,15 +132,22 @@ class ProcessoEletronicoRN extends InfraRN
       'Accept' => '*/*',
       'Content-Type' => 'application/json',
       ];
+
+      $arrGuzzleConfig = [
+        'base_uri' => $this->strBaseUri,
+        'timeout'  => self::WS_TIMEOUT_CONEXAO,
+        'headers'  => $this->arrheaders,
+        'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
+        ];
+
+      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      $bolSalvaLogs = $objInfraParametro->getValor('MOD_SEI_PEN_SALVA_HTTP_LOGS', false, 0);
+
+      if ($bolSalvaLogs) {
+        $arrGuzzleConfig['handler'] = $this->getStackParaLog();
+      }
       
-      $this->strClientGuzzle = new Client(
-          [
-          'base_uri' => $this->strBaseUri,
-          'timeout'  => self::WS_TIMEOUT_CONEXAO,
-          'headers'  => $this->arrheaders,
-          'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
-          ]
-      );
+      $this->strClientGuzzle = new Client($arrGuzzleConfig);
   }
 
   protected function inicializarObjInfraIBanco()
@@ -1061,26 +1073,33 @@ class ProcessoEletronicoRN extends InfraRN
       $hashDoComponenteDigital = $objParametros->hashDoComponenteDigital;
       $conteudo = $objParametros->conteudoDoComponenteDigital;
 
-        $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
+      $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
 
-        $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
-        $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
-        $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
+      $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+      $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+      $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
 
-        $strBaseUri = $this->strEnderecoWebService;
+      $strBaseUri = $this->strEnderecoWebService;
 
-        $arrheaders = [
-        'Accept' => '*/*',
-        ];
+      $arrheaders = [
+      'Accept' => '*/*',
+      ];
 
-        $strClientGuzzle = new GuzzleHttp\Client(
-            [
-            'base_uri' => $strBaseUri,
-            'headers'  => $arrheaders,
-            'timeout'  => self::WS_TIMEOUT_CONEXAO,
-            'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
-            ]
-        );
+      $arrConfigGuzzle = [
+          'base_uri' => $strBaseUri,
+          'headers'  => $arrheaders,
+          'timeout'  => self::WS_TIMEOUT_CONEXAO,
+          'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
+          ];
+
+      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      $bolSalvaLogs = $objInfraParametro->getValor('MOD_SEI_PEN_SALVA_HTTP_LOGS', false, 0);
+
+      if ($bolSalvaLogs) {
+        $arrGuzzleConfig['handler'] = $this->getStackParaLog();
+      }
+
+      $strClientGuzzle = new GuzzleHttp\Client($arrConfigGuzzle);
 
     
       $arrOptions = [
@@ -1147,15 +1166,21 @@ class ProcessoEletronicoRN extends InfraRN
         'Accept' => '*/*',
         'Content-Type' => 'application/json',
         ];
+        $arrConfigGuzzle = [
+              'base_uri' => $strBaseUri,
+              'headers'  => $arrheaders,
+              'timeout'  => self::WS_TIMEOUT_CONEXAO,
+              'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
+              ];
 
-        $strClientGuzzle = new GuzzleHttp\Client(
-            [
-            'base_uri' => $strBaseUri,
-            'headers'  => $arrheaders,
-            'timeout'  => self::WS_TIMEOUT_CONEXAO,
-            'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
-            ]
-        );
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $bolSalvaLogs = $objInfraParametro->getValor('MOD_SEI_PEN_SALVA_HTTP_LOGS', false, 0);
+
+        if ($bolSalvaLogs) {
+          $arrGuzzleConfig['handler'] = $this->getStackParaLog();
+        }
+
+        $strClientGuzzle = new GuzzleHttp\Client($arrConfigGuzzle);
 
 
         $arrOptions = [
@@ -2941,5 +2966,20 @@ class ProcessoEletronicoRN extends InfraRN
   public function delete($endpoint, $params = [])
     {
       return $this->getArrPenWsRest('DELETE', $endpoint, ['query' => $params]);
+  }
+
+  private function getStackParaLog() : HandlerStack {
+      // Monolog
+      $logger = new Logger('mod_sei_pen_logger');
+      $logger->pushHandler(new StreamHandler('php://stdout'));
+      // Handler base
+      $handler = new CurlHandler();
+
+      // Decorator
+      $logPenHandler = new LogPenHandler($handler, $logger);
+
+      // Stack
+      $stack = HandlerStack::create($logPenHandler);
+      return $stack;
   }
 }

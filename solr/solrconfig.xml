@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+
+  <luceneMatchVersion>9.9.0</luceneMatchVersion>
+
+  <!-- Update handler -->
+  <updateHandler class="solr.DirectUpdateHandler2"/>
+
+  <!-- Auto commit para logs -->
+  <autoCommit>
+    <maxTime>15000</maxTime>
+    <openSearcher>false</openSearcher>
+  </autoCommit>
+
+  <autoSoftCommit>
+    <maxTime>5000</maxTime>
+  </autoSoftCommit>
+
+  <!-- Request handlers -->
+  <requestHandler name="/select" class="solr.SearchHandler"/>
+
+  <requestHandler name="/update" class="solr.UpdateRequestHandler">
+    <lst name="defaults">
+      <str name="commitWithin">10000</str>
+    </lst>
+  </requestHandler>
+
+  <!-- Cache básico -->
+  <query>
+    <filterCache class="solr.CaffeineCache"
+                 size="512"
+                 initialSize="512"
+                 autowarmCount="0"/>
+  </query>
+
+</config>
