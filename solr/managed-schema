@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="api_logs" version="1.6">
+
+  <!-- ===================== -->
+  <!-- CORE CONFIG -->
+  <!-- ===================== -->
+
+  <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+
+  <fieldType name="pint" class="solr.IntPointField" docValues="true" />
+  <fieldType name="plong" class="solr.LongPointField" docValues="true" />
+  <fieldType name="pdouble" class="solr.DoublePointField" docValues="true" />
+
+  <fieldType name="pdate" class="solr.DatePointField" docValues="true" />
+
+  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+
+  <fieldType name="text_json" class="solr.TextField">
+    <analyzer>
+      <tokenizer class="solr.KeywordTokenizerFactory"/>
+    </analyzer>
+  </fieldType>
+
+  <!-- ===================== -->
+  <!-- IDENTITY -->
+  <!-- ===================== -->
+
+  <field name="id" type="string" indexed="true" stored="true" required="true" />
+
+  <!-- ===================== -->
+  <!-- REQUEST -->
+  <!-- ===================== -->
+
+  <field name="url" type="text_general" indexed="true" stored="true" />
+  <field name="method" type="string" indexed="true" stored="true" />
+
+  <field name="request_headers" type="text_json" indexed="false" stored="true" />
+  <field name="request_body" type="text_general" indexed="false" stored="true" />
+
+  <!-- ===================== -->
+  <!-- RESPONSE -->
+  <!-- ===================== -->
+
+  <field name="response_status" type="pint" indexed="true" stored="true" />
+
+  <field name="response_headers" type="text_json" indexed="false" stored="true" />
+  <field name="response_body" type="text_general" indexed="false" stored="true" />
+
+  <!-- ===================== -->
+  <!-- METRICS -->
+  <!-- ===================== -->
+
+  <field name="duration_ms" type="plong" indexed="true" stored="true" />
+
+  <field name="created_at" type="pdate" indexed="true" stored="true" />
+
+  <!-- ===================== -->
+  <!-- SEARCH FIELDS -->
+  <!-- ===================== -->
+
+  <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
+
+  <!-- ===================== -->
+  <!-- COPY FIELDS (FULL TEXT SEARCH) -->
+  <!-- ===================== -->
+
+  <copyField source="url" dest="_text_" />
+  <copyField source="request_body" dest="_text_" />
+  <copyField source="response_body" dest="_text_" />
+
+  <!-- ===================== -->
+  <!-- DEFAULTS -->
+  <!-- ===================== -->
+
+  <uniqueKey>id</uniqueKey>
+
+</schema>

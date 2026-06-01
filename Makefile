@@ -109,7 +109,7 @@ dist: cria_json_compatibilidade
 	@mkdir -p $(SIP_SCRIPTS_DIR)
 	@php composer.phar install --no-dev
 	@cp -R src/* $(SEI_MODULO_DIR)/
-	touch docs/INSTALL.md docs/UPGRADE.md docs/changelogs/CHANGELOG-$(VERSAO_MODULO).md
+	@cp -Rf solr dist/solr
 	@cp docs/INSTALL.md dist/INSTALACAO.md
 	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
 	@cp docs/changelogs/CHANGELOG-$(VERSAO_MODULO).md dist/NOTAS_VERSAO.md
@@ -128,8 +128,8 @@ dist: cria_json_compatibilidade
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md compatibilidade.json sei/ sip/
-	@rm -rf dist/sei dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md compatibilidade.json sei/ sip/ solr/
+	@rm -rf dist/sei dist/solr dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
 
@@ -148,7 +148,12 @@ config:  ## Configura o ambiente para outro banco de dados (mysql|sqlserver|orac
 
 
 install: check-isalive
-	$(CMD_COMPOSE_FUNC) up -d	
+	$(CMD_COMPOSE_FUNC) up -d
+	@docker exec funcional-solr-1 mkdir -p /opt/solr/server/solr/mod-sei-pen
+	@docker cp ./solr funcional-solr-1:/opt/solr/server/solr/mod-sei-pen/conf
+	@docker exec -u 0 funcional-solr-1 chown -R solr:solr /opt/solr/server/solr/mod-sei-pen
+	@docker exec -u 0 funcional-solr-1 chmod -R u+rwX /opt/solr/server/solr/mod-sei-pen
+	@docker exec -e SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=admin:SolrAdmin123\$$" funcional-solr-1 /opt/solr/bin/solr create -c mod-sei-pen -d /opt/solr/server/solr/mod-sei-pen/conf
 	$(CMD_COMPOSE_FUNC) exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
@@ -168,6 +173,7 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
+	
 
 
 .env:
