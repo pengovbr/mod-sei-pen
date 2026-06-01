@@ -11,7 +11,10 @@
     }
   }, 
   "require": {
-    "guzzlehttp/guzzle": "^7.0"
+    "guzzlehttp/guzzle": "^7.0",
+    "solarium/solarium": "^6.4",
+    "symfony/event-dispatcher": "^7.4",
+    "monolog/monolog": "*"
   },
       
   "require-dev": {

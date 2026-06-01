@@ -71,6 +71,7 @@ Após realizar a descompactação do arquivo zip de instalação, será criada u
 /**mod-sei-pen**-VERSAO 
     /sei              # Arquivos do módulo posicionados corretamente dentro da estrutura do SEI
     /sip              # Arquivos do módulo posicionados corretamente dentro da estrutura do SIP
+    /solr             # Arquivos do módulo para criação de core no solr para logs
     INSTALACAO.md     # Instruções de instalação do **mod-sei-pen**
     ATUALIZACAO.md    # Instruções de atualização do **mod-sei-pen**    
     NOTAS_VERSAO.MD   # Registros de novidades, melhorias e correções desta versão
@@ -261,6 +262,28 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
 
 **ATENÇÃO !  
 Outras configurações avançadas do módulo podem ser encontradas na seção [Outras Configurações Adicionais](#1_1_Outras_Configurações_Adicionais) descrita logo abaixo neste documento.**
+
+---
+
+### 1.11. Configuração para salvar LOGS do HTTP no SOLR
+
+Desde a versão 4.1.0 é possível salvar os logs do HTTP para debug e coleta de informações para abertura de chamados.
+
+Para salvar os logs de HTTP é necessário ter o solr configurado no SEI e criar um core específico para o módulo do Tramita.
+
+Para Solr com usuário adequado (geralmente solr):
+
+```
+$ mkdir -p <PASTADECORESDOSOLR>/mod-sei-pen
+$ cp <PASTADESCOMPACTADADOMODULO>/solr <PASTADECORESDOSOLR>/mod-sei-pen/conf
+$ SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=LOGINADMINDOSOLR:SENHAADMINDOSOLR" <CAMINHODO>/bin/solr create -c mod-sei-pen -d <PASTADECORESDOSOLR>/mod-sei-pen/conf
+---
+
+Depois de criado o core deve-se habilitar criando um parâmetro **MOD_SEI_PEN_SALVA_HTTP_LOGS** com valor '1'. Para desabilitar colocar o valor '0'.
+
+> [!IMPORTANT]
+> Não use esse parâmetro com valor '1' por muito tempo em produção pois pode degradar o ambiente. Só use para debug quando necessário.
+
 
 ---
 ---
