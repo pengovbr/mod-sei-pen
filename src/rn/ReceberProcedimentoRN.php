@@ -1290,31 +1290,19 @@ class ReceberProcedimentoRN extends InfraRN
       //Realiza a alteração dos metadados do processo(Por hora, apenas do nível de sigilo e hipótese legal)
       $objProtocoloDTO = new ProtocoloDTO();
       $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
-      $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjMetadadoProcedimento->nivelDeSigilo));
+      $strNivelAcessoLocal = $this->obterNivelSigiloSEI($parObjMetadadoProcedimento->nivelDeSigilo);
+      $objProtocoloDTO->setStrStaNivelAcessoLocal($strNivelAcessoLocal);
 
-    if($parObjMetadadoProcedimento->hipoteseLegal && $parObjMetadadoProcedimento->hipoteseLegal->identificacao) {
-        $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao));
-
-
-      if($this->obterNivelSigiloSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao) == ProtocoloRN::$NA_RESTRITO) {
-        $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-        $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
-
-        if (!isset($parObjProtocolo->hipoteseLegal) || (isset($parObjProtocolo->hipoteseLegal) && empty($parObjProtocolo->hipoteseLegal->identificacao))) {
-            $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+    if($strNivelAcessoLocal == ProtocoloRN::$NA_RESTRITO) {
+        if (isset($parObjMetadadoProcedimento->hipoteseLegal) && !empty($parObjMetadadoProcedimento->hipoteseLegal->identificacao)) {
+            $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao));
         } else {
-
-            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parObjProtocolo->hipoteseLegal->identificacao);
-          if (empty($numIdHipoteseLegal)) {
-                $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
-          } else {
-                  $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
-          }
+            $objProtocoloDTO->setNumIdHipoteseLegal($this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
         }
-      }
     }
 
-      $this->objProtocoloRN->alterarRN0203($objProtocoloDTO);
+      $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
+      $objProtocoloBD->alterar($objProtocoloDTO);
   }
 
   private function alterarMetadadosDocumento($parNumIdDocumento, $parObjMetadadoDocumento)
@@ -1322,13 +1310,19 @@ class ReceberProcedimentoRN extends InfraRN
       //Realiza a alteração dos metadados do documento(Por hora, apenas do nível de sigilo e hipótese legal)
       $objProtocoloDTO = new ProtocoloDTO();
       $objProtocoloDTO->setDblIdProtocolo($parNumIdDocumento);
-      $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjMetadadoDocumento->nivelDeSigilo));
+      $strNivelAcessoLocal = $this->obterNivelSigiloSEI($parObjMetadadoDocumento->nivelDeSigilo);
+      $objProtocoloDTO->setStrStaNivelAcessoLocal($strNivelAcessoLocal);
 
-    if($parObjMetadadoDocumento->hipoteseLegal && $parObjMetadadoDocumento->hipoteseLegal->identificacao) {
-        $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoDocumento->hipoteseLegal->identificacao));
+    if($strNivelAcessoLocal == ProtocoloRN::$NA_RESTRITO) {
+        if (isset($parObjMetadadoDocumento->hipoteseLegal) && !empty($parObjMetadadoDocumento->hipoteseLegal->identificacao)) {
+            $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoDocumento->hipoteseLegal->identificacao));
+        } else {
+            $objProtocoloDTO->setNumIdHipoteseLegal($this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+        }
     }
 
-      $this->objProtocoloRN->alterarRN0203($objProtocoloDTO);
+      $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
+      $objProtocoloBD->alterar($objProtocoloDTO);
   }
 
   private function registrarAndamentoRecebimentoProcesso(ProcedimentoDTO $objProcedimentoDTO, $parObjMetadadosProcedimento)
