@@ -349,7 +349,7 @@ class CenarioBaseTestCase extends TestCase
     } catch (\Exception $e) {
         $this->paginaBase->pesquisar($protocolo);
         sleep(1);
-        $this->paginaBase->elByXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
+        $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
     }
   }
 
@@ -717,7 +717,7 @@ class CenarioBaseTestCase extends TestCase
       $this->paginaBase->navegarParaControleProcesso();
       $txtPesquisaMenu = $this->paginaBase->elById("txtInfraPesquisarMenu");
       if (!$txtPesquisaMenu->isDisplayed()) {
-          $this->paginaBase->elByXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();//ícone de 3 risquinhos horizontais que abre/fecha o menu
+          $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click();//ícone de 3 risquinhos horizontais que abre/fecha o menu
       }
       $this->paginaBase->navegarPara("Processos em Tramitação Externa");
       $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
