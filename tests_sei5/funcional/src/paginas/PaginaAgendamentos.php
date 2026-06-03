@@ -29,15 +29,29 @@ class PaginaAgendamentos extends PaginaTeste
       unset($linhasAgendamentos[0]);
 
     foreach($linhasAgendamentos as $idx => $linha) {
-        $colunaComando = $linha->findElement(WebDriverBy::xpath('./td[2]'));
+        try {
+            $colunaComando = $linha->findElement(WebDriverBy::xpath('./td[2]'));
 
-      if ($colunaComando->getText() === $strAgendamento) {
-        $this->elByXPath("(//img[@title='$acao'])[$idx]")->click();
-        $bolExisteAlerta = $this->alertTextAndClose();
-        if ($bolExisteAlerta != null) { 
-            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER); 
+            if ($colunaComando->getText() === $strAgendamento) {
+                $this->waitUntil(function() use ($idx, $acao) {
+                    try {
+                        $this->elByXPath("(//img[@title='$acao'])[$idx]");
+                        return true;
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                });
+                $this->elByXPath("(//img[@title='$acao'])[$idx]")->click();
+                $bolExisteAlerta = $this->alertTextAndClose();
+                if ($bolExisteAlerta != null) {
+                    $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+                }
+                break; // sai do loop após clicar
+            }
+        } catch (\Exception $e) {
+            // elemento ficou stale, ignora e continua
+            continue;
         }
-      }
     }
 
   }
