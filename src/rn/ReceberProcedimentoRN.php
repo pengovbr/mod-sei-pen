@@ -1294,20 +1294,20 @@ class ReceberProcedimentoRN extends InfraRN
       $strHipoteseLegalPropriedade = $this->obterValorPropriedadeAdicional($arrPropriedadesAdicionais, "PEN_HIPOTESE_LEGAL_PROCESSO");
       $bolMultiplosOrgaos = $this->obterValorPropriedadeAdicional($arrPropriedadesAdicionais, "multiplosOrgaos") === "true";
 
-      if ($bolMultiplosOrgaos
+    if ($bolMultiplosOrgaos
           && ($parObjMetadadoProcedimento->nivelDeSigilo ?? null) == ProcessoEletronicoRN::$STA_SIGILO_PUBLICO
           && $strNivelSigiloPropriedade == ProcessoEletronicoRN::$STA_SIGILO_RESTRITO) {
-          $this->gravarLogDebug("Sobrescrevendo n\355vel de sigilo do processo com valor das propriedades adicionais do tr\342mite: " . $strNivelSigiloPropriedade, 2);
-          $parObjMetadadoProcedimento->nivelDeSigilo = $strNivelSigiloPropriedade;
+        $this->gravarLogDebug("Sobrescrevendo n\355vel de sigilo do processo com valor das propriedades adicionais do tr\342mite: " . $strNivelSigiloPropriedade, 2);
+        $parObjMetadadoProcedimento->nivelDeSigilo = $strNivelSigiloPropriedade;
 
-          if (!isset($parObjMetadadoProcedimento->hipoteseLegal)) {
-              $parObjMetadadoProcedimento->hipoteseLegal = new stdClass();
-          }
-
-          if (empty($parObjMetadadoProcedimento->hipoteseLegal->identificacao) && !empty($strHipoteseLegalPropriedade)) {
-              $parObjMetadadoProcedimento->hipoteseLegal->identificacao = $strHipoteseLegalPropriedade;
-          }
+      if (!isset($parObjMetadadoProcedimento->hipoteseLegal)) {
+          $parObjMetadadoProcedimento->hipoteseLegal = new stdClass();
       }
+
+      if (empty($parObjMetadadoProcedimento->hipoteseLegal->identificacao) && !empty($strHipoteseLegalPropriedade)) {
+          $parObjMetadadoProcedimento->hipoteseLegal->identificacao = $strHipoteseLegalPropriedade;
+      }
+    }
       //Realiza a alteração dos metadados do processo(Por hora, apenas do nível de sigilo e hipótese legal)
       $this->gravarLogDebug("Metadados do processo recebido para sincronização: id=" . $parNumIdProcedimento . ", nivelDeSigilo=" . ($parObjMetadadoProcedimento->nivelDeSigilo ?? 'null') . ", hipoteseLegal=" . ((isset($parObjMetadadoProcedimento->hipoteseLegal) && isset($parObjMetadadoProcedimento->hipoteseLegal->identificacao)) ? $parObjMetadadoProcedimento->hipoteseLegal->identificacao : 'null'), 2);
       $strNivelAcessoLocal = $this->obterNivelSigiloSEI($parObjMetadadoProcedimento->nivelDeSigilo);
@@ -1317,11 +1317,11 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO->setStrStaNivelAcessoLocal($strNivelAcessoLocal);
 
     if($strNivelAcessoLocal == ProtocoloRN::$NA_RESTRITO) {
-        if (isset($parObjMetadadoProcedimento->hipoteseLegal) && !empty($parObjMetadadoProcedimento->hipoteseLegal->identificacao)) {
-            $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao));
-        } else {
-            $objProtocoloDTO->setNumIdHipoteseLegal($this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
-        }
+      if (isset($parObjMetadadoProcedimento->hipoteseLegal) && !empty($parObjMetadadoProcedimento->hipoteseLegal->identificacao)) {
+          $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao));
+      } else {
+          $objProtocoloDTO->setNumIdHipoteseLegal($this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+      }
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
         $objProtocoloBD->alterar($objProtocoloDTO);
@@ -1340,9 +1340,9 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloConsultaDTO->retStrStaNivelAcessoGlobal();
       $objProtocoloConsultaDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloConsultaDTO);
 
-      if ($objProtocoloConsultaDTO != null) {
-          $this->gravarLogDebug("Resultado da sincronização do processo: id=" . $parNumIdProcedimento . ", local=" . $objProtocoloConsultaDTO->getStrStaNivelAcessoLocal() . ", global=" . $objProtocoloConsultaDTO->getStrStaNivelAcessoGlobal(), 2);
-      }
+    if ($objProtocoloConsultaDTO != null) {
+        $this->gravarLogDebug("Resultado da sincronização do processo: id=" . $parNumIdProcedimento . ", local=" . $objProtocoloConsultaDTO->getStrStaNivelAcessoLocal() . ", global=" . $objProtocoloConsultaDTO->getStrStaNivelAcessoGlobal(), 2);
+    }
 
     if ($strNivelAcessoLocal == ProtocoloRN::$NA_RESTRITO
           && $objProtocoloConsultaDTO != null
@@ -1362,12 +1362,12 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function obterValorPropriedadeAdicional($arrPropriedadesAdicionais, $strChave)
     {
-      foreach ($arrPropriedadesAdicionais as $objPropriedadeAdicional) {
-        $strChavePropriedade = is_array($objPropriedadeAdicional) ? ($objPropriedadeAdicional["chave"] ?? null) : ($objPropriedadeAdicional->chave ?? null);
-        if ($strChavePropriedade === $strChave) {
-          return is_array($objPropriedadeAdicional) ? ($objPropriedadeAdicional["valor"] ?? null) : ($objPropriedadeAdicional->valor ?? null);
-        }
+    foreach ($arrPropriedadesAdicionais as $objPropriedadeAdicional) {
+      $strChavePropriedade = is_array($objPropriedadeAdicional) ? ($objPropriedadeAdicional["chave"] ?? null) : ($objPropriedadeAdicional->chave ?? null);
+      if ($strChavePropriedade === $strChave) {
+        return is_array($objPropriedadeAdicional) ? ($objPropriedadeAdicional["valor"] ?? null) : ($objPropriedadeAdicional->valor ?? null);
       }
+    }
 
       return null;
   }
@@ -1382,11 +1382,11 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO->setStrStaNivelAcessoLocal($strNivelAcessoLocal);
 
     if($strNivelAcessoLocal == ProtocoloRN::$NA_RESTRITO) {
-        if (isset($parObjMetadadoDocumento->hipoteseLegal) && !empty($parObjMetadadoDocumento->hipoteseLegal->identificacao)) {
-            $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoDocumento->hipoteseLegal->identificacao));
-        } else {
-            $objProtocoloDTO->setNumIdHipoteseLegal($this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
-        }
+      if (isset($parObjMetadadoDocumento->hipoteseLegal) && !empty($parObjMetadadoDocumento->hipoteseLegal->identificacao)) {
+          $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoDocumento->hipoteseLegal->identificacao));
+      } else {
+          $objProtocoloDTO->setNumIdHipoteseLegal($this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+      }
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
         $objProtocoloBD->alterar($objProtocoloDTO);
