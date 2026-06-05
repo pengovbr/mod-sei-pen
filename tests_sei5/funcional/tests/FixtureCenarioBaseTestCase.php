@@ -330,4 +330,20 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
     return $objTipoProcedimentoDTO;
   }
 
+  /**
+   * Método shellExecutarTramites
+   *
+   * Este método executa os scripts de monitoramento de envio e recebimento de tarefas do PEN.
+   */
+  public function shellExecutarTramites()
+  {
+    $scriptEnvio       = 'php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php';
+    $scriptRecebimento = 'php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php';
+ 
+    shell_exec("docker exec funcional-org1-http-1 {$scriptEnvio}");
+    shell_exec("docker exec funcional-org1-http-1 {$scriptRecebimento}");
+    shell_exec("docker exec funcional-org2-http-1 {$scriptEnvio}");
+    shell_exec("docker exec funcional-org2-http-1 {$scriptRecebimento}");
+    shell_exec("docker exec funcional-org1-http-1 {$scriptRecebimento}");
+  }
 }

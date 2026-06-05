@@ -89,13 +89,13 @@ class PaginaEditarProcesso extends PaginaTeste
     if ($nivel !== null) {
       switch ($nivel) {
         case self::STA_NIVEL_ACESSO_PUBLICO:
-            $this->elById('optPublico')->click();
+            $this->selecionarRadioRestricao('optPublico');
             break;
         case self::STA_NIVEL_ACESSO_RESTRITO:
-            $this->elById('optRestrito')->click();
+            $this->selecionarRadioRestricao('optRestrito');
             break;
         case self::STA_NIVEL_ACESSO_SIGILOSO:
-            $this->elById('optSigiloso')->click();
+            $this->selecionarRadioRestricao('optSigiloso');
             break;
       }
     }
@@ -111,6 +111,26 @@ class PaginaEditarProcesso extends PaginaTeste
     }
 
       return null;
+  }
+
+  /**
+   * Seleciona o radio button de restrição de acesso, tentando clicar na label associada e, se falhar, clicando diretamente no input
+   * @param string $idCampo ID do campo de input do tipo radio
+   */
+  private function selecionarRadioRestricao(string $idCampo): void
+  {
+    $radio = $this->elById($idCampo);
+
+    if ($radio->isSelected()) {
+      return;
+    }
+
+    try {
+      $this->elByCss("label[for='{$idCampo}']")->click();
+      return;
+    } catch (\Exception $e) {
+      $this->driver->executeScript("arguments[0].click();", [$radio]);
+    }
   }
 
   public function adicionarInteressado($nomes): void
