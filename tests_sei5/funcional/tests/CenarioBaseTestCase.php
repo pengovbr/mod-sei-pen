@@ -377,7 +377,8 @@ class CenarioBaseTestCase extends TestCase
     $urgente = false,
     $callbackEnvio = null,
     $timeout = PEN_WAIT_TIMEOUT,
-    $multiplosOrgaos = false
+    $executarTramitarPendencias = true,
+    $multiplosOrgaos = false,
   )
     {
       $this->paginaProcesso->navegarParaTramitarProcesso();
@@ -471,7 +472,8 @@ class CenarioBaseTestCase extends TestCase
     $erroEsperado,
     $urgente = false,
     $multiplosOrgaos = false,
-    $timeout = PEN_WAIT_TIMEOUT
+    $timeout = PEN_WAIT_TIMEOUT,
+    $executarTramitarPendencias = true
   )
     {
       $this->paginaProcesso->navegarParaTramitarProcesso();
@@ -521,7 +523,12 @@ class CenarioBaseTestCase extends TestCase
       }
     }
 
-      sleep(1);
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' && $executarTramitarPendencias) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
+    
   }
 
   protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)

@@ -99,7 +99,10 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoSigilosoTest extends FixtureCen
       self::$destinatario['REP_ESTRUTURAS'],
       self::$destinatario['NOME_UNIDADE'],
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
-      false, null, PEN_WAIT_TIMEOUT,
+      false, 
+      null, 
+      PEN_WAIT_TIMEOUT,
+      true, // executarTramitarPendencias
       true // multíplos órgãos
     );
 
@@ -174,8 +177,10 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoSigilosoTest extends FixtureCen
       self::$destinatario['NOME_UNIDADE'],
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
       'Falha no envio externo do processo. Erro: 0004 - Apenas entidades de nível de sigílo público ou restrito podem ser tramitados pelo barramento.',
-      false, null, PEN_WAIT_TIMEOUT,
-      true // multíplos órgãos
+      urgente: false,       
+      multiplosOrgaos: true,
+      timeout: PEN_WAIT_TIMEOUT,
+      executarTramitarPendencias:true
     );
 
     $this->sairSistema();
