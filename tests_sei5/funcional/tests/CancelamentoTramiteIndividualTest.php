@@ -67,6 +67,7 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
             false,
             null,
             PEN_WAIT_TIMEOUT,
+            false,
             false
         );
 
@@ -103,6 +104,7 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
             false,
             null,
             PEN_WAIT_TIMEOUT,
+            false,
             false
         );
 

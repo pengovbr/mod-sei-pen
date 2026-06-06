@@ -531,7 +531,7 @@ class CenarioBaseTestCase extends TestCase
     
   }
 
-  protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
+  protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT, $executarTramitarPendencias = true)
     {
       $this->tramitarProcessoExternamente(
         $protocolo, 

@@ -130,7 +130,8 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         false,
         null,
         PEN_WAIT_TIMEOUT,
-        true
+        true,
+        false
       );
   }
 
