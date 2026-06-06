@@ -77,7 +77,6 @@ class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
               return true;
             }
         );
-        sleep(5);
 
     } else {
         $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
@@ -153,7 +152,6 @@ class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
 
     if (self::$tramitar == true) {
       $this->waitUntil(function() {
-        sleep(5);
         $this->paginaBase->refresh();
         $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
         $this->assertNotEquals('Aguardando Processamento', $novoStatus);

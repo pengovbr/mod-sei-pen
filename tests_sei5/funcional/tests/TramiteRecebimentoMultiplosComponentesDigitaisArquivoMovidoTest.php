@@ -76,6 +76,11 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
         $this->enviarComponentesDigitaisDoProcesso($novoTramite, $metadadosProcessoTeste);
         $reciboTramite = $this->receberReciboEnvio($novoTramite);
 
+        // Processar pendências para que o processo chegue ao destinatário
+        if (DESATIVAR_AGENDAMENTO == 'true') {
+            $this->executarTramitarPendenciasSimples();
+        }
+
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
         $this->assertNotNull($reciboTramite);

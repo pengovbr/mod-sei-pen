@@ -58,7 +58,7 @@ class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends FixtureCenarioBaseTes
 
       // 6 - Verificar se situação atual do processo está como bloqueado
       $this->waitUntil(function()  {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());

@@ -103,12 +103,21 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
       $this->abrirProcesso(self::$protocoloTestePrincipal);
 
       // 5-tramitar Processo Principal para o Órgão 2 com validação no remetente
-      $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+          self::$protocoloTestePrincipal, 
+          self::$destinatario['REP_ESTRUTURAS'], 
+          self::$destinatario['NOME_UNIDADE'], 
+          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+          false,
+          null,
+          PEN_WAIT_TIMEOUT,
+          true
+      );
 
       // verificar se situação atual do processo está como bloqueado no remetente
       $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -195,12 +204,21 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
       $this->cadastrarDocumentoInternoFixture(self::$documentoTeste5, self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
         
       // 12-tramitar Processo Principal para o Órgão 1 com validação no remetente
-      $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+        self::$protocoloTestePrincipal, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'], 
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
+      );
 
       // verificar se situação atual do processo está como bloqueado no remetente
       $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -259,12 +277,21 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
       $this->abrirProcesso(self::$protocoloTestePrincipal);
 
       // 15-tramitar Processo Principal para o Órgão 2 com validação no remetente
-      $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+        self::$protocoloTestePrincipal, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'], 
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
+      );
 
       // verificar se situação atual do processo está como bloqueado no remetente
       $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
@@ -323,12 +350,21 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
       $this->abrirProcesso(self::$protocoloTestePrincipal);
 
       // 18-tramitar Processo Principal para o Órgão 1 com validação no remetente
-      $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+        self::$protocoloTestePrincipal, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'], 
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
+      );
 
       // verificar se situação atual do processo está como bloqueado no remetente
       $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());

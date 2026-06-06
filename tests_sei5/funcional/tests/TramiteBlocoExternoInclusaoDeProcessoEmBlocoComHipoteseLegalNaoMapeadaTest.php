@@ -81,7 +81,7 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
       $this->paginaTramiteEmBloco->clicarSalvar();
 
       // Verificar se a mensagem de sucesso foi exibida
-      sleep(2);
+      sleep(1);
       $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         
       // Validação: a mensagem de alerta deve conter a hipótese legal não mapeada
@@ -156,7 +156,7 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
       $this->paginaTramiteEmBloco->clicarSalvar();
 
       // Verificar se a mensagem de sucesso foi exibida
-      sleep(2);
+      sleep(1);
       $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         
       // Validação: a mensagem de alerta deve conter a hipótese legal não mapeada

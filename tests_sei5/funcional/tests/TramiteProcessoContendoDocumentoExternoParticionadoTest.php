@@ -74,8 +74,14 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
       $this->abrirProcesso(self::$protocoloTeste);
 
       $this->tramitarProcessoExternamente(
-          self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, null, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES
+        self::$protocoloTeste, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'],
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false, 
+        null, 
+        PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES,
+        true
       );
   }
 
@@ -101,7 +107,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
       $this->abrirProcesso(self::$protocoloTeste);
 
       $this->waitUntil(function() use (&$orgaosDiferentes) {
-          sleep(5);
+          sleep(2);
           $this->paginaBase->refresh();
         try { 
             $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());

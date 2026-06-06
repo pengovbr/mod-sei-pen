@@ -61,7 +61,16 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends FixtureCenarioBaseTes
       $tipoDocumento = mb_convert_encoding(self::$documentoTeste["TIPO_DOCUMENTO"], "ISO-8859-1");
       $mensagemEsperada = sprintf("Não existe mapeamento de envio para %s no documento", $tipoDocumento);
       $this->expectExceptionMessage(mb_convert_encoding($mensagemEsperada, 'UTF-8', 'ISO-8859-1'));
-      $this->tramitarProcessoExternamente(self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+        self::$protocoloTeste, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'], 
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
+      );
   }
 
 
@@ -97,7 +106,16 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends FixtureCenarioBaseTes
       $tipoDocumento = mb_convert_encoding(self::$documentoTeste["TIPO_DOCUMENTO"], "ISO-8859-1");
       $mensagemEsperada = sprintf("Não existe mapeamento de envio para %s no documento", $tipoDocumento);
       $this->expectExceptionMessage(mb_convert_encoding($mensagemEsperada, 'UTF-8', 'ISO-8859-1'));
-      $this->tramitarProcessoExternamente(self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->tramitarProcessoExternamente(
+        self::$protocoloTeste, 
+        self::$destinatario['REP_ESTRUTURAS'], 
+        self::$destinatario['NOME_UNIDADE'], 
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], 
+        false,
+        null,
+        PEN_WAIT_TIMEOUT,
+        true
+      );
       $this->sairSistema();
   }
 }

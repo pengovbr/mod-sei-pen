@@ -52,7 +52,7 @@ class TramiteBlocoExternoUnidadeTest extends FixtureCenarioBaseTestCase
       $this->selecionarUnidadeInterna(self::$remetente['SIGLA_UNIDADE']);
 
       self::$objBlocoDeTramiteDTO = $this->cadastrarBlocoDeTramite();
-      sleep(2);
+      sleep(1);
 
       $this->paginaTramiteEmBloco->selecionarProcessos([self::$objProtocoloDTO->getStrProtocoloFormatado()]);
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
