@@ -606,7 +606,7 @@ class ExpedirProcedimentoRN extends InfraRN
           $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
       );
 
-      return $this->objProcessoEletronicoRN->construirCabecalho(
+      $cabecalho = $this->objProcessoEletronicoRN->construirCabecalho(
           $strNumeroRegistro,
           $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
           $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
@@ -618,6 +618,24 @@ class ExpedirProcedimentoRN extends InfraRN
           $dblIdProcedimento,
           $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false
       );
+
+    if (!empty($dblIdProcedimento) && ($objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false)) {
+        $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
+        $cabecalho["propriedadesAdicionais"][] = [
+            "chave" => "PEN_NIVEL_SIGILO_PROCESSO",
+            "valor" => $this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo())
+        ];
+
+        if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
+            $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
+            $cabecalho["propriedadesAdicionais"][] = [
+                "chave" => "PEN_HIPOTESE_LEGAL_PROCESSO",
+                "valor" => $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())
+            ];
+        }
+    }
+
+      return $cabecalho;
   }
 
     /**

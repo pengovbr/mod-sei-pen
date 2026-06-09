@@ -102,7 +102,9 @@ class PaginaTramitarProcesso extends PaginaTeste
   public function selecionarMultiplosOrgaos(): void
   {
     $element = $this->elByXPath("//input[@id='multiplosOrgaos']");
-    $this->driver->executeScript("arguments[0].click();", [$element]);
+    if (!$element->isSelected()) {
+      $this->driver->executeScript("arguments[0].click();", [$element]);
+    }
   }
 
     /**
