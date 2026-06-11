@@ -135,7 +135,7 @@ class MapeamentoDeUnidadesTest extends FixtureCenarioBaseTestCase
 
     $this->paginaMapUnidades->navegarPenMapeamentoUnidades();
     $this->paginaMapUnidades->selecionarEditar();
-    $this->paginaMapUnidades->selecionarUnidadePenCadastro(CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA);
+    $this->paginaMapUnidades->selecionarUnidadePenCadastro(CONTEXTO_ORGAO_B_NOME_UNIDADE);
     $this->paginaMapUnidades->salvar();
 
     sleep(1);
@@ -143,11 +143,11 @@ class MapeamentoDeUnidadesTest extends FixtureCenarioBaseTestCase
     $mensagem = $this->paginaMapUnidades->buscarMensagemAlerta();
     $this->assertStringContainsString(
         mb_convert_encoding('Mapeamento de Unidade gravado com sucesso.', 'UTF-8', 'ISO-8859-1'),
-        $mensagem
+        $mensagem,
+        mb_convert_encoding("A mensagem de sucesso esperada não foi exibida. Mensagem atual: '$mensagem'", 'UTF-8', 'ISO-8859-1')
     );
 
-
-    $this->assertTrue($this->paginaMapUnidades->validarMapeamentoExistente(CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA));
+    $this->assertTrue($this->paginaMapUnidades->validarMapeamentoExistente(CONTEXTO_ORGAO_B_NOME_UNIDADE));
 
     $this->sairSistema();
   }

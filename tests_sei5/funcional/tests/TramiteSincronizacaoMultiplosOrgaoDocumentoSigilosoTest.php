@@ -200,20 +200,19 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoSigilosoTest extends FixtureCen
   {
     $penMapEnvioParcialFixture = new \PenMapEnvioParcialFixture();
 
-    putenv("DATABASE_HOST=org1-database");
-    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
-      $penMapEnvioParcialFixture->remover([
-        'Id' => $idMapEnvioParcial
-      ]);
-    }
-
     putenv("DATABASE_HOST=org2-database");
     foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
       $penMapEnvioParcialFixture->remover([
         'Id' => $idMapEnvioParcial
       ]);
     }
+    
     putenv("DATABASE_HOST=org1-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
     parent::tearDownAfterClass();
   }
 
@@ -233,19 +232,6 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoSigilosoTest extends FixtureCen
    */
   private function criarCenarioTramiteEnvioParcialTest()
   {
-    // Mapear Envio Parcial no Remetente
-    self::$arrIdMapEnvioParcialOrgaoA = array();
-    putenv("DATABASE_HOST=org1-database");
-    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
-    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
-      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
-      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
-      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
-      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE'],
-      'SinMultiplosOrgaos' => 'S'
-    ]);
-    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
-
     // Mapear Envio Parcial no Destinatário
     self::$arrIdMapEnvioParcialOrgaoB = array();
     putenv("DATABASE_HOST=org2-database");
@@ -258,6 +244,17 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoSigilosoTest extends FixtureCen
     ]);
     self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
 
+    // Mapear Envio Parcial no Remetente
+    self::$arrIdMapEnvioParcialOrgaoA = array();
     putenv("DATABASE_HOST=org1-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE'],
+      'SinMultiplosOrgaos' => 'S'
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
   }
 }

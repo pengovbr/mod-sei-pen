@@ -148,79 +148,37 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
      *
      * @return void
      */
-  public function test_verificar_devolucao_origem_processo_anexado()
+  public function test_verificar_devolucao_origem_processo_anexado_ja_tramitado_com_sucesso_recusado()
     {
-      $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-
       $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-      $this->abrirProcesso(self::$protocoloTestePrincipal);
+      // Mensagem parcial de recusa esperada no histórico do processo principal
+      $mensagemRecusaParcial = sprintf(
+          "O processo %s não pode ser anexado ao processo %s pois já foi tramitado, com sucesso, para outro órgão.",
+          self::$protocoloTesteAnexado,
+          self::$protocoloTestePrincipal
+      );
+      $mensagemRecusaParcial = mb_convert_encoding($mensagemRecusaParcial, 'UTF-8', 'ISO-8859-1');
 
-      $this->waitUntil(function() use (&$orgaosDiferentes) {
+      // Aguarda a recusa do trâmite: valida o ícone de recusa e o histórico contendo a mensagem parcial
+      $this->waitUntil(function() use ($mensagemRecusaParcial) {
           sleep(2);
           $this->paginaBase->refresh();
-        try { 
-            $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
-            $this->assertFalse($this->paginaProcesso->processoAberto());
-            $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+        try {
+            // Verifica se o ícone de alerta de recusa foi adicionado ao processo
+            $this->paginaBase->navegarParaControleProcessoIcone();
+            $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTestePrincipal));
+
+            // Verifica se o histórico de recusa contém a mensagem parcial esperada
+            $this->abrirProcesso(self::$protocoloTestePrincipal);
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemRecusaParcial));
+
             return true;
         } catch (AssertionFailedError $e) {
             return false;
         }
       }, PEN_WAIT_TIMEOUT);
-
-      $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
-      $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTestePrincipal, $unidade);
-      $this->validarRecibosTramite($mensagemRecibo, true, true);
-      $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
-      $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
-  }
-
-    /**
-     * Teste de verificação da correta devolução do processo anexado no destinatário
-     *
-     * #[Group('verificacao_recebimento')]
-     * #[Large]
-     *
-     * #[Depends('test_verificar_devolucao_origem_processo_anexado')]
-     *
-     * @return void
-     */
-  public function test_verificar_devolucao_destino_processo_anexado()
-    {
-      $strProtocoloTeste = self::$protocoloTestePrincipal;
-      $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-
-      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
-
-      $this->abrirProcesso(self::$protocoloTestePrincipal);
-
-      $this->validarDadosProcesso(
-          self::$processoTestePrincipal['DESCRICAO'],
-          self::$processoTestePrincipal['RESTRICAO'],
-          self::$processoTestePrincipal['OBSERVACOES'],
-          array(self::$processoTestePrincipal['INTERESSADOS'])
-      );
-
-      $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
-
-      // Validação dos dados do processo principal
-      $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
-      $this->assertEquals(4, count($listaDocumentosProcessoPrincipal));
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste1, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste2, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[3], self::$documentoTeste6, self::$destinatario);
-
-      $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
-      $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
-
-      // Validação dos dados do processo anexado
-      $this->paginaProcesso->pesquisar(self::$protocoloTesteAnexado);
-      $listaDocumentosProcessoAnexado = $this->paginaProcesso->listarDocumentos();
-      $this->assertEquals(3, count($listaDocumentosProcessoAnexado));
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste3, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste4, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[2], self::$documentoTeste5, self::$destinatario);
   }
 
     /**
