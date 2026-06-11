@@ -349,7 +349,9 @@ class CenarioBaseTestCase extends TestCase
     } catch (\Exception $e) {
         $this->paginaBase->pesquisar($protocolo);
         sleep(1);
-        $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
+        try {
+          $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
+        } catch (\Exception $e) {}
     }
   }
 
@@ -387,6 +389,60 @@ class CenarioBaseTestCase extends TestCase
       $this->paginaTramitar->repositorio($repositorio);
       $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
       if ($multiplosOrgaos) { $this->paginaTramitar->selecionarMultiplosOrgaos(); }
+      $this->paginaTramitar->tramitar();
+
+    try {
+        $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
+    } catch (Exception $e) {
+    }
+
+    if (isset($mensagemAlerta)) {
+        throw new Exception($mensagemAlerta);
+    }
+
+      $callbackEnvio = $callbackEnvio ?: function () {
+        try {
+            $this->paginaTramitar->frame('ifrEnvioProcesso');
+            $mensagemSucesso = mb_convert_encoding('Trâmite externo do processo finalizado com sucesso!', 'UTF-8', 'ISO-8859-1');
+            $this->assertStringContainsString($mensagemSucesso, $this->paginaTramitar->elByCss('body')->getText());
+            $btnFechar = $this->paginaTramitar->elByXPath("//input[@id='btnFechar']");
+            $btnFechar->click();
+        } finally {
+          try {
+              $this->paginaTramitar->frame(null);
+              $this->paginaTramitar->frame("ifrConteudoVisualizacao");
+              $this->paginaTramitar->frame("ifrVisualizacao");
+          } catch (Exception $e) {
+          }
+        }
+
+          return true;
+      };
+
+    try {
+        $this->waitUntil($callbackEnvio, $timeout);
+    } finally {
+      try {
+          $this->paginaTramitar->frame(null);
+          $this->paginaTramitar->frame("ifrVisualizacao");
+      } catch (Exception $e) {
+      }
+    }
+
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' && $executarTramitarPendencias) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
+  }
+
+  protected function tramitarProcessoExternamenteMultiplosOrgaoDestinatario(
+    $executarTramitarPendencias = false,
+    $callbackEnvio = null,
+    $timeout = PEN_WAIT_TIMEOUT,
+  )
+    {
+      $this->paginaProcesso->navegarParaTramitarProcesso();
       $this->paginaTramitar->tramitar();
 
     try {

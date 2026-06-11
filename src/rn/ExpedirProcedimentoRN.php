@@ -2730,7 +2730,8 @@ class ExpedirProcedimentoRN extends InfraRN
         $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
       if (!$objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos(
           $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
-          $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
+          $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+          'S'
       )) {
           $strNomeUnidadeDestino = $objExpedirProcedimentoDTO->getStrUnidadeDestino();
           $strComplementoUnidade = InfraString::isBolVazia($strNomeUnidadeDestino) ? '' : ' <b>'.$strNomeUnidadeDestino.'</b>';
@@ -3133,8 +3134,11 @@ class ExpedirProcedimentoRN extends InfraRN
         if (!array_key_exists($strAtributo, $arrErros)) {
             $arrErros[$strAtributo] = [];
         }
-        $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
-        $mensagem .= ($index + 1) . ". " . mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1') . "; ";
+        $textoMensagem = mb_check_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8')
+            ? mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1')
+            : $objInfraValidacao->getStrDescricao();
+        $arrErros[$strAtributo][] = $textoMensagem;
+        $mensagem .= ($index + 1) . ". " . $textoMensagem . "; ";
       }
 
         return $mensagem;

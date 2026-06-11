@@ -355,6 +355,11 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
       'Pedido de sincronização manual múltiplos órgãos não encontrado nos andamentos do processo.'
     );
 
+    if (DESATIVAR_AGENDAMENTO == 'true') {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
+
     $this->sairSistema();
   }
 
@@ -413,6 +418,11 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
    */
   public function test_validar_sincronizar_processo_destino_realizado_multiplos_orgaos()
   {
+    if (DESATIVAR_AGENDAMENTO == 'true') {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
+    
     $this->acessarSistema(
       self::$destinatario['URL'],
       self::$destinatario['SIGLA_UNIDADE'],
@@ -424,8 +434,8 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
 
     $this->paginaProcesso->navegarParaConsultarAndamentos();
     $this->assertTrue(
-      $this->paginaProcesso->validarHistorioSincronizacao("Pedido envio automatico de processo para múltiplos órgãos"), 
-      'Sincronização realizada múltiplos órgãos não encontrada nos andamentos do processo.'
+      $this->paginaProcesso->validarHistorioSincronizacao("Pedido de sincronização manual múltiplos órgãos"), 
+      'Pedido de sincronização manual múltiplos órgãos não encontrada nos andamentos do processo.'
     );
 
     // listar documentos do Processo Principal
@@ -449,6 +459,13 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
   {
     $penMapEnvioParcialFixture = new \PenMapEnvioParcialFixture();
 
+    putenv("DATABASE_HOST=org2-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
+    
     putenv("DATABASE_HOST=org1-database");
     foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
       $penMapEnvioParcialFixture->remover([
@@ -456,13 +473,6 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
       ]);
     }
 
-    putenv("DATABASE_HOST=org2-database");
-    foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
-      $penMapEnvioParcialFixture->remover([
-        'Id' => $idMapEnvioParcial
-      ]);
-    }
-    putenv("DATABASE_HOST=org1-database");
     parent::tearDownAfterClass();
   }
 
@@ -482,19 +492,6 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
    */
   private function criarCenarioTramiteEnvioParcialTest()
   {
-    // Mapear Envio Parcial no Remetente
-    self::$arrIdMapEnvioParcialOrgaoA = array();
-    putenv("DATABASE_HOST=org1-database");
-    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
-    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
-      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
-      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
-      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
-      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE'],
-      'SinMultiplosOrgaos' => 'S'
-    ]);
-    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
-
     // Mapear Envio Parcial no Destinatário
     self::$arrIdMapEnvioParcialOrgaoB = array();
     putenv("DATABASE_HOST=org2-database");
@@ -507,6 +504,17 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenari
     ]);
     self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
 
+    // Mapear Envio Parcial no Remetente
+    self::$arrIdMapEnvioParcialOrgaoA = array();
     putenv("DATABASE_HOST=org1-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE'],
+      'SinMultiplosOrgaos' => 'S'
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
   }
 }

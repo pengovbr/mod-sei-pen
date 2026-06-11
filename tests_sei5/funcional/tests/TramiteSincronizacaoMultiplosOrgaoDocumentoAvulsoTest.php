@@ -75,6 +75,11 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $this->assertNotNull($novoTramite);
     $this->assertNotNull($reciboTramite);
 
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' ) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
     self::$processoTeste = $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario(self::$documentoTeste1, self::$destinatario);
 
     $this->sairSistema();
@@ -102,9 +107,9 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
 
     // Capturar a mensagem do alert
     $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
-
+  
     // Verificar se a mensagem esperada aparece
-    $mensagemEsperada = mb_convert_encoding("Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
+    $mensagemEsperada = mb_convert_encoding("Ainda não é possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
     $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
 
     $this->sairSistema();
@@ -122,13 +127,12 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
    */
   public function test_devolver_processo_para_origem()
   {
-    // Configuração dos dados para teste do cenário
-    self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-    self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+    $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+    $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
 
-    $documentos = array();
-    putenv("DATABASE_HOST=org1-database");
-    $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+    $this->tramitarProcessoExternamenteMultiplosOrgaoDestinatario(true);
+
+    $this->sairSistema();
   }
 
   /**
@@ -175,6 +179,11 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     // Verificar se a mensagem esperada aparece
     $mensagemEsperada = mb_convert_encoding("Solicitação de sincronização realizada com sucesso", 'UTF-8', 'ISO-8859-1');
     $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' ) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
   }
 
   private function receberReciboEnvio($novoTramite)
@@ -404,21 +413,6 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $penMapEnvioParcialFixture = new \PenMapEnvioParcialFixture();
 
     putenv("DATABASE_HOST=org2-database");
-    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
-      $penMapEnvioParcialFixture->remover([
-        'Id' => $idMapEnvioParcial
-      ]);
-    }
-    // Restaurar numeração do órgão alterado para evitar conflito de NUPs
-    $objOrgaoFixture = new OrgaoFixture();
-    $parametros = ['IdOrgao' => 0];
-    $arrObjOrgaoDTO = $objOrgaoFixture->buscar($parametros);
-    $objOrgaoDTO = $arrObjOrgaoDTO[0];
-
-    $parametros['Numeracao'] = str_replace(self::$replace, '@ano_4d@', $objOrgaoDTO->getStrNumeracao());
-    $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
-
-    putenv("DATABASE_HOST=org1-database");
     foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
       $penMapEnvioParcialFixture->remover([
         'Id' => $idMapEnvioParcial
@@ -432,8 +426,22 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
 
     $parametros['Numeracao'] = str_replace(self::$replace, '@ano_4d@', $objOrgaoDTO->getStrNumeracao());
     $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
-    
+
     putenv("DATABASE_HOST=org1-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
+    // Restaurar numeração do órgão alterado para evitar conflito de NUPs
+    $objOrgaoFixture = new OrgaoFixture();
+    $parametros = ['IdOrgao' => 0];
+    $arrObjOrgaoDTO = $objOrgaoFixture->buscar($parametros);
+    $objOrgaoDTO = $arrObjOrgaoDTO[0];
+
+    $parametros['Numeracao'] = str_replace(self::$replace, '@ano_4d@', $objOrgaoDTO->getStrNumeracao());
+    $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
+    
     parent::tearDownAfterClass();
   }
 
@@ -445,7 +453,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
   private function criarCenarioTramiteEnvioParcialTest()
   {
     // Mapear Envio Parcial no Remetente
-    self::$arrIdMapEnvioParcialOrgaoA = array();
+    self::$arrIdMapEnvioParcialOrgaoB = array();
     putenv("DATABASE_HOST=org2-database");
     $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
     $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
@@ -454,7 +462,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
       'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
       'StrUnidadePen' => self::$destinatario['NOME_UNIDADE']
     ]);
-    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
+    self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
 
     // Alterar numeração do órgão para evitar conflito de NUPs
     $objOrgaoFixture = new OrgaoFixture();
@@ -466,7 +474,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
 
     // Mapear Envio Parcial no Destinatário
-    self::$arrIdMapEnvioParcialOrgaoB = array();
+    self::$arrIdMapEnvioParcialOrgaoA = array();
     putenv("DATABASE_HOST=org1-database");
     $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
     $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
@@ -476,7 +484,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
       'StrUnidadePen' => self::$remetente['NOME_UNIDADE'],
       'SinMultiplosOrgaos' => 'S'
     ]);
-    self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
+    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
 
     // Alterar numeração do órgão para evitar conflito de NUPs
     $objOrgaoFixture = new OrgaoFixture();

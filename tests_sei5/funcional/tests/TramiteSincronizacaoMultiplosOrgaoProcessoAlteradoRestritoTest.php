@@ -62,7 +62,10 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoAlteradoRestritoTest extends Fix
       true
     );
 
-    $this->shellExecutarTramites();
+    if (DESATIVAR_AGENDAMENTO == 'true') {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
     $this->sairSistema();
   }
 
@@ -139,7 +142,10 @@ class TramiteSincronizacaoMultiplosOrgaoProcessoAlteradoRestritoTest extends Fix
     $mensagemEsperada = mb_convert_encoding("Solicitação de sincronização realizada com sucesso", 'UTF-8', 'ISO-8859-1');
     $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta);
 
-    $this->shellExecutarTramites();
+    if (DESATIVAR_AGENDAMENTO == 'true') {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
     $this->sairSistema();
   }
 

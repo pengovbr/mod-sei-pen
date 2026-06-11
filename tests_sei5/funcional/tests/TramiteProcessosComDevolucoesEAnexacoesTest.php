@@ -148,12 +148,12 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
       self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
       self::$documentoTeste6 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-      $objProtocoloTestePrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
+      $objProtocoloTesteAnexadoDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
+
+      $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloTesteAnexadoDTO->getDblIdProtocolo());
+
+      $objProtocoloTestePrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
       self::$protocoloTestePrincipal = $objProtocoloTestePrincipalDTO->getStrProtocoloFormatado();
-
-      $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloTestePrincipalDTO->getDblIdProtocolo());
-
-      $objProtocoloTesteAnexadoDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
 
       // Realizar a anexação de processos
       $this->anexarProcessoFixture($objProtocoloTestePrincipalDTO->getDblIdProtocolo(), $objProtocoloTesteAnexadoDTO->getDblIdProtocolo());
