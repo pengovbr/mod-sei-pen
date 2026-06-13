@@ -30,7 +30,7 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-docker-action@v5
       - name: Cache tmp files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           # Caminho onde os arquivos tmp estão armazenados
           path: |
@@ -62,9 +62,13 @@ jobs:
 
       - name: Executa update, install
         run: |
-             cd sei/src/sei/web/modulos/mod-sei-pen
+             cd 
              make update
              make install
 
-      - name: Testes funcionais
-        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional
+      - name: Run headless test
+        uses: coactions/setup-xvfb@v1
+        with:
+          working-directory: sei/src/sei/web/modulos/mod-sei-pen
+          run: make test-functional
+          options: "-screen 0 1920x1080x24"
