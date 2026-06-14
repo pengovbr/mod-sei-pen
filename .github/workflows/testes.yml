@@ -62,7 +62,7 @@ jobs:
 
       - name: Executa update, install
         run: |
-             cd 
+             cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
 
