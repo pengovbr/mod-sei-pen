@@ -62,6 +62,8 @@ jobs:
 
       - name: Executa update, install
         run: |
+             sudo echo "127.0.0.1 org1-http" | sudo tee -a /etc/hosts
+             sudo echo "127.0.0.1 org2-http" | sudo tee -a /etc/hosts
              cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
