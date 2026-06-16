@@ -45,13 +45,13 @@ jobs:
              cd sei/src/sei/web/modulos/mod-sei-pen
              make config
              sed -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/155275/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GIT\_ACTION\_ORG1/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GIT\_ACTION\_ORG1/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GITACTIONORG1/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GITACTIONORG1/' tests_sei5/funcional/phpunit.xml
              sed -z -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1/155277/' tests_sei5/funcional/phpunit.xml
-             sed -z -i 's/INFORME_O_NOME_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1/GIT\_ACTION\_FILHA/' tests_sei5/funcional/phpunit.xml
+             sed -z -i 's/INFORME_O_NOME_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1/GITACTIONFILHA/' tests_sei5/funcional/phpunit.xml
              sed -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/155276/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/GIT\_ACTION\_ORG2/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/GIT\_ACTION\_ORG2/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/GITACTIONORG2/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/GITACTIONORG2/' tests_sei5/funcional/phpunit.xml
              sed -e '/ORG1_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_sei5/funcional/.env
              sed -e '/ORG2_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_sei5/funcional/.env
              echo "ORG1_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG1" >> tests_sei5/funcional/.env
