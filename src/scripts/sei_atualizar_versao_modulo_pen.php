@@ -2658,7 +2658,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     // Adicionar coluna para controle de múltiplos órgãos
     if (!$objMetaBanco->isColunaExiste('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos')) {
-        $objMetaBanco->adicionarColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', 'CHAR(1)', PenMetaBD::NNULLO);
+        $objMetaBanco->adicionarColuna('md_pen_envio_comp_digitais','sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql('update md_pen_envio_comp_digitais set sin_multiplos_orgaos=\'N\'');
+        $objMetaBanco->alterarColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO);
         $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', 'N');
     }
 
