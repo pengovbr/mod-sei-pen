@@ -49,18 +49,20 @@ class LogPenHandler
                 function ($response) use ($request, $start) {
 
                     $duration = (microtime(true) - $start) * 1000;
-
+                    $uri = (string) $request->getUri();
                     $data = [
                         'request' => [
                             'method' => $request->getMethod(),
-                            'uri' => (string) $request->getUri(),
+                            'uri' => $uri,
                             'headers' => $request->getHeaders(),
                             'body' => (string) $request->getBody(),
                         ],
                         'response' => [
                             'status' => $response->getStatusCode(),
                             'headers' => $response->getHeaders(),
-                            'body' => (string) $response->getBody(),
+                            'body' => str_contains($uri, 'componentes-digitais')
+                                    ? '[BODY OMITIDO]'
+                                    : (string) $response->getBody(),
                         ],
                         'duration_ms' => $duration,
                     ];
