@@ -1873,6 +1873,29 @@ class ReceberProcedimentoRN extends InfraRN
         
           $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
 
+          //Recusa o trâmite, com mensagem amigável, quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante
+          $arrObjComponentesDigitaisAssinatura = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais : array($objDocumento->componentesDigitais);
+          foreach ($arrObjComponentesDigitaisAssinatura as $objComponenteDigitalAssinatura) {
+            $arrObjComponenteDigitalAssinatura = (array) $objComponenteDigitalAssinatura;
+            $arrObjAssinaturasDigitais = isset($arrObjComponenteDigitalAssinatura['assinaturasDigitais']) ? $arrObjComponenteDigitalAssinatura['assinaturasDigitais'] : array();
+            if (!is_array($arrObjAssinaturasDigitais)) {
+              $arrObjAssinaturasDigitais = array($arrObjAssinaturasDigitais);
+            }
+            foreach ($arrObjAssinaturasDigitais as $objAssinaturaDigital) {
+              $arrAssinaturaDigital = (array) $objAssinaturaDigital;
+              $strNomeAssinante = isset($arrAssinaturaDigital['nome']) ? $arrAssinaturaDigital['nome'] : null;
+              $strTratamentoAssinante = isset($arrAssinaturaDigital['cargo']) ? $arrAssinaturaDigital['cargo'] : null;
+              if (InfraString::isBolVazia($strNomeAssinante) || InfraString::isBolVazia($strTratamentoAssinante)) {
+                $mensagemErro = "Não foi adicionado o nome e nem o tratamento/cargo do assinante no documento "
+                  . $objProtocoloDTO->getStrProtocoloFormatado() 
+                  . " de ordem " . $objDocumento->ordem 
+                  . ". Por favor, corrija e realize uma nova tentativa de envio."
+                  . " OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+                throw new InfraException($mensagemErro);
+              }
+            }
+          }
+
           $objAtividadeDTOVisualizacao = new AtividadeDTO();
           $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
           $objAtividadeDTOVisualizacao->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
