@@ -1755,19 +1755,23 @@ class ExpedirProcedimentoRN extends InfraRN
       $strConteudoFS = null;
       $arrComponenteDigital = $this->retornaComponentesImutaveis($objDocumentoDTO);
     if(!empty($arrComponenteDigital)) {
-        $objAnexoRN = new AnexoRN();
-        $objAnexoDTO = new AnexoDTO();
-        $objAnexoDTO->setNumIdAnexo($arrComponenteDigital[0]->getDblIdAnexoImutavel());
-        $objAnexoDTO->setStrSinAtivo("S");
-        $objAnexoDTO->retTodos();
+        $objPenAnexoDocumentoRN = new PenAnexoDocumentoRN();
+        $objPenAnexoDocumentoDTO = $objPenAnexoDocumentoRN->consultarAnexoModuloPen($arrComponenteDigital[0]->getDblIdAnexoImutavel());
+      if ($objPenAnexoDocumentoDTO !== null) {
+          $strCaminhoAnexoImutavel = $objPenAnexoDocumentoRN->obterLocalizacaoAnexoModuloPen($objPenAnexoDocumentoDTO);
+        if (!file_exists($strCaminhoAnexoImutavel) || !is_readable($strCaminhoAnexoImutavel)) {
+            throw new InfraException('Módulo do Tramita: Anexo imutável não encontrado ou sem permissão de leitura no repositório do módulo PEN. IdAnexo: ' . $objPenAnexoDocumentoDTO->getNumIdAnexo());
+        }
 
-        $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
-        $strConteudoFS = file_get_contents($objAnexoRN->obterLocalizacao($objAnexoDTO));
+          $strConteudoFS = file_get_contents($strCaminhoAnexoImutavel);
+        if ($strConteudoFS === false) {
+            throw new InfraException('Módulo do Tramita: Falha lendo anexo imutável no repositório do módulo PEN. IdAnexo: ' . $objPenAnexoDocumentoDTO->getNumIdAnexo());
+        }
+      }
     }
 
       return $strConteudoFS;
   }
-
 
   private function obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $arrPenMimeTypes, $strProtocoloDocumentoFormatado)
     {
@@ -2635,17 +2639,18 @@ class ExpedirProcedimentoRN extends InfraRN
             throw new InfraException('Módulo do Tramita: Erro criando arquivo html temporário para envio do e-mail.');
         }
 
-        $objAnexoDTO = new AnexoDTO();
-        $objAnexoDTO->setNumIdAnexo($strNomeArquivoUploadHtml);
-        $objAnexoDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdDocumento());
-        $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
-        $objAnexoDTO->setNumTamanho(filesize(DIR_SEI_TEMP.'/'.$strNomeArquivoUploadHtml));
-        $objAnexoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-        $objAnexoDTO->setStrNome($objDocumentoDTO->getStrProtocoloDocumentoFormatado() . ".html");
-        $objAnexoDTO->setNumIdUnidade($objDocumentoDTO->getNumIdUnidadeResponsavel());
-        $objAnexoDTO->setStrSinAtivo("S");
-
-        $objAnexoDTO=$objAnexoRN->cadastrarRN0172($objAnexoDTO);
+        $objPenAnexoDocumentoDTO = new PenAnexoDocumentoDTO();
+        $objPenAnexoDocumentoDTO->setNumIdAnexo($strNomeArquivoUploadHtml);
+        $objPenAnexoDocumentoDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdDocumento());
+        $objPenAnexoDocumentoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+        $objPenAnexoDocumentoDTO->setNumTamanho(filesize(DIR_SEI_TEMP.'/'.$strNomeArquivoUploadHtml));
+        $objPenAnexoDocumentoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objPenAnexoDocumentoDTO->setStrNome($objDocumentoDTO->getStrProtocoloDocumentoFormatado() . ".html");
+        $objPenAnexoDocumentoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objPenAnexoDocumentoDTO->setStrSinAtivo("S");
+        
+        $objPenAnexoDocumentoRN = new PenAnexoDocumentoRN();
+        $objPenAnexoDocumentoDTO = $objPenAnexoDocumentoRN->cadastrarAnexoModuloPen($objPenAnexoDocumentoDTO);
 
         $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
         $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimentoPrincipal);
@@ -2661,7 +2666,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
         $objComponenteDigitalDTO=$objComponenteDigitalBD->consultar($objComponenteDigitalDTO);
 
-        $objComponenteDigitalDTO->setDblIdAnexoImutavel($objAnexoDTO->getNumIdAnexo());
+        $objComponenteDigitalDTO->setDblIdAnexoImutavel($objPenAnexoDocumentoDTO->getNumIdAnexo());
         $objComponenteDigitalDTO->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
         $objComponenteDigitalDTO->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
         $objComponenteDigitalDTO=$objComponenteDigitalBD->alterar($objComponenteDigitalDTO);

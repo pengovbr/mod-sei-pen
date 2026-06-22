@@ -1,6 +1,8 @@
 name: Testes funcionais para MySQL
 
-on: [pull_request]
+on:
+  workflow_dispatch:
+  pull_request:
 env: # Or as an environment variable
   CERTIFICADO_ORG1: ${{ secrets.CERTIFICADO_ORG1 }}
   CERTIFICADO_ORG2: ${{ secrets.CERTIFICADO_ORG2 }}
@@ -15,40 +17,60 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Pull Request branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
             repository: pengovbr/sei
+            submodules: recursive
             token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
             path: sei
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
             path: sei/src/sei/web/modulos/mod-sei-pen
-
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5
+      - name: Cache tmp files
+        uses: actions/cache@v5
+        with:
+          # Caminho onde os arquivos tmp estão armazenados
+          path: |
+            sei/src/sei/web/modulos/mod-sei-pen/src/tests_sei5/funcional/.tmp
+          # Chave única baseada no sistema operacional e no hash do arquivo de lock
+          key: ${{ runner.os }}-node-${{ hashFiles('sei/src/sei/web/modulos/mod-sei-pen/src/tests_sei5/funcional/.tmp/**') }}
+          # Chaves de fallback caso a chave exata não seja encontrada
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Configura e sobe o ambiente
         run: | 
              cd sei/src/sei/web/modulos/mod-sei-pen
              make config
-             sed -i 's/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1/155275/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1/GIT\_ACTION\_ORG1/' tests_sei5/funcional/phpunit.xml
-             sed -z -i 's/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\.1/155277/' tests_sei5/funcional/phpunit.xml
-             sed -z -i 's/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\.1/GIT\_ACTION\_FILHA/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2/155276/' tests_sei5/funcional/phpunit.xml
-             sed -i 's/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2/GIT\_ACTION\_ORG2/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/155275/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GITACTIONORG1/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GITACTIONORG1/' tests_sei5/funcional/phpunit.xml
+             sed -z -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1/155277/' tests_sei5/funcional/phpunit.xml
+             sed -z -i 's/INFORME_O_NOME_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1/GITACTIONFILHA/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/155276/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/GITACTIONORG2/' tests_sei5/funcional/phpunit.xml
+             sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2/GITACTIONORG2/' tests_sei5/funcional/phpunit.xml
              sed -e '/ORG1_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_sei5/funcional/.env
              sed -e '/ORG2_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_sei5/funcional/.env
              echo "ORG1_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG1" >> tests_sei5/funcional/.env
              echo "ORG2_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG2" >> tests_sei5/funcional/.env
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org2.pem
-             sed -i 's/exec/exec \-T/' Makefile
              make up
 
-      - name: Executa update, install e tramita silent
+      - name: Executa update, install
         run: |
+             sudo echo "127.0.0.1 org1-http" | sudo tee -a /etc/hosts
+             sudo echo "127.0.0.1 org2-http" | sudo tee -a /etc/hosts
              cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
 
-      - name: Testes funcionais
-        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-parallel-otimizado
+      - name: Run headless test
+        uses: coactions/setup-xvfb@v1
+        with:
+          working-directory: sei/src/sei/web/modulos/mod-sei-pen
+          run: make test-functional
+          options: "-screen 0 1920x1080x24"

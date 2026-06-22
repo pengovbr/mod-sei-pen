@@ -1208,11 +1208,12 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO->getObjProtocoloDTO()->setStrProtocoloFormatado($strNumProtocoloDocumentoAvulso);
     }
 
-      $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
+    $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
     if($objInfraParametro->getValor('SEI_FEDERACAO_NUMERO_PROCESSO')){
       $objInfraParametro->setValor('SEI_FEDERACAO_NUMERO_PROCESSO', 0);
     }
-      $objProcedimentoDTOGerado = $objProcedimentoRN->gerarRN0156($objProcedimentoDTO);
+
+    $objProcedimentoDTOGerado = $objProcedimentoRN->gerarRN0156($objProcedimentoDTO);
 
     if ($alterouTipoProcesso) {
         $this->atribuirTipoProcedimentoRelacinado($objProcedimentoDTO->getNumIdTipoProcedimento(), $objProcedimentoDTOGerado->getDblIdProcedimento(), $strProcessoNegocio);

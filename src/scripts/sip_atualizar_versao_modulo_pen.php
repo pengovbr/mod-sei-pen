@@ -309,6 +309,8 @@ class PenAtualizarSipRN extends InfraRN
           $this->instalarV4030();
         case '4.0.3':
           $this->instalarV4100();
+        case '4.1.0':
+          $this->instalarV4200_Beta();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
