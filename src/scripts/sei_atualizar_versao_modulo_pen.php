@@ -2628,92 +2628,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("4.0.2");
   }
 
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-  protected function instalarV4200_Beta()
-  {
-    $objMetaBanco = $this->inicializarObjMetaBanco();
-
-    // Adicionar coluna para controle de múltiplos órgãos
-    if (!$objMetaBanco->isColunaExiste('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos')) {
-        $objMetaBanco->adicionarColuna('md_pen_envio_comp_digitais','sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::SNULLO);
-        BancoSEI::getInstance()->executarSql('update md_pen_envio_comp_digitais set sin_multiplos_orgaos=\'N\'');
-        $objMetaBanco->alterarColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO);
-        $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', 'N');
-    }
-
-    //----------------------------------------------------------------------
-    // Tarefa Envio de processos para múltiplos órgãos
-    //----------------------------------------------------------------------
-    $objDTO = new TarefaDTO();
-    $objBD = new TarefaBD(BancoSEI::getInstance());
-
-    $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
-
-      $objDTO->unSetTodos();
-      $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
-
-      if ($objBD->contar($objDTO) == 0) {
-
-        $objUltimaTarefaDTO = new TarefaDTO();
-        $objUltimaTarefaDTO->retNumIdTarefa();
-        $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
-        $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
-
-        $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
-        $objDTO->setStrNome($strNome);
-        $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
-        $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
-        $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
-        $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
-        $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
-          $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-        }
-        $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
-        $objBD->cadastrar($objDTO);
-      }
-    };
-
-      $fnCadastrar('Envio de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Recebimento de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS');
-
-      $fnCadastrar('Pedido de sincronização manual múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR');
-      $fnCadastrar('A sincronização foi concluída com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO');
-
-      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
-      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
-      $fnCadastrar('A sincronização foi interrompida, após o sistema de destino rejeitar a tramitação. @MOTIVO_RECUSA@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA');
-      $fnCadastrar('Tramitação externa do processo @PROTOCOLO_FORMATADO@ cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO');
-
-      $fnCadastrar('Pedido de sincronização múltiplos órgãos recebida - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO');
-      $fnCadastrar('Pedido envio de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR');
-      $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Envio de processo múltiplos órgãos para o remetente - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE');
-      $fnCadastrar('A sincronização foi interrompida, após o sistema de destino cancelar a tramitação. @MOTIVO_CANCELAMENTO@', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM');
-      $fnCadastrar('Pedido de sincronização múltiplos órgãos realizada com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO');
-
-      $fnCadastrar('A ordem dos documentos foi alterada automaticamente para a ordem original devido a sincronização de processo para múltiplos órgãos', 'S', 'S', 'N', 'S', 'N', 'PEN_REORDENACAO_AUTOMATICA_PROCESSO');
-
-      $objTarefaOrdemArvoreDTO = new TarefaDTO();
-      $objTarefaOrdemArvoreDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
-      $objTarefaOrdemArvoreDTO->retNumIdTarefa();
-      $objTarefaOrdemArvoreDTO->retStrSinHistoricoResumido();
-      $objTarefaOrdemArvoreDTO->retStrSinHistoricoCompleto();
-      $objTarefaOrdemArvoreDTO = $objBD->consultar($objTarefaOrdemArvoreDTO);
-
-    if ($objTarefaOrdemArvoreDTO !== null) {
-      $objTarefaOrdemArvoreDTO->setStrSinHistoricoResumido('S');
-      $objTarefaOrdemArvoreDTO->setStrSinHistoricoCompleto('S');
-      $objBD->alterar($objTarefaOrdemArvoreDTO);
-    }
-      
-      $this->atualizarNumeroVersao("4.2.0-Beta");
-  }
   protected function instalarV4030()
   {
     $this->atualizarNumeroVersao("4.0.3");
@@ -2823,6 +2737,93 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       }
       
       $this->atualizarNumeroVersao("4.1.0");
+  }
+
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+  protected function instalarV4200_Beta()
+  {
+    $objMetaBanco = $this->inicializarObjMetaBanco();
+
+    // Adicionar coluna para controle de múltiplos órgãos
+    if (!$objMetaBanco->isColunaExiste('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos')) {
+        $objMetaBanco->adicionarColuna('md_pen_envio_comp_digitais','sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql('update md_pen_envio_comp_digitais set sin_multiplos_orgaos=\'N\'');
+        $objMetaBanco->alterarColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO);
+        $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', 'N');
+    }
+
+    //----------------------------------------------------------------------
+    // Tarefa Envio de processos para múltiplos órgãos
+    //----------------------------------------------------------------------
+    $objDTO = new TarefaDTO();
+    $objBD = new TarefaBD(BancoSEI::getInstance());
+
+    $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
+
+      $objDTO->unSetTodos();
+      $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+
+      if ($objBD->contar($objDTO) == 0) {
+
+        $objUltimaTarefaDTO = new TarefaDTO();
+        $objUltimaTarefaDTO->retNumIdTarefa();
+        $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
+        $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
+
+        $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
+        $objDTO->setStrNome($strNome);
+        $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
+        $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
+        $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
+        $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
+        $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+          $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+        }
+        $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+        $objBD->cadastrar($objDTO);
+      }
+    };
+
+      $fnCadastrar('Envio de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Recebimento de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS');
+
+      $fnCadastrar('Pedido de sincronização manual múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR');
+      $fnCadastrar('A sincronização foi concluída com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO');
+
+      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
+      $fnCadastrar('A sincronização do processo @PROTOCOLO_FORMATADO@ foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
+      $fnCadastrar('A sincronização foi interrompida, após o sistema de destino rejeitar a tramitação. @MOTIVO_RECUSA@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA');
+      $fnCadastrar('Tramitação externa do processo @PROTOCOLO_FORMATADO@ cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO');
+
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos recebida - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO');
+      $fnCadastrar('Pedido envio de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR');
+      $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Envio de processo múltiplos órgãos para o remetente - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE');
+      $fnCadastrar('A sincronização foi interrompida, após o sistema de destino cancelar a tramitação. @MOTIVO_CANCELAMENTO@', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos realizada com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO');
+
+      $fnCadastrar('A ordem dos documentos foi alterada automaticamente para a ordem original devido a sincronização de processo para múltiplos órgãos', 'S', 'S', 'N', 'S', 'N', 'PEN_REORDENACAO_AUTOMATICA_PROCESSO');
+
+      $objTarefaOrdemArvoreDTO = new TarefaDTO();
+      $objTarefaOrdemArvoreDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
+      $objTarefaOrdemArvoreDTO->retNumIdTarefa();
+      $objTarefaOrdemArvoreDTO->retStrSinHistoricoResumido();
+      $objTarefaOrdemArvoreDTO->retStrSinHistoricoCompleto();
+      $objTarefaOrdemArvoreDTO = $objBD->consultar($objTarefaOrdemArvoreDTO);
+
+    if ($objTarefaOrdemArvoreDTO !== null) {
+      $objTarefaOrdemArvoreDTO->setStrSinHistoricoResumido('S');
+      $objTarefaOrdemArvoreDTO->setStrSinHistoricoCompleto('S');
+      $objBD->alterar($objTarefaOrdemArvoreDTO);
+    }
+      
+      $this->atualizarNumeroVersao("4.2.0-Beta");
   }
 
   private function listarAnexoDocumentosInternos()
