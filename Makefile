@@ -44,6 +44,7 @@ PEN_TST_FNC_EVD_TFP= $(PEN_TST_FNC_EVD)/teste_funcional_falsos_positivos
 NOME_ARQ_EVDNC_TFP = evidencia-teste_funcional_falsos_positivos
 
 -include $(PEN_TEST_FUNC)/.env
+-include $(PEN_TEST_FUNC)/.modulo.env
 
 CMD_INSTALACAO_SEI = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php atualizar_versao_sei.php
 CMD_INSTALACAO_SIP = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_versao_sip.php
@@ -330,6 +331,28 @@ stop-test-container:
 
 vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run --rm -w /tests php-test-functional bash -c './composer.phar install'
+
+
+install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados do sistema
+	@echo ">>>>>>Executando instalação assinatura eletrénica no ORG1 e Org2<<<<<<"
+	@echo ""
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/assinatura-eletronica org1-http ./composer.phar install --no-dev
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/assinatura-eletronica org2-http ./composer.phar install --no-dev
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	@echo ""
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	
+	@docker exec funcional-solr-1 mkdir -p /opt/solr/server/solr/mod-sei-assinatura
+	@docker cp ../mod-sei-assinatura-eletronica/solr funcional-solr-1:/opt/solr/server/solr/mod-sei-assinatura/conf	
+	@docker exec -u 0 funcional-solr-1 chown -R solr:solr /opt/solr/server/solr/mod-sei-assinatura
+	@docker exec -u 0 funcional-solr-1 chmod -R u+rwX /opt/solr/server/solr/mod-sei-assinatura
+	@docker exec -e SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=admin:SolrAdmin123\$$" funcional-solr-1 /opt/solr/bin/solr create -c mod-sei-assinatura -d /opt/solr/server/solr/mod-sei-assinatura/conf
+	@echo ""
+	@echo "==================================================================================================="
+	@echo ""
+	@echo "Fim da instalação do módulo"
 
 cria_json_compatibilidade:
 	$(shell ./gerar_json_compatibilidade.sh)

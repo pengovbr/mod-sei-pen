@@ -25,5 +25,8 @@ class ExpedirProcedimentoDTO extends InfraDTO {
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdBloco');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdAtividade');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdUnidade');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_BOL, 'SinMultiplosOrgaos');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_BOL, 'SinEnvioAutoMultiplosOrgaos');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ, 'MetadadosProcedimento');
   }
 }

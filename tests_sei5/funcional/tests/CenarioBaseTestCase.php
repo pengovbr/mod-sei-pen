@@ -60,6 +60,7 @@ class CenarioBaseTestCase extends TestCase
     protected $paginaPenHipoteseLegalListar = null;
     protected $paginaMapUnidades = null;
     protected $paginaAgendamentos = null;
+    protected $paginaEnviarEmail = null;
 
   public function setUpPage(): void
     {
@@ -86,6 +87,7 @@ class CenarioBaseTestCase extends TestCase
       $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar(self::$driver, $this);
       $this->paginaMapUnidades = new PaginaMapUnidades(self::$driver, $this);
       $this->paginaAgendamentos = new PaginaAgendamentos(self::$driver, $this);
+      $this->paginaEnviarEmail = new PaginaEnviarEmail(self::$driver, $this);
 
   }
 
@@ -348,7 +350,9 @@ class CenarioBaseTestCase extends TestCase
     } catch (\Exception $e) {
         $this->paginaBase->pesquisar($protocolo);
         sleep(1);
-        $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
+        try {
+          $this->paginaBase->elByXPath('//a[@id="lnkInfraMenuSistema"]')->click(); //ícone de 3 risquinhos horizontais que abre/fecha o menu
+        } catch (\Exception $e) {}
     }
   }
 
@@ -368,13 +372,24 @@ class CenarioBaseTestCase extends TestCase
       return $protocolo;
   }
 
-  protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT, $executarTramitarPendencias = true)
+  protected function tramitarProcessoExternamente(
+    $protocolo,
+    $repositorio,
+    $unidadeDestino,
+    $unidadeDestinoHierarquia,
+    $urgente = false,
+    $callbackEnvio = null,
+    $timeout = PEN_WAIT_TIMEOUT,
+    $executarTramitarPendencias = true,
+    $multiplosOrgaos = false,
+  )
     {
       $this->paginaProcesso->navegarParaTramitarProcesso();
     
       // Preencher parâmetros do trâmite
       $this->paginaTramitar->repositorio($repositorio);
       $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
+      if ($multiplosOrgaos) { $this->paginaTramitar->selecionarMultiplosOrgaos(); }
       $this->paginaTramitar->tramitar();
 
     try {
@@ -420,6 +435,157 @@ class CenarioBaseTestCase extends TestCase
       // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
       $this->executarTramitarPendenciasSimples();
     }
+  }
+
+  protected function tramitarProcessoExternamenteMultiplosOrgaoDestinatario(
+    $executarTramitarPendencias = false,
+    $callbackEnvio = null,
+    $timeout = PEN_WAIT_TIMEOUT,
+  )
+    {
+      $this->paginaProcesso->navegarParaTramitarProcesso();
+      $this->paginaTramitar->tramitar();
+
+    try {
+        $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
+    } catch (Exception $e) {
+    }
+
+    if (isset($mensagemAlerta)) {
+        throw new Exception($mensagemAlerta);
+    }
+
+      $callbackEnvio = $callbackEnvio ?: function () {
+        try {
+            $this->paginaTramitar->frame('ifrEnvioProcesso');
+            $mensagemSucesso = mb_convert_encoding('Trâmite externo do processo finalizado com sucesso!', 'UTF-8', 'ISO-8859-1');
+            $this->assertStringContainsString($mensagemSucesso, $this->paginaTramitar->elByCss('body')->getText());
+            $btnFechar = $this->paginaTramitar->elByXPath("//input[@id='btnFechar']");
+            $btnFechar->click();
+        } finally {
+          try {
+              $this->paginaTramitar->frame(null);
+              $this->paginaTramitar->frame("ifrConteudoVisualizacao");
+              $this->paginaTramitar->frame("ifrVisualizacao");
+          } catch (Exception $e) {
+          }
+        }
+
+          return true;
+      };
+
+    try {
+        $this->waitUntil($callbackEnvio, $timeout);
+    } finally {
+      try {
+          $this->paginaTramitar->frame(null);
+          $this->paginaTramitar->frame("ifrVisualizacao");
+      } catch (Exception $e) {
+      }
+    }
+
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' && $executarTramitarPendencias) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
+  }
+
+  /**
+   * Realiza tramitação externa de processo esperando um erro específico
+   * 
+   * Este método é uma variação do tramitarProcessoExternamente() que, ao invés de
+   * validar o sucesso da tramitação, valida que um erro específico foi retornado
+   * pelo sistema. É utilizado em testes que precisam validar comportamentos de rejeição,
+   * como tentativa de tramitar documentos sigilosos ou com restrições de segurança.
+   * 
+   * Fluxo de execução:
+   * 1. Navega para a tela de tramitação externa
+   * 2. Preenche os dados do trâmite (repositório, unidade, múltiplos órgãos)
+   * 3. Envia o trâmite
+   * 4. Aguarda a janela de feedback do sistema
+   * 5. Valida que a mensagem de erro esperada está presente
+   * 6. Fecha a janela de feedback
+   * 
+   * @param string|object $protocolo Número do processo a ser tramitado
+   * @param string $repositorio Nome do repositório de estruturas destino
+   * @param string $unidadeDestino Nome da unidade de destino
+   * @param string $unidadeDestinoHierarquia Hierarquia da unidade (opcional)
+   * @param string $erroEsperado Texto do erro que deve ser retornado pelo sistema
+   * @param bool $urgente Define se o trâmite é urgente (padrão: false)
+   * @param bool $multiplosOrgaos Define se deve marcar opção de múltiplos órgãos (padrão: false)
+   * @param int $timeout Tempo máximo de espera em segundos (padrão: PEN_WAIT_TIMEOUT)
+   * 
+   * @throws Exception Se houver um alert antes do processamento
+   * @throws AssertionFailedError Se o erro esperado não for encontrado
+   * 
+   * @return void
+   */
+  protected function tramitarProcessoExternamenteErroEsperado(
+    $protocolo,
+    $repositorio,
+    $unidadeDestino,
+    $unidadeDestinoHierarquia,
+    $erroEsperado,
+    $urgente = false,
+    $multiplosOrgaos = false,
+    $timeout = PEN_WAIT_TIMEOUT,
+    $executarTramitarPendencias = true
+  )
+    {
+      $this->paginaProcesso->navegarParaTramitarProcesso();
+    
+      // Preencher parâmetros do trâmite
+      $this->paginaTramitar->repositorio($repositorio);
+      $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
+      if ($multiplosOrgaos) { $this->paginaTramitar->selecionarMultiplosOrgaos(); }
+      $this->paginaTramitar->tramitar();
+
+    try {
+        $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
+    } catch (Exception $e) {
+    }
+
+    if (isset($mensagemAlerta)) {
+        throw new Exception($mensagemAlerta);
+    }
+
+      $callbackValidacaoErro = function () use ($erroEsperado) {
+        try {
+            $this->paginaTramitar->frame('ifrEnvioProcesso');
+            $conteudoBody = $this->paginaTramitar->elByCss('body')->getText();
+            $erroEsperadoConvertido = mb_convert_encoding($erroEsperado, 'UTF-8', 'ISO-8859-1');
+            $this->assertStringContainsString($erroEsperadoConvertido, $conteudoBody);
+            $btnFechar = $this->paginaTramitar->elByXPath("//input[@id='btnFechar']");
+            $btnFechar->click();
+        } finally {
+          try {
+              $this->paginaTramitar->frame(null);
+              $this->paginaTramitar->frame("ifrConteudoVisualizacao");
+              $this->paginaTramitar->frame("ifrVisualizacao");
+          } catch (Exception $e) {
+          }
+        }
+
+          return true;
+      };
+
+    try {
+        $this->waitUntil($callbackValidacaoErro, $timeout);
+    } finally {
+      try {
+          $this->paginaTramitar->frame(null);
+          $this->paginaTramitar->frame("ifrVisualizacao");
+      } catch (Exception $e) {
+      }
+    }
+
+    // executa pendências APÓS confirmação de envio
+    if (DESATIVAR_AGENDAMENTO == 'true' && $executarTramitarPendencias) {
+      // Equivalente ao: make tramitar-pendencias-simples, após clicar no botão enviar (para órgão externo)
+      $this->executarTramitarPendenciasSimples();
+    }
+    
   }
 
   protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT, $executarTramitarPendencias = true)

@@ -22,6 +22,8 @@ class PenRestricaoEnvioComponentesDigitaisDTO extends InfraDTO
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StrEstrutura', 'str_estrutura');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadePen', 'id_unidade_pen');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StrUnidadePen', 'str_unidade_pen');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinMultiplosOrgaos', 'sin_multiplos_orgaos');
+      
   
       $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
   }

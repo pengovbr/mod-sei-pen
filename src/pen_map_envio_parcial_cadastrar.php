@@ -58,6 +58,7 @@ try {
         $strUnidadePen = $_POST['txtUnidade'];
         $numIdRepositorio = $_POST['selRepositorioEstruturas'];
         $txtRepositorioEstruturas = $_POST['txtRepositorioEstruturas'];
+        $sinMultiplosOrgaos = $_POST['sinMultiplosOrgaos'] ? 'S' : 'N';
 
         $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
         $objDTO->setNumIdEstrutura($numIdRepositorio);
@@ -86,6 +87,7 @@ try {
         $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
         $objDTO->setNumIdUnidadePen($numIdUnidadePen);
         $objDTO->setStrStrUnidadePen($strUnidadePen);
+        $objDTO->setStrSinMultiplosOrgaos($sinMultiplosOrgaos);
 
         $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
       if (!empty($_GET['Id'])) {
@@ -155,6 +157,7 @@ try {
           $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
           $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
           $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadePen();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retStrSinMultiplosOrgaos();
           $objPenRestricaoEnvioComponentesDigitaisDTO->setDblId($_GET['Id']);
 
           $objPenRestricaoEnvioComponentesDigitaisDTO =
@@ -164,6 +167,7 @@ try {
             $numIdRepositorio = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdEstrutura();
             $hdnIdUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen();
             $strNomeUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen();
+            $sinMultiplosOrgaos = $objPenRestricaoEnvioComponentesDigitaisDTO->getStrSinMultiplosOrgaos();
         }
       }
 
@@ -182,6 +186,16 @@ try {
             'controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento'
             . '&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1'
         );
+
+      try {
+        $podeEnvioMultiplosOrgaos = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnvioMultiplosOrgaos", null);
+        // Garantir que seja um array
+        if (!is_null($podeEnvioMultiplosOrgaos) && !is_array($podeEnvioMultiplosOrgaos)) {
+          $podeEnvioMultiplosOrgaos = explode(',', $podeEnvioMultiplosOrgaos);
+        }
+      } catch (Throwable $e) {
+        $podeEnvioMultiplosOrgaos = null;
+      }
         break;
     default:
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
@@ -360,6 +374,13 @@ $objPaginaSEI->montarJavaScript();
 
     objAutoCompletarEstrutura.processarResultado = function(id, descricao, complemento) {
       window.infraAvisoCancelar();
+      $('#divSinMultiplosOrgaos').css('display', 'none');
+      if (id!='' && '<?php echo !is_null($podeEnvioMultiplosOrgaos) && is_array($podeEnvioMultiplosOrgaos) ? '1' : '0'; ?>'=='1') {
+          $arrIdsMultiplosOrgaos = ('<?php echo is_array($podeEnvioMultiplosOrgaos) ? implode(',', $podeEnvioMultiplosOrgaos) : $podeEnvioMultiplosOrgaos; ?>').split(',');
+          if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
+            $('#divSinMultiplosOrgaos').css('display', 'block');
+          }
+      }
     };
 
     $('#btnIdUnidade').click(function() {
@@ -494,6 +515,18 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
     </div>
 
     <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?php echo $hdnIdUnidade; ?>" />
+  </div>
+
+  <?php
+    $displayNone = (is_array($podeEnvioMultiplosOrgaos) && in_array($hdnIdUnidade, $podeEnvioMultiplosOrgaos)) ? '' : 'display: none;';
+  ?>
+  <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; <?php echo $displayNone; ?>">
+    <input type="checkbox" id="sinMultiplosOrgaos" name="sinMultiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" <?php echo $sinMultiplosOrgaos === 'S' || !empty($displayNone) ? 'checked' : '' ?> />
+    <label id="lblSinMultiplosOrgaos" for="sinMultiplosOrgaos" class="infraLabelCheckbox">
+      Habilitar a opção de manter o processo aberto na unidade selecionada.
+      <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
+      <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?=PaginaSEI::getInstance()->getIconeAjuda()?>" class='infraImg'/></a>
+    </label>
   </div>
 
   <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />

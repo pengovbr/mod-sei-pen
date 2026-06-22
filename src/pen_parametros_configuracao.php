@@ -138,6 +138,15 @@ $objPagina->abrirStyle();
     margin-left:10px;
 }
 
+#txtUnidadePen{
+    width: 40%;
+    min-width: 150px;
+}
+
+#btnUnidadeRh2 {
+    margin: 5px 0px 5px 5px;
+}
+
 <?
 $objPagina->fecharStyle();
 $objPagina->montarJavaScript();
@@ -238,6 +247,28 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             echo '</div>';
               break;
 
+          case 'PEN_ID_PROCESSO_FICARA_ABERTO':
+            try {
+              $objPenParametroRN = new PenParametroRN();
+              $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+              $paramUnidade = $parametro->getStrValor();
+              if (!is_null($numIdRepositorioOrigem) && !is_null($paramUnidade)) {
+                $objProcessoEletronico = new ProcessoEletronicoRN();
+                $objProcessoEletronicoDTO  = $objProcessoEletronico->buscarEstrutura($numIdRepositorioOrigem, $paramUnidade);
+                $strNomeUnidadeSelecionada = $objProcessoEletronicoDTO->getStrNome(). ' - ' .$objProcessoEletronicoDTO->getStrSigla();
+              }
+            } catch (Exception $e) {
+            }
+
+            $textoAjuda="Selecionar o ID da unidade AGU que ficará responsável por manter o processo aberto no SEI após o envio para o Tramita.GOV.BR";
+            echo '<div class="div_input">';
+            echo '<input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText input-field" value="'.PaginaSEI::tratarHTML($strNomeUnidadeSelecionada).'" tabindex=""/>';
+            echo '<button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>';
+            echo '<input type="hidden" id="PEN_ID_PROCESSO_FICARA_ABERTO" name="parametro[PEN_ID_PROCESSO_FICARA_ABERTO]" value="'.PaginaSEI::tratarHTML($parametro->getStrValor()).'" />';
+            echo "<a class='pen_ajuda' id='ajuda_processo_aberto' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+            echo '</div>';
+              break;
+
           default:
             echo '<div class="div_input">';
             echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
@@ -250,6 +281,43 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
 <?
 $objPagina->getInstance()->fecharAreaDados();
+
+$strLinkAjaxUnidade = $objSessao->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_cadastro');
+?>
+<script type="text/javascript">
+
+var objAutoCompletarEstrutura = null;
+var numIdRepositorioOrigem = function (){
+    var select = document.getElementById('PEN_ID_REPOSITORIO_ORIGEM');
+    return select.options[select.selectedIndex].value;
+};
+var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
+
+function inicializar(){
+  // aqui verifica se o campo PEN_ID_PROCESSO_FICARA_ABERTO existe no formulario
+    if ($('#PEN_ID_PROCESSO_FICARA_ABERTO').length){
+      objAutoCompletarEstrutura = new infraAjaxAutoCompletar('PEN_ID_PROCESSO_FICARA_ABERTO','txtUnidadePen','<?php echo $strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
+      objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
+      objAutoCompletarEstrutura.mostrarAviso = true;
+      objAutoCompletarEstrutura.limparCampo = false;
+      objAutoCompletarEstrutura.tempoAviso = 10000000;
+      objAutoCompletarEstrutura.prepararExecucao = function(){
+          var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidadePen').value;
+          parametros += '&id_repositorio=' + numIdRepositorioOrigem();
+          return parametros;
+      };
+      objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
+          window.infraAvisoCancelar();
+      };
+      $('#btnUnidadeRh2').click(function() {
+          $('#hdnUnidadeRh').val('');
+          objAutoCompletarEstrutura.executar();
+          objAutoCompletarEstrutura.procurar();
+      });
+    }
+}
+</script>
+<?php
 $objPagina->fecharBody();
 $objPagina->fecharHtml();
 ?>

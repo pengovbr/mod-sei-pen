@@ -34,6 +34,28 @@ class ProcessoEletronicoRN extends InfraRN
   public static $TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO = 'PEN_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO';
   public static $TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO = 'PEN_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO';
   public static $TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO = 'PEN_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO';
+  
+
+  public static $TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_ENVIO_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS = 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR';
+
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO';
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM';
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA = 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA';
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO';
+  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO';
+  
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR = 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR';
+  public static $TI_PROCESSO_ELETRONICO_AUTO_ENVIO_MULTIPLOS_ORGAOS = 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS';
+  public static $TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE = 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE';
+  public static $TI_PROCESSO_ELETRONICO_REORDENACAO_AUTOMATICA_PROCESSO = 'PEN_REORDENACAO_AUTOMATICA_PROCESSO';
 
     /* TIPO DE PROTOCOLO RECEBIDO PELO BARRAMENTO - SE PROCESSO OU DOCUMENTO AVULSO */
   public static $STA_TIPO_PROTOCOLO_PROCESSO = 'P';
@@ -45,6 +67,7 @@ class ProcessoEletronicoRN extends InfraRN
   public static $STA_SIGILO_SIGILOSO = '3';
 
     /* RELAÇÃO DE SITUAÇÕES POSSÍVEIS EM UM TRÂMITE */
+  public static $STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA = 0;
   public static $STA_SITUACAO_TRAMITE_NAO_INICIADO = 0;                       // Não Iniciado - Aguardando envio de Metadados pela solução
   public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
   public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
@@ -898,7 +921,8 @@ class ProcessoEletronicoRN extends InfraRN
 
 
   public function construirCabecalho($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
-        $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false, $dblIdProcedimento = null
+        $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false, $dblIdProcedimento = null,
+        $multiplosOrgaos = true
     ) {
 
       $cabecalho = [
@@ -930,6 +954,13 @@ class ProcessoEletronicoRN extends InfraRN
       $atribuirInfoModulo = $this->atribuirInformacoesModuloREST();
 
       $cabecalho['propriedadesAdicionais'] = array_merge($atribuirInformacoes, $atribuirInfoModulo);
+
+      if ($multiplosOrgaos) {
+        $cabecalho['propriedadesAdicionais'][] = [
+          'chave' => 'multiplosOrgaos',
+          'valor' => "true"
+        ];
+      }
 
       return $cabecalho;
   }
@@ -1278,6 +1309,23 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha na solicitação de metadados do processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
+  public function solicitarSincronizarTramite($parNumIdentificacaoTramite)
+    {
+      $endpoint = "sincroniza-tramite/{$parNumIdentificacaoTramite}";
+    try {
+        $parametros = [
+        'IDT' => $parNumIdentificacaoTramite
+        ];
+            
+        return $this->get($endpoint, $parametros);
+
+    } catch (\Exception $e) {
+        $mensagem = "Falha ao solicitar a sincronização do trâmite";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -1742,7 +1790,21 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null)
+  /**
+   * Consulta trâmites de processo
+   *
+   * @param  null|integer $parNumIdTramite
+   * @param  null|string  $parNumeroRegistro
+   * @param  null|integer $parNumeroUnidadeRemetente
+   * @param  null|integer $parNumeroUnidadeDestino 
+   * @param  null|string  $parProtocolo
+   * @param  null|integer $parNumeroRepositorioEstruturas
+   * @param  null|string  $situacaoAtual
+   * @param  null|integer $limit
+   * @return null|array   Array de objetos TramiteDTO
+   * @throws InfraException
+   */
+  public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null, $situacaoAtual = null, $limit = null)
     {
       $endpoint = 'tramites';
     try
@@ -1770,6 +1832,14 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros['protocolo'] = $parProtocolo;
         }
 
+        if (!is_null($situacaoAtual)) {
+            $parametros['situacaoAtual'] = $situacaoAtual;
+        }
+
+        if (!is_null($limit)) {
+            $parametros['quantidadeDeRegistros'] = $limit;
+        }
+
         $arrResultado = $this->get($endpoint, $parametros);
 
         if (isset($arrResultado->tramites) && !empty($arrResultado->tramites[0])) {
@@ -1787,6 +1857,88 @@ class ProcessoEletronicoRN extends InfraRN
 
             $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado->tramites[0]);
             $arrObjTramite[0]->itensHistorico = (object) $itensHistorico;
+
+        }
+
+        return $arrObjTramite;
+
+    } catch (\Exception $e) {
+        $mensagem = "Falha na consulta de trâmites de processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
+  /**
+   * Consulta trâmites de processo
+   *
+   * @param  null|integer $parNumIdTramite
+   * @param  null|string  $parNumeroRegistro
+   * @param  null|integer $parNumeroUnidadeRemetente
+   * @param  null|integer $parNumeroUnidadeDestino 
+   * @param  null|string  $parProtocolo
+   * @param  null|integer $parNumeroRepositorioEstruturas
+   * @param  null|string  $situacaoAtual
+   * @param  null|integer $limit
+   * @return null|array   Array de objetos TramiteDTO
+   * @throws InfraException
+   */
+  public function consultarTramitesTodos($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null, $situacaoAtual = null, $limit = null)
+    {
+      $endpoint = 'tramites';
+    try
+      {
+        $arrObjTramite = [];
+        $parametros = [
+        'IDT' => $parNumIdTramite
+        ];
+
+        if(!is_null($parNumeroRegistro)) {
+            $parametros['NRE'] = $parNumeroRegistro;
+        }
+
+        if(!is_null($parNumeroUnidadeRemetente) && !is_null($parNumeroRepositorioEstruturas)) {
+            $parametros['remetente']['identificacaoDoRepositorioDeEstruturas'] = $parNumeroRepositorioEstruturas;
+            $parametros['remetente']['numeroDeIdentificacaoDaEstrutura'] = $parNumeroUnidadeRemetente;
+        }
+
+        if(!is_null($parNumeroUnidadeDestino) && !is_null($parNumeroRepositorioEstruturas)) {
+            $parametros['destinatario']['identificacaoDoRepositorioDeEstruturas'] = $parNumeroRepositorioEstruturas;
+            $parametros['destinatario']['numeroDeIdentificacaoDaEstrutura'] = $parNumeroUnidadeDestino;
+        }
+
+        if (!is_null($parProtocolo)) {
+            $parametros['protocolo'] = $parProtocolo;
+        }
+
+        if (!is_null($situacaoAtual)) {
+            $parametros['situacaoAtual'] = $situacaoAtual;
+        }
+
+        if (!is_null($limit)) {
+            $parametros['quantidadeDeRegistros'] = $limit;
+        }
+
+        $arrResultado = $this->get($endpoint, $parametros);
+
+        if (isset($arrResultado->tramites) && $arrResultado->totalDeRegistros > 0) {
+
+          foreach ($arrResultado->tramites as $key => $tramite) {
+            $itensHistorico = [];
+            foreach ($tramite->mudancasDeSituacao as $mudancaDeSituacao) {
+              $itensHistorico['operacao'][] = $mudancaDeSituacao;
+            }
+
+            $arrResultado->tramites[$key] = array_filter(
+              get_object_vars($arrResultado->tramites[$key]),
+              function ($value) {
+                return !is_null($value);
+              }
+            );
+
+            $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado->tramites[$key]);
+            $arrObjTramite[$key]->itensHistorico = (object) $itensHistorico;
+          }
 
         }
 
@@ -2308,6 +2460,18 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  protected function consultarConectado(ProcessoEletronicoDTO $objProcessoEletronicoDTO)
+    {
+    try {
+        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        return $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
+    }catch(Exception $e){
+        $mensagem = "Falha na contagem de processos eletrônicos registrados";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
 
   protected function tentarNovamenteSobErroHTTP($callback, $numTentativa = 1)
     {
@@ -2320,6 +2484,19 @@ class ProcessoEletronicoRN extends InfraRN
       } else {
           throw $fault;
       }
+    }
+  }
+
+  public static function bloquearProcesso($parDblIdProcedimento)
+    {
+    try{
+      $objEntradaBloquearProcessoAPI = new EntradaBloquearProcessoAPI();
+      $objEntradaBloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+
+      $objSeiRN = new SeiRN();
+      $objSeiRN->bloquearProcesso($objEntradaBloquearProcessoAPI);
+    } catch (InfraException $e) {
+        throw new InfraException("Erro ao bloquear processo", $e);
     }
   }
 
@@ -2856,15 +3033,15 @@ class ProcessoEletronicoRN extends InfraRN
 
         return $objResposta;
     } catch (RequestException $e) {
-        $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
+        $erroResposta = $e->hasResponse() ? json_decode($e->getResponse()->getBody()->getContents()) : null;
         
         // Lança uma nova exceção com os detalhes do RequestException
         throw new Exception(
             json_encode(
                 [
                 'error' => true,
-                'codigoErro' => $erroResposta->codigoErro,
-                'message' => $erroResposta->mensagem,
+                'codigoErro' => $e->hasResponse() ? $erroResposta->codigoErro : null,
+                'message' => $e->hasResponse() ? $erroResposta->mensagem : $e->getMessage(),
                 'exception' => $e->getMessage(),
                 'details' => $e->hasResponse() ? (string) $e->getResponse()->getBody() : 'No response body'
                 ]
@@ -2914,36 +3091,421 @@ class ProcessoEletronicoRN extends InfraRN
         $msg_esperada = "NRE, '$nre', já possui trâmite em andamento para este destinatário";
         // Expressão regular para buscar o texto com o número do processo como coringa
         $regex = '/Não é possível executar o serviço de reprodução de trâmite do processo \d{5}\.\d{6}\/\d{4}-\d{2}, pois não há componentes digitais válidos a serem reproduzidos/';
-        if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
-          return $arrayException;
-        } else {
-          $detalhes = $this->tratarFalhaWebService($e);
-          throw new InfraException($mensagem, $e, $detalhes);
+      if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
+        return $arrayException;
+      } else {
+        $detalhes = $this->tratarFalhaWebService($e);
+        throw new InfraException($mensagem, $e, $detalhes);
+      }
+    }
+  }
+
+  /**
+   * Valida se o processo é de múltiplos órgãos, verificando a existência da propriedade adicional 'multiplosOrgaos' nos metadados do processo
+   * @param int $numIdProcedimento
+   * @return bool
+   */
+  public function validarProcessoMultiplosOrgaos($numIdProcedimento)
+  {
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+      $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+    if ($objTramiteDTO === null) {
+      return false;
+    }
+
+    try {
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+      if (empty($arrObjTramites)) {
+          return false;
+      }
+        $objMetadados = $arrObjTramites[0];
+    } catch (Exception $e) {
+      LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      return false;
+    }
+
+      // Validar se unidade destino do multiplos órgãos existe na base de unidades do SEI
+      $objUnidadeDTO = new PenUnidadeDTO();
+      $objUnidadeDTO->setNumIdUnidadeRH($objMetadados->destinatario->numeroDeIdentificacaoDaEstrutura);
+      $objUnidadeDTO->retNumIdUnidade();
+
+      $objPenUnidadeRN = new PenUnidadeRN();
+    if ($objPenUnidadeRN->contar($objUnidadeDTO) == 0) {
+      return false;
+    }
+
+      // Verificar se o processo é de múltiplos órgãos
+      $propriedadesAdicionais = (
+          isset($objMetadados->propriedadesAdicionais) &&
+          is_array($objMetadados->propriedadesAdicionais)
+      )
+          ? $objMetadados->propriedadesAdicionais
+          : [];
+    if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+      foreach ($propriedadesAdicionais as $valor) {
+        if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+          return true;
+          break;
         }
+      }
+    }
+        
+      return false;
+  }
+
+  /**
+   * Valida se o processo é de múltiplos órgãos, verificando a existência da propriedade adicional 'multiplosOrgaos' nos metadados do processo
+   * @param int $numIdProcedimento
+   * @return bool
+   */
+  public function validarProcessoBlocoMultiplosOrgaos($numIdProcedimento)
+  {
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+      $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO);
+    if ($objTramiteDTO === null) {
+      return false;
+    }
+
+    try {
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+      if (empty($arrObjTramites)) {
+          return false;
+      }
+        $objMetadados = $arrObjTramites[0];
+    } catch (Exception $e) {
+      LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      return false;
+    }
+
+      // Verificar se o processo é de múltiplos órgãos
+      $propriedadesAdicionais = (
+          isset($objMetadados->propriedadesAdicionais) &&
+          is_array($objMetadados->propriedadesAdicionais)
+      )
+          ? $objMetadados->propriedadesAdicionais
+          : [];
+    if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+      foreach ($propriedadesAdicionais as $valor) {
+        if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+          return true;
+          break;
+        }
+      }
+    }
+        
+      return false;
+  }
+
+  /**
+   * Valida se o processo pode ter o cancelamento recusado
+   *
+   * @param int $idProcedimento
+   * @return void
+   */
+  public function validarProcessoRecusaCancelamento($idProcedimento, $motivoRecusa = '')
+  {
+    $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+    $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
+
+    $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+    $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+    if ($objTramiteDTO) {
+      $arrTiProcessoEletronico = [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM)
+      ];
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($idProcedimento);
+      $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retNumIdTarefa();
+      $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+      $objAtividadeDTO->retDthAbertura();
+      $objAtividadeDTO->retDthConclusao();
+    
+      $objAtividadeRN = new AtividadeRN();
+      $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+
+      if ($objAtividadeDTO !== null && in_array($objAtividadeDTO->getNumIdTarefa(), [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR)
+      ])) {
+        $tramiteCanceladoRecusa = $this->consultarTramitesTodos(null, $objTramiteDTO->getStrNumeroRegistro());
+        if (count($tramiteCanceladoRecusa) > 0) {
+          $tramiteRecusa = $tramiteCanceladoRecusa[count($tramiteCanceladoRecusa) - 1]->situacaoAtual;
+          $arrayRecusa = [
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA
+          ];
+          if (in_array($tramiteRecusa, $arrayRecusa)) {
+            switch ($tramiteRecusa) {
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
+                $idTarefaRecusa = ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO;
+                  break;
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:
+                $idTarefaRecusa = ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA;
+                  break;
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE:
+                $idTarefaRecusa = ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO;
+                  break;
+            }
+            
+            $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProcedimento);
+            $this->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), $idTarefaRecusa, null, $motivoRecusa);
+          }
+        }
+      }
+    }
+  }
+
+  public function gravarAtividadeMultiplosOrgaos(ProcedimentoDTO $objProcedimentoDTO, $numIdTramite, $penTarefa, $numIdUnidade = null, $motivoRecusa = '')
+  {
+    $objTarefaDTO = new TarefaDTO();
+    $objTarefaDTO->retNumIdTarefa();
+    $objTarefaDTO->retStrSinLancarAndamentoFechado();
+    $objTarefaDTO->setStrIdTarefaModulo($penTarefa);
+
+    $objTarefaRN = new TarefaRN();
+    $objTarefaDTO = $objTarefaRN->consultar($objTarefaDTO);
+
+    if($objTarefaDTO === null) {
+      return false;
+    }
+
+    $idTarefa = $objTarefaDTO->getNumIdTarefa();
+    $strDataHoraAtual = InfraData::getStrDataHoraAtual();
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+    $objAtividadeDTO->setNumIdUnidade($numIdUnidade ?? SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTO->setNumIdUsuarioAtribuicao(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTO->setNumIdTarefa($idTarefa);
+    $objAtividadeDTO->setStrSinInicial('N');
+    $objAtividadeDTO->setDtaPrazo(null);
+    $objAtividadeDTO->setNumIdUsuarioAtribuicao(null);
+    $objAtividadeDTO->setNumIdUsuarioVisualizacao(null);
+    $objAtividadeDTO->setDthAbertura($strDataHoraAtual);
+    $objAtividadeDTO->setNumTipoVisualizacao(AtividadeRN::$TV_VISUALIZADO);
+
+    if ($objTarefaDTO->getStrSinLancarAndamentoFechado() == 'S') {
+      //lança andamento fechado
+      $objAtividadeDTO->setNumIdUsuarioConclusao(SessaoSEI::getInstance()->getNumIdUsuario());
+      $objAtividadeDTO->setDthConclusao($strDataHoraAtual);
+    } else {
+      $objAtividadeDTO->setNumIdUsuarioConclusao(null);
+      $objAtividadeDTO->setDthConclusao(null);
+    }
+
+    $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
+    $objAtividadeDTO = $objAtividadeBD->cadastrar($objAtividadeDTO);
+
+    $objAtributoAndamentoRN = new AtributoAndamentoRN();
+
+    $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
+    $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+    $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
+    $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+    $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
+
+    if (!empty($motivoRecusa)) {
+      $eRecusaSincronizacao = $penTarefa == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA;
+      $temObsRecusa = strpos($motivoRecusa, '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.') !== false;
+      if ($eRecusaSincronizacao && $temObsRecusa) {
+        $motivoRecusa = str_replace('. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', '', $motivoRecusa);
+      }
+      $atributoNome = $penTarefa == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM
+          ? 'MOTIVO_CANCELAMENTO' : 'MOTIVO_RECUSA';
+      $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+      $objAtributoAndamentoDTO->setStrNome($atributoNome);
+      $objAtributoAndamentoDTO->setStrValor($motivoRecusa);
+      $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
+      $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+      $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
+    }
+
+    $arrObjTramite = $this->consultarTramites($numIdTramite);
+
+    $objTramite = array_pop($arrObjTramite);
+
+    $objEstrutura = $this->consultarEstrutura(
+        $objTramite->destinatario->identificacaoDoRepositorioDeEstruturas,
+        $objTramite->destinatario->numeroDeIdentificacaoDaEstrutura,
+        true
+    );
+
+    $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTO->setStrNome('UNIDADE');
+    $objAtributoAndamentoDTO->setStrValor($objEstrutura->nome);
+    $objAtributoAndamentoDTO->setStrIdOrigem($objEstrutura->numeroDeIdentificacaoDaEstrutura);
+    $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+    $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
+
+    $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($objTramite->destinatario->identificacaoDoRepositorioDeEstruturas);
+
+    if (!empty($objRepositorioDTO)) {
+      $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+      $objAtributoAndamentoDTO->setStrNome('REPOSITORIO');
+      $objAtributoAndamentoDTO->setStrValor($objRepositorioDTO->getStrNome());
+      $objAtributoAndamentoDTO->setStrIdOrigem($objRepositorioDTO->getNumId());
+      $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+      $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
+    }
+      
+  }
+
+  /**
+   * Verifica se o processo possui documento interno não assinado, ou seja, documento com status de editor interno e que não esteja cancelado, e que não possua assinatura cadastrada
+   *
+   * @param int $dblIdProcedimento
+   * @return bool
+   */
+  public function possuiDocumentoInternoNaoAssinado($dblIdProcedimento)
+  {
+    $objDocumentoDTO = new DocumentoDTO();
+    $objDocumentoDTO->setDblIdProcedimento($dblIdProcedimento);
+    $objDocumentoDTO->retDblIdDocumento();
+    $objDocumentoDTO->retStrStaDocumento();
+    $objDocumentoDTO->retStrStaEstadoProtocolo();
+
+    $objDocumentoRN = new DocumentoRN();
+    $arrObjDocumentoDTO = (array)$objDocumentoRN->listarRN0008($objDocumentoDTO);
+
+    if (empty($arrObjDocumentoDTO)) {
+      return false;
+    }
+
+    $objAssinaturaDTO = new AssinaturaDTO();
+    $objAssinaturaDTO->setDistinct(true);
+    $objAssinaturaDTO->retDblIdDocumento();
+
+    $objAssinaturaRN = new AssinaturaRN();
+    foreach ($arrObjDocumentoDTO as $objDocumentoDTO) {
+      if ($objDocumentoDTO->getStrStaDocumento() != DocumentoRN::$TD_EDITOR_INTERNO) {
+        continue;
+      }
+
+      if ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+        continue;
+      }
+
+      $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+      if ($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function cadastrarAtividadePedidoSincronizacao(ProcedimentoDTO $objProcedimentoDTO, string $tarefa)
+    {
+    try {
+        $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo($tarefa);
+
+        $objTarefaDTO = new TarefaDTO();
+        $objTarefaDTO->retNumIdTarefa();
+        $objTarefaDTO->retStrSinLancarAndamentoFechado();
+        $objTarefaDTO->setNumIdTarefa($idTarefa);
+
+        $objTarefaRN = new TarefaRN();
+        $objTarefaDTO = $objTarefaRN->consultar($objTarefaDTO);
+
+      if($objTarefaDTO === null) {
+        return false;
+      }
+
+        $idTarefa = $objTarefaDTO->getNumIdTarefa();
+        $strDataHoraAtual = InfraData::getStrDataHoraAtual();
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setNumIdUsuarioAtribuicao(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setNumIdTarefa($idTarefa);
+        $objAtividadeDTO->setStrSinInicial('N');
+        $objAtividadeDTO->setDtaPrazo(null);
+        $objAtividadeDTO->setNumIdUsuarioAtribuicao(null);
+        $objAtividadeDTO->setNumIdUsuarioVisualizacao(null);
+        $objAtividadeDTO->setDthAbertura($strDataHoraAtual);
+        $objAtividadeDTO->setNumTipoVisualizacao(AtividadeRN::$TV_VISUALIZADO);
+
+      if ($objTarefaDTO->getStrSinLancarAndamentoFechado() == 'S') {
+        //lança andamento fechado
+        $objAtividadeDTO->setNumIdUsuarioConclusao(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setDthConclusao($strDataHoraAtual);
+      } else {
+        $objAtividadeDTO->setNumIdUsuarioConclusao(null);
+        $objAtividadeDTO->setDthConclusao(null);
+      }
+
+        $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
+        $objAtividadeDTO = $objAtividadeBD->cadastrar($objAtividadeDTO);
+
+        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+        $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
+        $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+        $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
+        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+        $objAtributoAndamentoRN = new AtributoAndamentoRN();
+        $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
+    } catch (\Exception $e) {
+        $this->gravarLogDebug("Erro ao gravar atividade múltiplos órgãos: $e", 0, true);
     }
   }
   
   public function tratarCodigoErro($idRepositorioEstrutura, $stringJson, $mensagem)
     {
-      try {
-        // Agora volta para UTF-8
-        $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
-        // Decodifica para array
-        $json = json_decode($messageUtf8, true);
-        if (isset($json['codigoErro']) && isset($json['message'])) {
-          switch ($json['codigoErro']) {
-            case '0055':
-              $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
-              $nome = $objRepositorioDTO->getStrNome();
-              $mensagem = "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: "
-                . $nome . ". Por favor, verifique se a unidade pertence a outra estrutura.";
+    try {
+      // Agora volta para UTF-8
+      $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
+      // Decodifica para array
+      $json = json_decode($messageUtf8, true);
+      if (isset($json['codigoErro']) && isset($json['message'])) {
+        switch ($json['codigoErro']) {
+          case '0055':
+            $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
+            $nome = $objRepositorioDTO->getStrNome();
+            $mensagem = "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: "
+              . $nome . ". Por favor, verifique se a unidade pertence a outra estrutura.";
               break;
-          }
-
         }
-      } catch (Exception $e) {
-        // Não faz nada, pois a mensagem já está definida
+
       }
+    } catch (Exception $e) {
+      // Não faz nada, pois a mensagem já está definida
+    }
 
       return $mensagem;
   }

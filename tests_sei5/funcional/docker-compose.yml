@@ -30,7 +30,8 @@ services:
     ports:
       - "8983:8983"
     environment:
-      - SOLR_HEAP=256m 
+      - SOLR_HEAP=256m
+      
   selenium:
     image: selenium/standalone-chrome-debug
     links:
@@ -147,6 +148,8 @@ services:
   org1-http:
     image: ${HTTP_IMAGE}:${ENVIRONMENT_VERSION}
     restart: always
+    env_file:
+      - .modulo.env
     depends_on:
       - org1-database
     volumes:
@@ -215,6 +218,8 @@ services:
   org2-http:
     image: ${HTTP_IMAGE}:${ENVIRONMENT_VERSION}
     restart: always
+    env_file:
+      - .modulo.env
     depends_on:
       - org2-database
     volumes:

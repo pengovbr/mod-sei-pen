@@ -13,6 +13,7 @@ class ProcessoEletronicoDTO extends InfraDTO
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'numero_registro');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimento', 'id_procedimento');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimentoApensacao', 'id_procedimento_apensacao');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinMultiplosOrgaos', 'sin_multiplos_orgaos');
 
       // Campo criado para identificar o protocolo como sendo processo ou documento
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StaTipoProtocolo', 'sta_tipo_protocolo');

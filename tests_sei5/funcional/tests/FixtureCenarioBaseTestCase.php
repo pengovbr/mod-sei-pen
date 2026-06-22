@@ -4,7 +4,7 @@
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture};
 use Tests\Funcional\Sei\Fixtures\{ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture};
 use Tests\Funcional\Sei\Fixtures\{DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture,TipoProcedimentoFixture};
+use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture,TipoProcedimentoFixture,OrgaoFixture};
 use PHPUnit\Framework\AssertionFailedError;
 
 use function PHPSTORM_META\map;
@@ -338,5 +338,4 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
     return $objTipoProcedimentoDTO;
   }
-
 }

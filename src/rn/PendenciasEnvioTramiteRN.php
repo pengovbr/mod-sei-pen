@@ -41,6 +41,64 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
                     $this->gravarLogDebug(InfraException::inspecionar($e));
             }
           }
+
+          $pendenciasAutomaticas = $this->obterPendenciasAutomaticasMultiplosOrgaos();
+          foreach ($pendenciasAutomaticas as $objProcedimentoDTO) {
+            $idProtocolo = $objProcedimentoDTO->getDblIdProcedimento();
+            $mensagemLog = ">>> Enviando pendência do protocolo $idProtocolo para fila de processamento";
+            $this->gravarLogDebug($mensagemLog, 3);
+
+            try {
+              $objProtocoloDTO = new ProtocoloDTO();
+              $objProtocoloDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+              $objProtocoloDTO->retTodos();
+
+              $objProtocoloRN = new ProtocoloRN();
+              $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+              $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+              $objProcessoEletronicoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+              $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+              $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+
+              $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+              $objTramite = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+
+              $strNumeroRegistro = $objTramite->NRE;
+              $remetente = $objTramite->destinatario; // destinatário por motivo de aqui ser o recebimento
+              $destinatario = $objTramite->remetente; // remnetente por motivo de aqui ser o recebimento
+
+
+              $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
+              $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
+
+              $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+
+              $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($destinatario->identificacaoDoRepositorioDeEstruturas);
+              $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+              $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
+              $objExpedirProcedimentoDTO->setBolSinUrgente(false);
+              $objExpedirProcedimentoDTO->setDblIdProcedimento($objProtocoloDTO->getDblIdProtocolo());
+              $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
+              $objExpedirProcedimentoDTO->setNumIdBloco(null);
+              $objExpedirProcedimentoDTO->setNumIdAtividade(null);
+              $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
+              $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+              $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
+              $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(true);
+              $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objTramite);
+
+              $objSincronizacaoExpedirProcedimentoRN = new SincronizacaoExpedirProcedimentoRN();
+              $objSincronizacaoExpedirProcedimentoRN->expedirAuto($objExpedirProcedimentoDTO);
+
+            } catch (\Exception $e) {
+              $this->reabrirProcessoSeBloqueado($objProtocoloDTO->getDblIdProtocolo());
+              $this->gravarAmostraErroLogSEI($e);
+              $this->gravarLogDebug(InfraException::inspecionar($e));
+            }
+
+          }
         } catch (ModuloIncompativelException $e) {
             // Sai loop de eventos para finalizar o script e subir uma nova versão atualizada
             throw $e;
@@ -107,6 +165,122 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
         //Captura todas as pendências e status retornadas para impedir duplicidade
         $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
         yield $objPendenciaDTO;
+    }
+  }
+
+  private function obterPendenciasAutomaticasMultiplosOrgaos()
+  {
+    $pendendciasAutomaticas = [];
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeDTO->setDistinct(true);
+    $objAtividadeDTO->setNumIdTarefa([
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
+    ], InfraDTO::$OPER_IN);
+    $objAtividadeDTO->retTodos();
+
+    $objAtividadeRN = new AtividadeRN();
+    $arrAtividadeDTO = (array)$objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+    if (count($arrAtividadeDTO) > 0) {
+      $this->gravarLogDebug(count($arrAtividadeDTO) . " pendências de envio automático identificadas", 2);
+      foreach ($arrAtividadeDTO as $objAtividadeDTO) {
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($objAtividadeDTO->getDblIdProtocolo());
+
+        if ($this->possuiTramiteEmAndamento($objProcedimentoDTO)) {
+          continue;
+        }
+
+        $pendendciasAutomaticas[] = $objProcedimentoDTO;
+        
+        $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
+        
+        yield $objProcedimentoDTO;
+      }
+    }
+
+  }
+
+  /**
+   * Verifica se o protocolo possui algum trâmite ainda em andamento.
+   *
+   * @param ProcedimentoDTO $objProcedimentoDTO
+   * @return bool
+   */
+  private function possuiTramiteEmAndamento(ProcedimentoDTO $objProcedimentoDTO)
+  {
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $arrTramites = (array)$objProcessoEletronicoRN->consultarTramitesTodos(
+      null,
+      null,
+      null,
+      null,
+      $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()
+    );
+
+    $arrSituacoesConcluidas = [
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
+    ];
+
+    foreach ($arrTramites as $objTramite) {
+      if (!isset($objTramite->situacaoAtual) || !in_array($objTramite->situacaoAtual, $arrSituacoesConcluidas)) {
+        $this->gravarLogDebug(
+          'Envio automático ignorado para o protocolo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ': existe trâmite em andamento.',
+          2
+        );
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Reabre de forma defensiva um processo que tenha permanecido bloqueado apos
+   * falha no envio automatico de sincronizacao entre multiplos orgaos.
+   *
+   * O metodo apenas tenta o desbloqueio quando o processo ainda estiver em
+   * estado bloqueado e sempre restaura a unidade original da sessao.
+   *
+   * @param mixed $dblIdProcedimento
+   * @return void
+   */
+  private function reabrirProcessoSeBloqueado($dblIdProcedimento)
+  {
+    if (empty($dblIdProcedimento)) {
+      return;
+    }
+
+    try {
+      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+      $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
+
+      if ($objProcedimentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
+        return;
+      }
+
+      $numIdUnidadeSessaoOriginal = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+
+      try {
+        $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($dblIdProcedimento);
+
+        if (!empty($numIdUnidadeDesbloqueio)) {
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);
+        }
+
+        ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+        $this->gravarLogDebug("Processo $dblIdProcedimento reaberto automaticamente apos falha no envio automatico", 2, true);
+      } finally {
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoOriginal);
+      }
+    } catch (\Exception $e) {
+      $this->gravarLogDebug("Falha ao reabrir automaticamente o processo $dblIdProcedimento apos erro no envio automatico: $e", 2, true);
     }
   }
 

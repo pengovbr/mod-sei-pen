@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="472px" height="472px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 472 472"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .str1 {stroke:#6CA7E6;stroke-width:16.65;stroke-miterlimit:22.9256}
+    .str0 {stroke:#14C854;stroke-width:33.3;stroke-miterlimit:22.9256}
+    .fil1 {fill:none}
+    .fil2 {fill:#14C854}
+    .fil0 {fill:#6CA7E6}
+   ]]>
+  </style>
+ </defs>
+ <g id="Camada_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <path class="fil0" d="M24.62 2.61l306.28 0 0 167.9c-13.53,-4.12 -27.8,-6.55 -42.55,-7.05l0 -29.16 -44.82 0 0 33.72c-34.59,8.41 -64.91,27.69 -87.15,54.04l-0.23 0 0 0.26c-24.14,28.72 -38.69,65.78 -38.69,106.23 0,24.41 5.3,47.59 14.8,68.44l-107.64 0 0 -394.38zm43.02 306.83l44.82 0 0 44.81 -44.82 0 0 -44.81zm0 -263.65l44.82 0 0 44.82 -44.82 0 0 -44.82zm88.51 0l44.81 0 0 44.82 -44.81 0 0 -44.82zm87.38 0l44.82 0 0 44.82 -44.82 0 0 -44.82zm-175.89 88.51l44.82 0 0 44.81 -44.82 0 0 -44.81zm88.51 0l44.81 0 0 44.81 -44.81 0 0 -44.81zm-88.51 87.76l44.82 0 0 44.81 -44.82 0 0 -44.81z"/>
+  <path class="fil1 str0" d="M341.78 434.89c-17.61,9.29 -37.25,14.14 -57.19,14.14 -67.28,0 -121.82,-54.09 -121.82,-120.81 0,-66.73 54.54,-120.82 121.82,-120.82 67.28,0 121.82,54.09 121.82,120.82"/>
+  <polygon class="fil2" points="341.96,443.09 330.98,418.36 299.13,406.05 328.5,393.05 378.85,411.96 359.2,462.6 328.92,476.03 "/>
+  <g id="_1263807727072">
+   <path class="fil1 str1" d="M284.83 389.2c-1.09,0.06 -2.18,0.08 -3.28,0.08 -34.56,0 -62.58,-27.79 -62.58,-62.07 0,-34.28 28.02,-62.07 62.58,-62.07 34.57,0 62.59,27.79 62.59,62.07 0,1.45 -0.05,2.89 -0.15,4.33"/>
+   <rect class="fil0" x="275.78" y="287.62" width="8.63" height="44.33" rx="106.4" ry="106.4"/>
+   <rect class="fil0" transform="matrix(1.91575E-14 -0.901733 0.723348 2.3882E-14 248.726 331.938)" width="9.58" height="49.16" rx="118" ry="118"/>
+  </g>
+  <polygon class="fil2" points="391.93,324.15 418.79,327.43 445.72,306.42 441.78,338.29 399.69,371.79 366.33,328.92 370.36,296.03 "/>
+ </g>
+</svg>

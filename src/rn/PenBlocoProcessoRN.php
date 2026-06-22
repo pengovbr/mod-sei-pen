@@ -344,6 +344,11 @@ class PenBlocoProcessoRN extends InfraRN
         //Regras de Negocio
         $objInfraException = new InfraException();
 
+        $validacaoMultiplosOrgaos = $this->validarProcessoMultiplosOrgaosParaBloco($objPenBlocoProcessoDTO->getDblIdProtocolo());
+      if ($validacaoMultiplosOrgaos !== false) {
+          throw new InfraException($validacaoMultiplosOrgaos);
+      }
+
         $objPenBlocoProcessoBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
 
         return $objPenBlocoProcessoBD->cadastrar($objPenBlocoProcessoDTO);
@@ -365,6 +370,11 @@ class PenBlocoProcessoRN extends InfraRN
 
   protected function validarBlocoDeTramiteControlado($idProtocolo)
     {
+      $validacaoMultiplosOrgaos = $this->validarProcessoMultiplosOrgaosParaBloco($idProtocolo);
+    if ($validacaoMultiplosOrgaos !== false) {
+        return $validacaoMultiplosOrgaos;
+    }
+
       $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
       $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
       $objPenBlocoProcessoDTO->setDblIdProtocolo($idProtocolo);
@@ -408,6 +418,25 @@ class PenBlocoProcessoRN extends InfraRN
     }
 
       return false;
+  }
+
+  public function validarProcessoMultiplosOrgaosParaBloco($idProtocolo)
+    {
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    if (!$objProcessoEletronicoRN->validarProcessoBlocoMultiplosOrgaos($idProtocolo)) {
+        return false;
+    }
+
+      $objProcedimentoDTO = new ProcedimentoDTO();
+      $objProcedimentoDTO->setDblIdProcedimento($idProtocolo);
+      $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+
+      return "Prezado(a) usuário(a), o processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} "
+        . "foi tramitado por meio da funcionalidade manter aberto e sincronizado. "
+        . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
   }
 
   public function validarQuantidadeDeItensNoBloco($dblIdbloco, $arrProtocolosOrigem)

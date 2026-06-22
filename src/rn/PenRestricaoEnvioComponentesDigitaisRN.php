@@ -7,6 +7,22 @@ require_once DIR_SEI_WEB . '/SEI.php';
  */
 class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
 {
+  public function possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($numIdEstrutura, $numIdUnidadePen, $strSinMultiplosOrgaos = null)
+    {
+    if (InfraString::isBolVazia($numIdEstrutura) || InfraString::isBolVazia($numIdUnidadePen)) {
+      return false;
+    }
+
+      $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+      $objDTO->setNumIdEstrutura($numIdEstrutura);
+      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
+      if (!InfraString::isBolVazia($strSinMultiplosOrgaos)) {
+          $objDTO->setStrSinMultiplosOrgaos($strSinMultiplosOrgaos);
+      }
+
+      return $this->contar($objDTO) > 0;
+  }
+
 
     /**
      * Inicializa o obj do banco da Infra

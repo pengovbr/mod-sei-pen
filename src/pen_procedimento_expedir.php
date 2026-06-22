@@ -19,6 +19,8 @@ try {
     $strParametros = '';
     $bolErrosValidacao = false;
     $executarExpedicao = false;
+    $bloquearEnvioSemMapeamentoParcial = false;
+    $strMensagemBloqueioEnvio = null;
     $arrComandos = [];
     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
 
@@ -42,6 +44,108 @@ try {
       $executarExpedicao = filter_var($_GET['executar'], FILTER_VALIDATE_BOOLEAN);
   }
 
+  
+    $arrDestinosMultiplosOrgaos = [];
+
+    $filtrarDestinosMultiplosOrgaosDisponiveis = function ($numIdProcedimento, $strProtocoloProcedimentoFormatado, array $arrDestinosMultiplosOrgaos): array {
+      if (empty($numIdProcedimento) || empty($strProtocoloProcedimentoFormatado) || empty($arrDestinosMultiplosOrgaos)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      try {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (is_null($objTramiteDTO)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      $strNumeroRegistro = $objTramiteDTO->getStrNumeroRegistro();
+
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+      try {
+        $arrTramiteSucesso = $objProcessoEletronicoRN->consultarTramites(
+          null,
+          $strNumeroRegistro,
+          null,
+          null,
+          empty($strNumeroRegistro) ? $strProtocoloProcedimentoFormatado : null,
+          null,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+          1
+        );
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (empty($arrTramiteSucesso)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      try {
+        $arrObjTramite = $objProcessoEletronicoRN->consultarTramitesTodos(
+          null,
+          null,
+          null,
+          null,
+          $strProtocoloProcedimentoFormatado,
+          null,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+        );
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (empty($arrObjTramite)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      foreach ($arrObjTramite as $objTramite) {
+        if (!isset($objTramite->destinatario->identificacaoDoRepositorioDeEstruturas) || !isset($objTramite->destinatario->numeroDeIdentificacaoDaEstrutura)) {
+          continue;
+        }
+
+        $strChaveDestino = $objTramite->destinatario->identificacaoDoRepositorioDeEstruturas . ':' . $objTramite->destinatario->numeroDeIdentificacaoDaEstrutura;
+        if (!isset($arrDestinosMultiplosOrgaos[$strChaveDestino]) || !isset($objTramite->IDT)) {
+          continue;
+        }
+
+        $bolManterProcessoAberto = false;
+
+        try {
+          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramite->IDT);
+          if (empty($arrObjTramites)) {
+              continue;
+          }
+          $objMetadados = $arrObjTramites[0];
+          $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais) ? ($objMetadados->propriedadesAdicionais ?: []) : [];
+
+          if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+            foreach ($propriedadesAdicionais as $valor) {
+              if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+                $bolManterProcessoAberto = true;
+                break;
+              }
+            }
+          }
+        } catch (Exception $e) {
+          continue;
+        }
+
+        if (!$bolManterProcessoAberto) {
+          unset($arrDestinosMultiplosOrgaos[$strChaveDestino]);
+        }
+      }
+
+      return $arrDestinosMultiplosOrgaos;
+    };
+
     $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
     $strLinkProcedimento = $objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=procedimento_controlar&acao_retorno=procedimento_controlar&id_procedimento='.$idProcedimento);
 
@@ -49,7 +153,6 @@ try {
 
     case 'pen_procedimento_expedir':
         $strTitulo = 'Envio Externo de Processo';
-        $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
         $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
         //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
@@ -115,6 +218,44 @@ try {
         $boolSinUrgente = $objPaginaSEI->getCheckbox($_POST['chkSinUrgente'], true, false);
         $arrIdProcedimentosApensados = $objPaginaSEI->getArrValuesSelect($_POST['hdnProcedimentosApensados']);
 
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $repositorioMultiplosOrgaos = false;
+        $unidadeDestinatarioMultiplosOrgaos = false;
+        $nomeUnidadeDestinatarioMultiplosOrgaos = false;
+        $devolucaoOrgaoOrigemMultiplosOrgaos = false;
+      if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProcedimento)) {
+          $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+          $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
+          $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+          $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+        if ($objTramiteDTO && $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+          if (!empty($arrObjTramites)) {
+            $objMetadados = $arrObjTramites[0];
+            $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
+            $numIdRepositorio = $repositorioMultiplosOrgaos;
+            $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+            $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
+            $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
+            $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
+            $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
+
+            $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
+            $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
+            $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+            $devolucaoOrgaoOrigemMultiplosOrgaos = true;
+          }
+        }
+      }
+
+      $objPenEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos &&
+          !$objPenEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos)) {
+          $bloquearEnvioSemMapeamentoParcial = true;
+          $strMensagemBloqueioEnvio = 'O processo <strong>'.PaginaSEI::tratarHTML($strProtocoloProcedimentoFormatado).'</strong>, compartilhado com múltiplos órgãos, não pode ser devolvido para a unidade de origem <strong>'.PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos).'</strong>: é necessário que o Mapeamento de Envio Parcial esteja ativo, para a referida unidade, no seu órgão.';
+      }
+
         //Carregar dados do procedimento na primeiro acesso à página
       if (!isset($_POST['hdnIdProcedimento'])) {
             $objProcedimentoRN = new ProcedimentoRN();
@@ -123,14 +264,46 @@ try {
             $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
       }
 
+      if ($bloquearEnvioSemMapeamentoParcial) {
+          $strMensagemBloqueioEnvio = 'O processo <strong>'.PaginaSEI::tratarHTML($strProtocoloProcedimentoFormatado).'</strong>, compartilhado com múltiplos órgãos, não pode ser devolvido para a unidade de origem <strong>'.PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos).'</strong>: é necessário que o Mapeamento de Envio Parcial esteja ativo, para a referida unidade, no seu órgão.';
+      }
+
+      $arrTiProcessoEletronico = [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS),
+      ];
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
+      $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retNumIdTarefa();
+      $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+    
+      $objAtividadeRN = new AtividadeRN();
+      $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+      $processoRecebidoMultiplosOrgaos = false;
+      if (!empty($objAtividadeDTO) && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS)) {
+          $processoRecebidoMultiplosOrgaos = true;
+      }
+
       if(isset($_POST['sbmExpedir'])) {
+        if ($bloquearEnvioSemMapeamentoParcial) {
+          throw new InfraException(strip_tags($strMensagemBloqueioEnvio));
+        }
+
+          $multiplosOrgaos = filter_var($_POST['multiplosOrgaos'], FILTER_VALIDATE_BOOLEAN);
+
           $numVersao = $objPaginaSEI->getNumVersao();
-          echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
+          echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
           echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
 
           $strTituloPagina = "Envio externo do processo $strProtocoloProcedimentoFormatado";
           $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
-
+          
           $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
           $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
           $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
@@ -147,26 +320,143 @@ try {
           $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
+        if ($devolucaoOrgaoOrigemMultiplosOrgaos) {
+          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
+        } else {
+          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos || $processoRecebidoMultiplosOrgaos);
+        }
+          $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
-        try {
-            $objExpedirProcedimentosRN->setEventoEnvioMetadados(
-                function ($parNumIdTramite) use ($strLinkProcedimento): void {
-                    $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
-                    echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
-                }
-            );
+          $arrTiProcessoEletronico = [
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
+          ];
+    
+          $objAtividadeDTO = new AtividadeDTO();
+          $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
+          $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+          $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+          $objAtividadeDTO->retNumIdAtividade();
+          $objAtividadeDTO->retNumIdTarefa();
+          $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+        
+          $objAtividadeRN = new AtividadeRN();
+          $ObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+        
+          $processoDestinatario = false;
+          if (!empty($ObjAtividadeDTO) && in_array($ObjAtividadeDTO->getNumIdTarefa(), $arrTiProcessoEletronico)) {
+              $processoDestinatario = true;
+          }
+          if ($multiplosOrgaos && $processoDestinatario) {
+              $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(true);
+          }
+          
+          $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+          $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($numIdProcedimento);
 
-            $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
+          $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+          if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($numIdProcedimento)) {
+            throw new InfraException('Não é possível tramitar um processos com documentos gerados e não assinados');
+          }
+
+          $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, null, null, null, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+          $enviarDireto = true;
+          if (count($tramitePendencia) > 0) {
+            $enviarDireto = false;
+
+            $arrTiProcessoEletronico = [
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE),
+            ];
+
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
+            $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeDTO->retNumIdTarefa();
+            $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+          
+            $objAtividadeRN = new AtividadeRN();
+            $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+            $arrIdTarefaPedisoSincronizacao = [
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
+            ];
+            if ($objAtividadeDTO !== null && in_array($objAtividadeDTO->getNumIdTarefa(), $arrIdTarefaPedisoSincronizacao)) {
+              $enviarDireto = true;
+            }
+          }
+
+          try {
+            if ($processoDestinatario && $objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($numIdProcedimento) && !$enviarDireto) {
+               $objSincronizacaoExpedirProcedimentoRN = new SincronizacaoExpedirProcedimentoRN();
+               $objSincronizacaoExpedirProcedimentoRN->sincronizar($objExpedirProcedimentoDTO);
+            } else {
+              $objExpedirProcedimentosRN->setEventoEnvioMetadados(
+              function ($parNumIdTramite) use ($strLinkProcedimento): void {
+                  $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
+                  echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
+              }
+              );
+              $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
+            }
+
             $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 
             // Muda situação da barra de progresso para Concluído
             echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
-        } catch(\Exception $e) {
+          } catch(\Exception $e) {
             $objPaginaSEI->processarExcecao($e);
             echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
-        }
+          }
 
           $objPaginaSEI->finalizarBarraProgresso(null, false);
+      }
+
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+      $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+
+      $podeManterProcessoAberto = false;
+      if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) {
+        // Devolução ao órgão que criou o processo: sempre exibe a opção de manter aberto.
+        $podeManterProcessoAberto = true;
+      } elseif (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+        $podeManterProcessoAberto = true;
+        $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+        $objPenEnvioParcialDTO->retNumIdEstrutura();
+        $objPenEnvioParcialDTO->retNumIdUnidadePen();
+        $objPenEnvioParcialDTO->setStrSinMultiplosOrgaos('S');
+
+        $objPenEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+        $objPenEnvioParcialDTO = $objPenEnvioParcialRN->listar($objPenEnvioParcialDTO);
+
+        if (count($objPenEnvioParcialDTO) > 0) {
+          foreach ($objPenEnvioParcialDTO as $dto) {
+              $strChaveDestino = $dto->getNumIdEstrutura() . ':' . $dto->getNumIdUnidadePen();
+              $arrDestinosMultiplosOrgaos[$strChaveDestino] = true;
+          }
+
+          $arrDestinosMultiplosOrgaos = $filtrarDestinosMultiplosOrgaosDisponiveis($numIdProcedimento, $strProtocoloProcedimentoFormatado, $arrDestinosMultiplosOrgaos);
+        }
+      }
+
+      if (!$bloquearEnvioSemMapeamentoParcial) {
+        array_unshift($arrComandos, '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>');
       }
 
         break;
@@ -184,7 +474,7 @@ $objPaginaSEI->abrirHead();
 $objPaginaSEI->montarMeta();
 $objPaginaSEI->montarTitle(':: ' . $objPaginaSEI->getStrNomeSistema() . ' - ' . $strTitulo . ' ::');
 $objPaginaSEI->montarStyle();
-echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
+echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
 
 $objPaginaSEI->abrirStyle();
 ?>
@@ -261,6 +551,18 @@ function inicializar() {
 
     objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
         window.infraAvisoCancelar();
+        $('#divSinMultiplosOrgaos').css('display', 'none');
+        $('#multiplosOrgaos').prop('checked', false);
+        if (id!=''){
+          <?php if ($podeManterProcessoAberto) { ?>
+            $arrDestinosMultiplosOrgaos = <?php echo json_encode(array_keys($arrDestinosMultiplosOrgaos)); ?>;
+            $strChaveDestino = $('#selRepositorioEstruturas').val() + ':' + id;
+            if ($arrDestinosMultiplosOrgaos.indexOf($strChaveDestino) !== -1) {
+              $('#divSinMultiplosOrgaos').css('display', 'block');
+              $('#multiplosOrgaos').prop('checked', true);
+            }
+          <?php } ?>
+        }
     };
 
     $('#btnIdUnidade').click(function() {
@@ -296,7 +598,6 @@ function inicializar() {
     };
 
     objAutoCompletarApensados.processarResultado = function(id,descricao,complemento){
-
         if (id!=''){
             var options = document.getElementById('selProcedimentosApensados').options;
 
@@ -484,7 +785,14 @@ function enviarForm(event){
 
     jQuery.each(['txtProtocoloExibir', 'selRepositorioEstruturas', 'hdnIdUnidade'], function(index, name){
         var objInput = jQuery('#' + name);
-        objData[name] = objInput.val();
+        // Se o campo estiver desabilitado, habilitar temporariamente para pegar o valor
+        if (objInput.prop('disabled')) {
+            objInput.prop('disabled', false);
+            objData[name] = objInput.val();
+            objInput.prop('disabled', true);
+        } else {
+            objData[name] = objInput.val();
+        }
     });
 
     jQuery('option', 'select#selProcedimentosApensados').each(function(index, element){
@@ -513,6 +821,26 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 <?php
 $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 ?>
+    <br />
+    <!-- Aqui mostrar uma targa amarela informando que o procedimento será enviado para o orgão de origem que manteve o processo aberto -->
+    <?php if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) { ?>
+    <div class="infraAreaAviso" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+        <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Aviso" class="infraImg" />
+        <span style="color: #856404; font-weight: bold;">
+            Processo compartilhado com múltiplos órgãos: o destinatário deve ser o órgão de origem <strong><?php echo PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos); ?></strong> que criou o processo.
+        </span>
+    </div>
+    <?php } ?>
+
+    <?php if ($bloquearEnvioSemMapeamentoParcial) { ?>
+    <div class="infraAreaAviso" style="background-color: #f8d7da; border: 1px solid #f5c2c7; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+        <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Erro" class="infraImg" />
+        <span style="color: #842029; font-weight: bold;">
+            <?php echo $strMensagemBloqueioEnvio; ?>
+        </span>
+    </div>
+    <?php } ?>
+
     <div id="divProtocoloExibir" class="infraAreaDados" style="height: 4.5em;">
         <label id="lblProtocoloExibir" for="txtProtocoloExibir" accesskey="" class="infraLabelObrigatorio">Protocolo:</label>
         <input type="text" id="txtProtocoloExibir" name="txtProtocoloExibir" class="infraText infraReadOnly" readonly="readonly" value="<?php echo $strProtocoloProcedimentoFormatado; ?>" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
@@ -559,8 +887,39 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />
     <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?php echo htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
+    
+    <?php if ($podeManterProcessoAberto) { ?>
+      <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; display: none;">
+        <input type="checkbox" id="multiplosOrgaos" name="multiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" />
+        <label id="lblSinMultiplosOrgaos" for="multiplosOrgaos" class="infraLabelCheckbox">
+          Manter o processo aberto na unidade atual?
+          <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
+          <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getIconeAjuda() ?>" class='infraImg'/></a>
+        </label>
+      </div>
+    <?php } ?>
 
 </form>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $repositorioMultiplosOrgaos = '<?php echo $repositorioMultiplosOrgaos ?: ''; ?>';
+    $unidadeDestinatarioMultiplosOrgaos = '<?php echo $unidadeDestinatarioMultiplosOrgaos ?: ''; ?>';
+    $nomeUnidadeDestinatarioMultiplosOrgaos = '<?php echo $nomeUnidadeDestinatarioMultiplosOrgaos ?: ''; ?>';
+    
+    if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) {
+        $('#selRepositorioEstruturas').val($repositorioMultiplosOrgaos).change().prop('disabled', true).addClass('infraReadOnly');
+        $('#hdnIdUnidade').val($unidadeDestinatarioMultiplosOrgaos);
+        $('#txtUnidade').val($nomeUnidadeDestinatarioMultiplosOrgaos).prop('disabled', true).addClass('infraReadOnly');
+        $('#btnIdUnidade').prop('disabled', true).css('display', 'none');
+        $('#imgPesquisaAvancada').css('display', 'none');
+
+        <?php if ($podeManterProcessoAberto) { ?>
+          $('#divSinMultiplosOrgaos').css('display', 'block');
+          $('#multiplosOrgaos').prop('checked', true);
+        <?php } ?>
+    }
+  });
+</script>
 <?php
 $objPaginaSEI->montarAreaDebug();
 $objPaginaSEI->fecharBody();

@@ -96,6 +96,17 @@ class PaginaTramitarProcesso extends PaginaTeste
       $this->elByXPath("//button[@value='Enviar']")->click();
   }
 
+  /**
+   * Seleciona a opção de múltiplos órgãos
+   */
+  public function selecionarMultiplosOrgaos(): void
+  {
+    $element = $this->elByXPath("//input[@id='multiplosOrgaos']");
+    if (!$element->isSelected()) {
+      $this->driver->executeScript("arguments[0].click();", [$element]);
+    }
+  }
+
     /**
      * Fecha barra de progresso
      */

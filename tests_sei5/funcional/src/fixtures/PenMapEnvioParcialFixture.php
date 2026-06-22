@@ -25,6 +25,7 @@ class PenMapEnvioParcialFixture extends \FixtureBase
       $this->objMapEnvioParcialDTO->setStrStrEstrutura($dados['StrEstrutura'] ?: 'RE CGSIS');
       $this->objMapEnvioParcialDTO->setNumIdUnidadePen($dados['IdUnidadePen']);
       $this->objMapEnvioParcialDTO->setStrStrUnidadePen($dados['StrUnidadePen']);
+      $this->objMapEnvioParcialDTO->setStrSinMultiplosOrgaos($dados['SinMultiplosOrgaos'] ?: 'N');
         
       $objMapEnvioParcialDB = new \PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       $objMapEnvioParcialDB->cadastrar($this->objMapEnvioParcialDTO);

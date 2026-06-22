@@ -32,10 +32,13 @@ require_once __DIR__ . '/src/paginas/PaginaConsultarAndamentos.php';
 require_once __DIR__ . '/src/paginas/PaginaProcessosTramitadosExternamente.php';
 require_once __DIR__ . '/src/paginas/PaginaReciboTramite.php';
 require_once __DIR__ . '/src/paginas/PaginaEditarProcesso.php';
+require_once __DIR__ . '/src/paginas/PaginaAnexarProcesso.php';
+require_once __DIR__ . '/src/paginas/PaginaAgendamentos.php';
 require_once __DIR__ . '/src/paginas/PaginaCancelarDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaMoverDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaCadastroMapEnvioCompDigitais.php';
 require_once __DIR__ . '/src/paginas/PaginaEnvioParcialListar.php';
+require_once __DIR__ . '/src/paginas/PaginaEnviarEmail.php';
 
 require_once __DIR__ . '/tests/CenarioBaseTestCase.php';
 require_once __DIR__ . '/tests/FixtureCenarioBaseTestCase.php';

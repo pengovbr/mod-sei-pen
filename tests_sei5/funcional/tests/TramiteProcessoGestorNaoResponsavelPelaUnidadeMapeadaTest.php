@@ -9,8 +9,17 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
     public static $processoTeste;
     public static $documentoTeste;
     public static $protocoloTeste;
-    protected static $nomeOrgNaoMapeada = 'MELO_SEGES_ORG1';
-    protected static $idOrgNaoMapeada = '155043';
+    
+    protected static $nomeOrgNaoMapeada;
+    protected static $idOrgNaoMapeada;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        $ehDev = str_contains(PEN_ENDERECO_WEBSERVICE, 'dev');
+        self::$nomeOrgNaoMapeada = $ehDev ? 'HIGO_ORG1' : 'MELO_SEGES_ORG1';
+        self::$idOrgNaoMapeada = $ehDev ? '165892' : '155043';
+    }
 
     public static function tearDownAfterClass(): void
     {
