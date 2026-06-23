@@ -1592,14 +1592,30 @@ class ExpedirProcedimentoRN extends InfraRN
           }
 
           $objAssinaturaDigital['cpf'] = $observacaoAssinaturas['cpf'];
-          $objAssinaturaDigital['nome'] = mb_convert_encoding($observacaoAssinaturas['nome'], 'UTF-8', 'ISO-8859-1');
-          $objAssinaturaDigital['cargo'] = mb_convert_encoding($observacaoAssinaturas['cargo'], 'UTF-8', 'ISO-8859-1');
+          //Issue #1178: quando nome ou cargo/tratamento nao esta no banco, envia o texto padrao
+          //"Informacao inexistente" em vez de campo vazio, evitando recusa por orgaos com SEI 5.1.0+.
+          $objAssinaturaDigital['nome'] = $this->obterDadoAssinaturaOuPadrao($observacaoAssinaturas['nome']);
+          $objAssinaturaDigital['cargo'] = $this->obterDadoAssinaturaOuPadrao($observacaoAssinaturas['cargo']);
           $objAssinaturaDigital['observacao'] = json_encode($observacaoAssinaturas['observacao']);
 
           $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital; 
       }
 
       return $objComponenteDigital;
+  }
+
+  /**
+   * Retorna o dado da assinatura (nome ou cargo/tratamento) convertido para UTF-8. Quando o dado não
+   * está preenchido no banco do sistema, utiliza o texto padrão "Informação inexistente", garantindo o
+   * preenchimento obrigatório dos metadados exigidos por órgãos com SEI 5.1.0 ou superior. Issue #1178.
+   */
+  private function obterDadoAssinaturaOuPadrao($strValor)
+    {
+      if (InfraString::isBolVazia($strValor)) {
+          $strValor = 'Informação inexistente';
+      }
+
+      return mb_convert_encoding($strValor, 'UTF-8', 'ISO-8859-1');
   }
 
 
