@@ -1211,6 +1211,8 @@ class ExpedirProcedimentoRN extends InfraRN
       $objAssinaturaDTO->retNumIdAtividade();
       $objAssinaturaDTO->retStrStaFormaAutenticacao();
       $objAssinaturaDTO->retStrP7sBase64();
+      $objAssinaturaDTO->retStrNome();
+      $objAssinaturaDTO->retStrTratamento();
       $resAssinatura = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
 
     foreach ($resAssinatura as $keyOrder => $assinatura) {
@@ -1225,7 +1227,11 @@ class ExpedirProcedimentoRN extends InfraRN
         $objAssinaturaDigital = [];
         $objAssinaturaDigital['razao'] = mb_convert_encoding($dataTarjas[$keyOrder], 'UTF-8', 'ISO-8859-1');
         $objAssinaturaDigital['observacao'] = mb_convert_encoding($dataTarjas[count($dataTarjas) - 1], 'UTF-8', 'ISO-8859-1');
-        $objAssinaturaDigital['dataHora'] = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura());      
+        $objAssinaturaDigital['dataHora'] = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura());
+        //Issue #1178: preenche o nome e o cargo/tratamento do assinante. Quando o dado não está no banco,
+        //utiliza o texto padrão "Informação inexistente", evitando a recusa por órgãos com SEI 5.1.0 ou superior.
+        $objAssinaturaDigital['nome'] = $this->obterDadoAssinaturaOuPadrao($assinatura->getStrNome());
+        $objAssinaturaDigital['cargo'] = $this->obterDadoAssinaturaOuPadrao($assinatura->getStrTratamento());
 
       if($assinatura->getStrStaFormaAutenticacao() == AssinaturaRN::$TA_CERTIFICADO_DIGITAL) {
           $objAssinaturaDigital['hash'] = [
@@ -1255,6 +1261,20 @@ class ExpedirProcedimentoRN extends InfraRN
     }
 
       return $objComponenteDigital;
+  }
+
+  /**
+   * Retorna o dado da assinatura (nome ou cargo/tratamento) convertido para UTF-8. Quando o dado não
+   * está preenchido no banco do sistema, utiliza o texto padrão "Informação inexistente", garantindo o
+   * preenchimento obrigatório dos metadados exigidos por órgãos com SEI 5.1.0 ou superior. Issue #1178.
+   */
+  private function obterDadoAssinaturaOuPadrao($strValor)
+    {
+      if (InfraString::isBolVazia($strValor)) {
+          $strValor = 'Informação inexistente';
+      }
+
+      return mb_convert_encoding($strValor, 'UTF-8', 'ISO-8859-1');
   }
 
 
