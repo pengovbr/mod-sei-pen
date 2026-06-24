@@ -2636,7 +2636,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV4100()
     {
       
-      $objInfraBanco = BancoSEI::getInstance();
+      $objMetaBanco = $this->inicializarObjMetaBanco();
 
       if (!$objMetaBanco->isTabelaExiste('md_pen_anexo_documento')) {
         $objMetaBanco->criarTabela([
@@ -2656,6 +2656,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           ],
           'pk' => ['cols' => ['id_anexo']]
         ]);
+
+        $objInfraBanco = BancoSEI::getInstance();
       
         $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from md_pen_anexo_documento');
         $numMaxId = $rs[0]['total'] ?? 0;
