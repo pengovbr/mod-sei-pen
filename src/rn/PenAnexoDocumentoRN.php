@@ -146,9 +146,8 @@ class PenAnexoDocumentoRN extends InfraRN
         throw new InfraException('Módulo do Tramita: Cópia do anexo no repositório de arquivos do módulo PEN corrompida.');
     }
 
-    if (unlink($strNomeUploadCompleto) === false) {
-        throw new InfraException('Módulo do Tramita: Falha removendo arquivo temporário após consolidar anexo no repositório do módulo PEN.');
-    }
+    return $strCaminhoRepositorio;
+    
   }
 
 }
