@@ -455,7 +455,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
           $strMensagemErro = "";
 
           if ($strValidacoes !== '') {
-            $strMensagemErro .= mb_convert_encoding($strValidacoes, 'ISO-8859-1', 'UTF-8');
+            $strMensagemErro .= $strValidacoes;
           }
 
           $cabecalhoMsg = "Tramitação externa do processo $protocolo cancelada. ";
