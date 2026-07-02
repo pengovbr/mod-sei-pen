@@ -444,6 +444,24 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
         $objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
 
         $dblIdProcedimento = $objProtocoloDTO->getDblIdProtocolo();
+
+        if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($objProtocoloDTO->getDblIdProtocolo())) {
+          $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
+
+          $objProcessoEletronicoRN->cancelarTramite($idTramite);
+          $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
+            $objProcedimentoDTO,
+            $idTramite,
+            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO,
+            $numIdUnidadeProcesso
+          );
+
+          $strMensagemErro = "Tramitação externa do processo $protocolo cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.";
+          LogSEI::getInstance()->gravar($strMensagemErro, InfraLog::$ERRO);
+          $this->gravarLogDebug($strMensagemErro, 0, true);
+          return;
+        }
+
         $objInfraException = new InfraException();
         $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
         $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
@@ -473,23 +491,6 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
           );
 
           $objProcessoEletronicoRN->cancelarTramite($idTramite);
-          return;
-        }
-
-        if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($objProtocoloDTO->getDblIdProtocolo())) {
-          $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
-
-          $objProcessoEletronicoRN->cancelarTramite($idTramite);
-          $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos(
-            $objProcedimentoDTO,
-            $idTramite,
-            ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM,
-            $numIdUnidadeProcesso
-          );
-
-          $strMensagemErro = "Tramitação externa do processo $protocolo cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.";
-          LogSEI::getInstance()->gravar($strMensagemErro, InfraLog::$ERRO);
-          $this->gravarLogDebug($strMensagemErro, 0, true);
           return;
         }
 
