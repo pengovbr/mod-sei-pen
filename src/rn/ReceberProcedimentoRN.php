@@ -1883,15 +1883,14 @@ class ReceberProcedimentoRN extends InfraRN
             }
             foreach ($arrObjAssinaturasDigitais as $objAssinaturaDigital) {
               $arrAssinaturaDigital = (array) $objAssinaturaDigital;
-              $strNomeAssinante = isset($arrAssinaturaDigital['nome']) ? $arrAssinaturaDigital['nome'] : null;
-              $strTratamentoAssinante = isset($arrAssinaturaDigital['cargo']) ? $arrAssinaturaDigital['cargo'] : null;
-              if (InfraString::isBolVazia($strNomeAssinante) || InfraString::isBolVazia($strTratamentoAssinante)) {
-                $mensagemErro = "Não foi adicionado o nome e nem o tratamento/cargo do assinante no documento "
-                  . $objProtocoloDTO->getStrProtocoloFormatado() 
-                  . " de ordem " . $objDocumento->ordem 
-                  . ". Por favor, corrija e realize uma nova tentativa de envio."
-                  . " OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
-                throw new InfraException($mensagemErro);
+              //Issue #1178: quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante,
+              //preenche o dado com o texto padrão "Informação inexistente" ao invés de recusar o trâmite, mantendo o
+              //mesmo tratamento tolerante adotado na expedição (evita recusa entre órgãos com SEI 5.1.0 ou superior).
+              $strNomeAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao(isset($arrAssinaturaDigital['nome']) ? $arrAssinaturaDigital['nome'] : null);
+              $strTratamentoAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao(isset($arrAssinaturaDigital['cargo']) ? $arrAssinaturaDigital['cargo'] : null);
+              if (is_object($objAssinaturaDigital)) {
+                $objAssinaturaDigital->nome = $strNomeAssinante;
+                $objAssinaturaDigital->cargo = $strTratamentoAssinante;
               }
             }
           }

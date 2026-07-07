@@ -2982,4 +2982,22 @@ class ProcessoEletronicoRN extends InfraRN
       $stack = HandlerStack::create($logPenHandler);
       return $stack;
   }
+
+  /**
+   * Retorna o dado da assinatura (nome ou cargo/tratamento) recebido do barramento. Quando o dado não
+   * está preenchido, utiliza o texto padrão "Informação inexistente" ao invés de recusar o trâmite,
+   * mantendo o mesmo tratamento tolerante adotado na expedição. Issue #1178.
+   * 
+   * @param string|null $strValor Valor recebido do barramento
+   * @return string Valor recebido do barramento ou texto padrão quando não preenchido
+   */
+  public function obterDadoAssinaturaOuPadrao($strValor)
+    {
+      if (InfraString::isBolVazia($strValor)) {
+          //Texto padrão da fonte (ISO-8859-1) convertido para UTF-8, mantendo o padrão dos dados recebidos do barramento.
+          return mb_convert_encoding('Informação inexistente', 'UTF-8', 'ISO-8859-1');
+      }
+
+      return mb_convert_encoding($strValor, 'UTF-8', 'ISO-8859-1');
+  }
 }
