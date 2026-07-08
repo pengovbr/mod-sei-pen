@@ -102,7 +102,7 @@ class PendenciasTramiteRN extends InfraRN
               $strChaveLock = 'PEN_LOCK_TRAMITE_' . $numIdTramite;
               $objCache = CacheSEI::getInstance();
 
-              // Tenta obter lock para processamento do trÃ¢mite
+              // Tenta obter lock para processamento do trâmite
               if ($objCache->getAtributo($strChaveLock)) {
                 continue;
               }
