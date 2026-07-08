@@ -13,6 +13,7 @@ class PendenciasTramiteRN extends InfraRN
     const CODIGO_EXECUCAO_ERRO = 1;
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
+    const LOCK_TIMEOUT_SECONDS = 1800; // 30 minutos  
     const COMANDO_EXECUCAO_WORKER = '%s %s %s %s %s %s %s %s > %s 2>&1 &';
     // Envio
     const LOCALIZACAO_SCRIPT_WORKER_ENVIO = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php";
@@ -98,7 +99,23 @@ class PendenciasTramiteRN extends InfraRN
             $this->gravarLogDebug($mensagemLog, 3);
 
             try {
-                  $this->receberPendenciaProcessamento($objPendenciaDTO, $parBolSegundoPlano);
+              $strChaveLock = 'PEN_LOCK_TRAMITE_' . $numIdTramite;
+              $objCache = CacheSEI::getInstance();
+
+              // Tenta obter lock para processamento do trâmite
+              if ($objCache->getAtributo($strChaveLock)) {
+                continue;
+              }
+
+              $objCache->setAtributo($strChaveLock, time(), self::LOCK_TIMEOUT_SECONDS);
+
+              usleep(100000); // 100ms
+
+              try {
+                $this->receberPendenciaProcessamento($objPendenciaDTO, $parBolSegundoPlano);
+              } finally {
+                $objCache->removerAtributo($strChaveLock);
+              }
             } catch (\Exception $e) {
                     $this->gravarAmostraErroLogSEI($e);
                     $this->gravarLogDebug(InfraException::inspecionar($e));
