@@ -1768,6 +1768,8 @@ class PENIntegracao extends SeiIntegracao
    */
   public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
+    $numUltimoStatusTramite = null;
+
     if (!$this->isProcessoRecebidoTramita($objProcedimentoAPIPrincipal)) {
 
       $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
@@ -1775,14 +1777,12 @@ class PENIntegracao extends SeiIntegracao
         return null;
       }
 
-      $numIdAtividadeAnexacao = $objAtividadeAnexacaoDTO->getNumIdAtividade();
-
       $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
       if ($numIdAtividadeTramitacaoExterna === null) {
         return null;
       }
 
-      if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
+      if (!$this->processoPaiPossuiTramiteValidoAposAnexacao($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
         return null;
       }
       $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
@@ -1803,7 +1803,7 @@ class PENIntegracao extends SeiIntegracao
         if ($numIdAtividadeTramitacaoExterna === null) {
           return null;
         }
-        if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
+        if (!$this->processoPaiPossuiTramiteValidoAposAnexacao($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
           return null;
         }
         $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
@@ -1947,17 +1947,18 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Verifica se o processo pai ja teve algum tramite concluido com sucesso no Tramita GOV.BR.
+   * Verifica se o processo pai possui algum tramite valido no Tramita GOV.BR apos a anexacao do processo filho.
    *
-   * Para esta regra, sucesso significa encontrar em qualquer momento do historico um tramite
-   * com situacaoAtual igual a 6, correspondente ao recibo recebido pelo remetente.
+   * Considera-se tramite valido aquele cuja situacaoAtual esta entre 0 e 6 (nao iniciado, em andamento
+   * ou concluido com sucesso). Tramites cancelados (7), recusados (8), com ciencia de recusa (9) ou
+   * cancelados automaticamente (10) NAO sao considerados, pois nao consolidam a tramitacao.
    * Os tramites avaliados devem ter ocorrido apos a anexacao do processo (comparando a dataHora das suboperacoes e a dataHora da atividade de anexacao).
    *
    * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
    * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return bool
    */
-  private function processoPaiJaFoiTramitadoComSucesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
+  private function processoPaiPossuiTramiteValidoAposAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
   {
     $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
     $objProcessoEletronicoDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
