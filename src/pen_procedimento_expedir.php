@@ -222,7 +222,6 @@ try {
         $repositorioMultiplosOrgaos = false;
         $unidadeDestinatarioMultiplosOrgaos = false;
         $nomeUnidadeDestinatarioMultiplosOrgaos = false;
-        $devolucaoOrgaoOrigemMultiplosOrgaos = false;
       if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProcedimento)) {
           $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
           $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
@@ -244,7 +243,6 @@ try {
             $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
             $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
             $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
-            $devolucaoOrgaoOrigemMultiplosOrgaos = true;
           }
         }
       }
@@ -320,11 +318,7 @@ try {
           $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
-        if ($devolucaoOrgaoOrigemMultiplosOrgaos) {
-          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
-        } else {
           $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos || $processoRecebidoMultiplosOrgaos);
-        }
           $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
           $arrTiProcessoEletronico = [
@@ -432,10 +426,7 @@ try {
       $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
       $podeManterProcessoAberto = false;
-      if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) {
-        // Devolução ao órgão que criou o processo: sempre exibe a opção de manter aberto.
-        $podeManterProcessoAberto = true;
-      } elseif (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+      if (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
         $podeManterProcessoAberto = true;
         $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
         $objPenEnvioParcialDTO->retNumIdEstrutura();
@@ -913,10 +904,6 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
         $('#btnIdUnidade').prop('disabled', true).css('display', 'none');
         $('#imgPesquisaAvancada').css('display', 'none');
 
-        <?php if ($podeManterProcessoAberto) { ?>
-          $('#divSinMultiplosOrgaos').css('display', 'block');
-          $('#multiplosOrgaos').prop('checked', true);
-        <?php } ?>
     }
   });
 </script>
