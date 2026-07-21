@@ -108,6 +108,15 @@ class PenExpedirBlocoRN extends InfraRN
             $objDto = new PenBlocoProcessoDTO();
             $objDto->setNumIdBloco($objPenBlocoProcessoDTO->getNumIdBloco());
             $objDto->setDblIdProtocolo($dblIdProcedimento);
+            $objDto->setNumIdAndamento(
+                [
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO
+                ],
+                InfraDTO::$OPER_NOT_IN
+            );
             $objDto->retTodos();
 
             $objPenBlocoProcesso = $objPenBlocoProcessoRN->consultar($objDto);
