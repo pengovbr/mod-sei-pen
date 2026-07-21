@@ -81,8 +81,11 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 
                 // Configuração padrão do Envio Parcial
                 "EnviarApenasComponentesDigitaisPendentes" => false,
-
-                "EnvioMultiplosOrgaos" => array()
+                
+                // Configuração padrão do Envio Multiplos Órgãos
+                // Caso seja necessário enviar o mesmo processo para multiplos órgãos, 
+                // é necessário que a aplicação implemente a lógica de envio para cada órgão.
+                // "EnvioMultiplosOrgaos" => array(),
             )
         );
     }
