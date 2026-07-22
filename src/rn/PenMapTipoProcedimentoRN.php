@@ -144,7 +144,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       }
     }
     if (count($arrTipoProcedimento) > 0) {
-        $mensagem = sprintf($mensagem, implode('", "', $mapeamentos), implode('", "', $arrTipoProcedimento));
+        $mensagem = sprintf($mensagem, implode('\n- ', $arrTipoProcedimento));
         LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
         $objInfraException = new InfraException();
         $objInfraException->adicionarValidacao($mensagem);

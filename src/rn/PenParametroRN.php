@@ -221,12 +221,12 @@ class PenParametroRN extends InfraRN
             && $objPenParametroDTO->getStrValor() == $objTipoProcedimentoDTO->getIdTipoProcedimento()
         ) {
         $mapeamentos[$objTipoProcedimentoDTO->getIdTipoProcedimento()] =
-        $objTipoProcedimentoDTO->getIdTipoProcedimento() . '-' .  $objTipoProcedimentoDTO->getNome();
+        $objTipoProcedimentoDTO->getNome();
       }
     }
     
     if (count($mapeamentos) > 0) {
-        $mensagem = sprintf($mensagem, implode('", "', $mapeamentos));
+        $mensagem = sprintf($mensagem, implode('\n- ', $mapeamentos));
         LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
         $objInfraException = new InfraException();
         $objInfraException->adicionarValidacao($mensagem);
