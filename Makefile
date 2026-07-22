@@ -1,4 +1,4 @@
-.PHONY: .env .modulo.env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
+.PHONY: .env .modulo.env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config minify-png minify-svg
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei5
@@ -99,7 +99,7 @@ $(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi 
 $(FILE_VENDOR_UNITARIO): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
 	make install-phpunit-vendor
 
-dist: cria_json_compatibilidade
+dist: minify-png minify-svg cria_json_compatibilidade
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
 	@mkdir -p $(SEI_SCRIPTS_DIR)
 	@mkdir -p $(SEI_CONFIG_DIR)
@@ -131,6 +131,14 @@ dist: cria_json_compatibilidade
 	@rm -rf dist/sei dist/solr dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
+minify-png:
+	@find . -type f -name "*.png" \
+	    -exec docker run --rm -v .:/work ghcr.io/oxipng/oxipng -o max --strip safe {} \;
+
+minify-svg:
+	@echo "Minificando SVG..."
+	@find . -type f -name "*.svg" \
+		-exec docker run --rm -v .:/app -w /app minidocks/svgo --multipass {} \;
 
 clean:
 	@rm -rf $(SEI_SCRIPTS_DIR)/*;   if [ -d $(SEI_SCRIPTS_DIR) ]; then rmdir -p --ignore-fail-on-non-empty $(SEI_SCRIPTS_DIR); fi
