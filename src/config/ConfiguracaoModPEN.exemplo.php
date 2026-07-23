@@ -106,6 +106,11 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
               //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
               //     )
               // )
+
+              // Configuração padrão do Envio Multiplos Órgãos
+              // Caso seja necessário enviar o mesmo processo para multiplos órgãos, 
+              // é necessário que a aplicação implemente a lógica de envio para cada órgão.
+              // "EnvioMultiplosOrgaos" => array(),
           )
       );
   }
