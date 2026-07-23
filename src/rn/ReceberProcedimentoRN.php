@@ -2228,9 +2228,11 @@ class ReceberProcedimentoRN extends InfraRN
               $objAssinaturaDTO->setStrProtocoloDocumentoFormatado($objProtocoloDTO->getStrProtocoloFormatado());
               $objAssinaturaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
               $objAssinaturaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-              $objAssinaturaDTO->setStrNome(mb_convert_encoding($assinaturasDigital['nome'], 'ISO-8859-1', 'UTF-8'));
+              //Issue #1178: nome/cargo ausentes recebem o texto padrao em vez de ficarem vazios,
+              //espelhando a tolerancia ja aplicada na expedicao.
+              $objAssinaturaDTO->setStrNome(mb_convert_encoding($this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($assinaturasDigital['nome'] ?? null), 'ISO-8859-1', 'UTF-8'));
               $objAssinaturaDTO->setDblCpf($assinaturasDigital['cpf']);
-              $objAssinaturaDTO->setStrTratamento(mb_convert_encoding($assinaturasDigital['cargo'], 'ISO-8859-1', 'UTF-8'));
+              $objAssinaturaDTO->setStrTratamento(mb_convert_encoding($this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($assinaturasDigital['cargo'] ?? null), 'ISO-8859-1', 'UTF-8'));
               $objAssinaturaDTO->setNumIdTarjaAssinatura($idTarja);
               $objAssinaturaDTO->setStrStaFormaAutenticacao($formaAutenticacao);
               $objAssinaturaDTO->setStrNumeroSerieCertificado($numeroSerie);
