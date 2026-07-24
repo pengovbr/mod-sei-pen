@@ -1352,28 +1352,63 @@ class PENIntegracao extends SeiIntegracao
    * @return void
    * @throws InfraException - Exceção lançada quando o processo anexado já tiver sido tramitado via Tramita GOV.BR, impossibilitando o desanexar
    */
-  public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+   public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
-    $numIdAtividadeAnexacao = $this->retornarIdAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
-    if ($numIdAtividadeAnexacao === null) {
-      return null;
-    }
+    $numUltimoStatusTramite = null;
 
-    $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $numIdAtividadeAnexacao);
-    if ($numIdAtividadeTramitacaoExterna === null) {
-      return null;
-    }
+    if (!$this->isProcessoRecebidoTramita($objProcedimentoAPIPrincipal)) {
 
-    if (!$this->processoPaiJaFoiTramitadoComSucesso($objProcedimentoAPIPrincipal)) {
-      return null;
-    }
+      $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
+      if ($objAtividadeAnexacaoDTO === null) {
+        return null;
+      }
 
+      $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+      if ($numIdAtividadeTramitacaoExterna === null) {
+        return null;
+      }
+
+      if (!$this->processoPaiPossuiTramiteValidoAposAnexacao($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
+        return null;
+      }
+      $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+
+    } else {
+        $objComponentesDigital = new ComponenteDigitalDTO();
+        $objComponentesDigital->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
+        $objComponentesDigital->setStrProtocoloProcedimentoAnexado($objProcedimentoAPIAnexado->getNumeroProtocolo());
+        $objComponentesDigital->setStrNumeroRegistro(null, InfraDTO::$OPER_DIFERENTE);
+        $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+      if ($objComponenteDigitalBD->contar($objComponentesDigital) == 0) {
+        $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
+        if ($objAtividadeAnexacaoDTO === null) {
+          return null;
+        }
+
+        $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+        if ($numIdAtividadeTramitacaoExterna === null) {
+          return null;
+        }
+        if (!$this->processoPaiPossuiTramiteValidoAposAnexacao($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
+          return null;
+        }
+        $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
+      }
+    }
     $nomeModulo = $this->getNome();
     $mensagem = $nomeModulo . ': Prezado(a) usuário(a), não é possível desanexar o processo '
       . $objProcedimentoAPIAnexado->getNumeroProtocolo()
       . ' do processo '
       . $objProcedimentoAPIPrincipal->getNumeroProtocolo()
-      . ', pois o processo pai já foi tramitado com sucesso via Tramita GOV.BR.';
+      . ', pois já houve tramitação via Tramita GOV.BR.';
+
+    if ($numUltimoStatusTramite !== null && in_array((int) $numUltimoStatusTramite, [0, 1, 2, 3, 4, 5, 8], true)) {
+      $mensagem = $nomeModulo . ': Não é possível desanexar o processo '
+        . $objProcedimentoAPIAnexado->getNumeroProtocolo()
+        . ' do processo '
+        . $objProcedimentoAPIPrincipal->getNumeroProtocolo()
+        . ', pois há uma tramitação via Tramita GOV.BR em andamento. Favor aguardar a conclusão da tramitação para realizar uma nova tentativa de desanexação.';
+    }
 
     $objInfraException = new InfraException();
     $objInfraException->adicionarValidacao($mensagem);
@@ -1383,21 +1418,89 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Retorna o id da atividade de anexacao no processo pai referente ao processo anexado informado.
+   * Verifica se o processo pai já teve um tramite recebido registrado no Tramita GOV.BR, buscando pela tarefa de processo recebido no historico do processo pai.
+   * Esta verificação é importante para validar se o processo pai já teve algum tramite iniciado no Tramita GOV.BR, o que impacta nas regras de desanexação dos processos filhos.
+   */
+  private function isProcessoRecebidoTramita(ProcedimentoAPI $objProcedimentoAPIPrincipal)
+  {
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoAPIPrincipal->getIdProcedimento());
+    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+
+    $objAtividadeRN = new AtividadeRN();
+    return $objAtividadeRN->contarRN0035($objAtividadeDTO);
+  }
+
+  /**
+   * Retorna o status do último trâmite do processo pai após a anexação.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param AtividadeDTO $objAtividadeAnexacaoDTO
+   * @return int|null
+   */
+  private function retornarUltimoStatusTramiteProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
+  {
+    $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+    $objProcessoEletronicoDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
+
+    $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+    $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO);
+
+    if ($objTramiteDTO == null || empty($objTramiteDTO->getStrNumeroRegistro())) {
+      return null;
+    }
+
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $arrObjTramite = $objProcessoEletronicoRN->consultarTramitesTodos(null, $objTramiteDTO->getStrNumeroRegistro());
+
+    if (empty($arrObjTramite)) {
+      return null;
+    }
+
+    $strDataAberturaFormatada = str_replace('/', '-', $objAtividadeAnexacaoDTO->getDthAbertura());
+    $numTimestampAnexacao = strtotime($strDataAberturaFormatada);
+    $numUltimoTimestamp = null;
+    $numUltimoStatus = null;
+
+    foreach ($arrObjTramite as $objTramite) {
+      if (!isset($objTramite->situacaoAtual) || empty($objTramite->itensHistorico) || empty($objTramite->itensHistorico->operacao[0]->dataHora)) {
+        continue;
+      }
+
+      $numTimestampTramite = strtotime($objTramite->itensHistorico->operacao[0]->dataHora);
+      if ($numTimestampTramite === false || $numTimestampAnexacao === false || $numTimestampTramite < $numTimestampAnexacao) {
+        continue;
+      }
+
+      if ($numUltimoTimestamp === null || $numTimestampTramite >= $numUltimoTimestamp) {
+        $numUltimoTimestamp = $numTimestampTramite;
+        $numUltimoStatus = (int) $objTramite->situacaoAtual;
+      }
+    }
+
+    return $numUltimoStatus;
+  }
+
+  /**
+   * Retorna o DTO da atividade de anexacao no processo pai referente ao processo anexado informado.
    *
    * A busca e feita no historico do processo pai pela tarefa de anexacao e pelo atributo
    * PROCESSO contendo o numero do protocolo do processo filho.
    *
    * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
    * @param ProcedimentoAPI $objProcedimentoAPIAnexado
-   * @return int|null
+   * @return AtividadeDTO|null
    */
-  private function retornarIdAtividadeAnexacaoProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+  private function retornarAtividadeAnexacaoProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
     $objAtividadeDTO = new AtividadeDTO();
     $objAtividadeDTO->setDblIdProtocolo($objProcedimentoAPIPrincipal->getIdProcedimento());
     $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ANEXADO_PROCESSO);
     $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retDthAbertura();
     $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_DESC);
 
     $objAtividadeRN = new AtividadeRN();
@@ -1425,34 +1528,51 @@ class PENIntegracao extends SeiIntegracao
 
     foreach ($arrObjAtributoAndamentoDTO as $objAtributoDTO) {
       if ($objAtributoDTO->getStrValor() == $objProcedimentoAPIAnexado->getNumeroProtocolo()) {
-        return $objAtributoDTO->getNumIdAtividade();
+        $numIdAtividade = $objAtributoDTO->getNumIdAtividade();
+        foreach ($arrObjAtividadeDTO as $atividadeDTO) {
+          if ($atividadeDTO->getNumIdAtividade() == $numIdAtividade) {
+            return $atividadeDTO;
+          }
+        }
       }
     }
 
     return null;
   }
 
-  /**
+   /**
    * Retorna o id da primeira atividade de tramite externo do processo pai apos a anexacao.
    *
    * Esta validacao usa a atividade "Processo em tramitacao externa para ..." e garante que ela
    * ocorreu depois da atividade de anexacao do processo filho no historico do pai.
    *
    * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
-   * @param int $numIdAtividadeAnexacao
+   * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return int|null
    */
-  private function retornarIdAtividadeTramitacaoExternaProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, $numIdAtividadeAnexacao)
+  private function retornarIdAtividadeTramitacaoExternaProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
   {
     $objAtividadeDTO = new AtividadeDTO();
     $objAtividadeDTO->setDblIdProtocolo($objProcedimentoAPIPrincipal->getIdProcedimento());
-    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
-    $objAtividadeDTO->setNumIdAtividade($numIdAtividadeAnexacao, InfraDTO::$OPER_MAIOR);
+    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
     $objAtividadeDTO->retNumIdAtividade();
     $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_ASC);
     $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
 
     $objAtividadeRN = new AtividadeRN();
+    if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) { 
+      $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
+    } else {
+      $idTarefas = [
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO)
+      ];
+      $objAtividadeDTO->setNumIdTarefa($idTarefas, InfraDTO::$OPER_IN);
+    }
+    $objAtividadeDTO->setNumIdAtividade($objAtividadeAnexacaoDTO->getNumIdAtividade(), InfraDTO::$OPER_MAIOR);
+
     $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
     if ($objAtividadeDTO == null) {
@@ -1463,15 +1583,18 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Verifica se o processo pai ja teve algum tramite concluido com sucesso no Tramita GOV.BR.
+   * Verifica se o processo pai possui algum tramite valido no Tramita GOV.BR apos a anexacao do processo filho.
    *
-   * Para esta regra, sucesso significa encontrar em qualquer momento do historico um tramite
-   * com situacaoAtual igual a 6, correspondente ao recibo recebido pelo remetente.
+   * Considera-se tramite valido aquele cuja situacaoAtual esta entre 0 e 6 (nao iniciado, em andamento
+   * ou concluido com sucesso). Tramites cancelados (7), recusados (8), com ciencia de recusa (9) ou
+   * cancelados automaticamente (10) NAO sao considerados, pois nao consolidam a tramitacao.
+   * Os tramites avaliados devem ter ocorrido apos a anexacao do processo (comparando a dataHora das suboperacoes e a dataHora da atividade de anexacao).
    *
    * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return bool
    */
-  private function processoPaiJaFoiTramitadoComSucesso(ProcedimentoAPI $objProcedimentoAPIPrincipal)
+  private function processoPaiPossuiTramiteValidoAposAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
   {
     $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
     $objProcessoEletronicoDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
@@ -1490,9 +1613,27 @@ class PENIntegracao extends SeiIntegracao
       return false;
     }
 
+    $situacoesPermitidas = [
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+    ];
+
+    $strDataAberturaFormatada = str_replace('/', '-', $objAtividadeAnexacaoDTO->getDthAbertura());
+    $numTimestampAnexacao = strtotime($strDataAberturaFormatada);
+
     foreach ($arrObjTramite as $objTramite) {
-      if (isset($objTramite->situacaoAtual) && (int) $objTramite->situacaoAtual === ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
-        return true;
+      if (isset($objTramite->situacaoAtual) && in_array((int) $objTramite->situacaoAtual, $situacoesPermitidas)) {
+        if (!empty($objTramite->itensHistorico) && !empty($objTramite->itensHistorico->operacao[0]->dataHora)) {
+          $numTimestampTramite = strtotime($objTramite->itensHistorico->operacao[0]->dataHora);
+          if ($numTimestampTramite !== false && $numTimestampAnexacao !== false && $numTimestampTramite >= $numTimestampAnexacao) {
+            return true;
+          }
+        }
       }
     }
 
