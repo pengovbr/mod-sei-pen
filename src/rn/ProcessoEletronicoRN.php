@@ -1799,6 +1799,88 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  /**
+   * Consulta trâmites de processo
+   *
+   * @param  null|integer $parNumIdTramite
+   * @param  null|string  $parNumeroRegistro
+   * @param  null|integer $parNumeroUnidadeRemetente
+   * @param  null|integer $parNumeroUnidadeDestino 
+   * @param  null|string  $parProtocolo
+   * @param  null|integer $parNumeroRepositorioEstruturas
+   * @param  null|string  $situacaoAtual
+   * @param  null|integer $limit
+   * @return null|array   Array de objetos TramiteDTO
+   * @throws InfraException
+   */
+  public function consultarTramitesTodos($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null, $situacaoAtual = null, $limit = null)
+    {
+      $endpoint = 'tramites';
+    try
+      {
+        $arrObjTramite = [];
+        $parametros = [
+        'IDT' => $parNumIdTramite
+        ];
+
+        if(!is_null($parNumeroRegistro)) {
+            $parametros['NRE'] = $parNumeroRegistro;
+        }
+
+        if(!is_null($parNumeroUnidadeRemetente) && !is_null($parNumeroRepositorioEstruturas)) {
+            $parametros['remetente']['identificacaoDoRepositorioDeEstruturas'] = $parNumeroRepositorioEstruturas;
+            $parametros['remetente']['numeroDeIdentificacaoDaEstrutura'] = $parNumeroUnidadeRemetente;
+        }
+
+        if(!is_null($parNumeroUnidadeDestino) && !is_null($parNumeroRepositorioEstruturas)) {
+            $parametros['destinatario']['identificacaoDoRepositorioDeEstruturas'] = $parNumeroRepositorioEstruturas;
+            $parametros['destinatario']['numeroDeIdentificacaoDaEstrutura'] = $parNumeroUnidadeDestino;
+        }
+
+        if (!is_null($parProtocolo)) {
+            $parametros['protocolo'] = $parProtocolo;
+        }
+
+        if (!is_null($situacaoAtual)) {
+            $parametros['situacaoAtual'] = $situacaoAtual;
+        }
+
+        if (!is_null($limit)) {
+            $parametros['quantidadeDeRegistros'] = $limit;
+        }
+
+        $arrResultado = $this->get($endpoint, $parametros);
+
+        if (isset($arrResultado->tramites) && $arrResultado->totalDeRegistros > 0) {
+
+          foreach ($arrResultado->tramites as $key => $tramite) {
+            $itensHistorico = [];
+            foreach ($tramite->mudancasDeSituacao as $mudancaDeSituacao) {
+              $itensHistorico['operacao'][] = $mudancaDeSituacao;
+            }
+
+            $arrResultado->tramites[$key] = array_filter(
+              get_object_vars($arrResultado->tramites[$key]),
+              function ($value) {
+                return !is_null($value);
+              }
+            );
+
+            $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado->tramites[$key]);
+            $arrObjTramite[$key]->itensHistorico = (object) $itensHistorico;
+          }
+
+        }
+
+        return $arrObjTramite;
+
+    } catch (\Exception $e) {
+        $mensagem = "Falha na consulta de trâmites de processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
   public function consultarTramitesProtocolo($parProtocoloFormatado)
     {
       $arrObjTramite = [];
