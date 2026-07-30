@@ -2696,6 +2696,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   
       }
       
+      // Recria o índice único de id_serie na tabela md_pen_rel_doc_map_enviado
+      $objMetaBanco->criarIndice('md_pen_rel_doc_map_enviado', 'ak1_rel_doc_map_enviado', ['id_serie'], true);
+
       $this->atualizarNumeroVersao("4.1.0");
   }
 
