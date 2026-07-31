@@ -423,7 +423,7 @@ install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados
 	@echo "Fim da instalação do módulo"
 
 cria_json_compatibilidade:
-	$(shell ./gerar_json_compatibilidade.sh)
+	$(shell ./scripts/gerar_json_compatibilidade.sh)
 
 install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados do sistema
 	@echo ">>>>>>Executando instalação assinatura eletrénica no ORG1 e Org2<<<<<<"
