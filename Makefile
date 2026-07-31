@@ -348,7 +348,7 @@ vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run --rm -w /tests php-test-functional bash -c './composer.phar install'
 
 cria_json_compatibilidade:
-	$(shell ./gerar_json_compatibilidade.sh)
+	$(shell ./scripts/gerar_json_compatibilidade.sh)
 
 install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados do sistema
 	@echo ">>>>>>Executando instalação assinatura eletrénica no ORG1 e Org2<<<<<<"
