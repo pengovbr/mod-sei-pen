@@ -428,6 +428,30 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN:
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
 ```
 
+### 1.3. Arquivos brotli para SVG e JS e CSS
+
+Foram adicionados arquivos comprimidos no formato **Brotli (`.br`)** para os recursos **SVG**, **JavaScript (JS)** e **CSS**.
+
+Esses arquivos podem ser utilizados por servidores HTTP que oferecem suporte à compressão estática, permitindo que o conteúdo seja entregue diretamente na versão comprimida quando o cliente (navegador) informar suporte ao algoritmo Brotli por meio do cabeçalho `Accept-Encoding`.
+
+### Benefícios
+
+- Redução do tamanho dos arquivos transferidos.
+- Melhor desempenho no carregamento das páginas.
+- Menor consumo de largura de banda.
+- Compatibilidade com navegadores modernos que suportam Brotli.
+
+### Configuração no servidor HTTP
+
+Para utilizar os arquivos `.br`, o servidor HTTP deve estar configurado para:
+
+- Detectar o cabeçalho `Accept-Encoding` enviado pelo cliente.
+- Servir automaticamente os arquivos `.br` correspondentes quando disponíveis.
+- Enviar o cabeçalho `Content-Encoding: br` na resposta.
+- Definir corretamente o tipo de conteúdo (`Content-Type`) para cada recurso.
+
+Com essa configuração, os clientes compatíveis receberão automaticamente as versões compactadas dos arquivos **SVG**, **JS** e **CSS**, proporcionando uma entrega de conteúdo mais eficiente.
+
 ---
 ---
 
