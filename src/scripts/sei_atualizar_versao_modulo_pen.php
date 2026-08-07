@@ -2700,6 +2700,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   
       }
       
+      // Recria o índice único de id_serie na tabela md_pen_rel_doc_map_enviado
+      $objMetaBanco->criarIndice('md_pen_rel_doc_map_enviado', 'ak1_rel_doc_map_enviado', ['id_serie'], true);
+
+      
+      //----------------------------------------------------------------------
+      // Correção da FK md_pen_componente_digital -> anexo para ON DELETE SET NULL.
+      // Sem isso, o expurgo definitivo de um anexo pela limpeza da lixeira falha.
+      //----------------------------------------------------------------------
+      $objMetaBanco->excluirChaveEstrangeira('md_pen_componente_digital', 'fk_md_pen_comp_dig_anexo');
+      $objMetaBanco->criarChaveEstrangeiraComExclusao(
+        'fk_md_pen_comp_dig_anexo',
+        'md_pen_componente_digital',
+        ['id_anexo'],
+        'anexo',
+        ['id_anexo'],
+        'SET NULL'
+      );
+
       $this->atualizarNumeroVersao("4.1.0");
   }
 
