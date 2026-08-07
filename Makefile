@@ -149,6 +149,17 @@ minify-svg:
 	@find . -type f -name "*.svg" \
 		-exec docker run --rm -v .:/app -w /app minidocks/svgo --multipass {} \;
 
+generate-brotli:
+	docker run --rm \
+		-v "$(PWD)/src:/work" \
+		-w /work \
+		alpine:latest \
+		sh -c "apk add --no-cache brotli >/dev/null && \
+			find . \
+				-type d -name modulos -prune -o \
+				\( -name '*.svg' -o -name '*.js' -o -name '*.css' \) \
+				-exec brotli -v -f -q 11 {} \;"
+
 clean:
 	@rm -rf $(SEI_SCRIPTS_DIR)/*;   if [ -d $(SEI_SCRIPTS_DIR) ]; then rmdir -p --ignore-fail-on-non-empty $(SEI_SCRIPTS_DIR); fi
 	@rm -rf $(SEI_CONFIG_DIR)/*;    if [ -d $(SEI_CONFIG_DIR) ];  then rmdir -p --ignore-fail-on-non-empty $(SEI_CONFIG_DIR); fi
