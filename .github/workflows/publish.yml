@@ -16,7 +16,11 @@ jobs:
         uses: docker/setup-docker-action@v5
 
       - name: Distribution
-        run: make dist
+        run: |
+          make minify-js
+          make minify-png
+          make minify-svg
+          make dist
       
       - name: Get the version
         id: get_version
