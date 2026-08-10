@@ -463,6 +463,30 @@ Procedimentos destinados ao Administradores do SEI responsáveis pela configura�
 * **Configurações Técnicas Adicionais**: 
 Esta seção apresenta algumas configurações adicionais do módulo do Tramita.GOV.BR que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
 
+### 2.4. Envio para Múltiplos Órgãos
+
+A parametrização **`EnvioMultiplosOrgaos`** define a configuração utilizada para o envio de um mesmo processo para múltiplos órgãos.
+
+Por padrão, essa parametrização não possui órgãos configurados:
+
+```php
+"EnvioMultiplosOrgaos" => array(),
+```
+#### Exemplo
+
+```php
+"EnvioMultiplosOrgaos" => array(
+   "12345", "54321", "9876"
+),
+```
+
+Nesse exemplo, o processo deverá ser encaminhado para os três órgãos configurados:
+
+1. `12345`
+2. `54321`
+3. `9876`
+
+
 ---
 ---
 
