@@ -56,6 +56,7 @@ class ExpedirProcedimentoRN extends InfraRN
     protected $fnEventoEnvioMetadados;
     protected $objPenDebug;
     protected $objCacheMetadadosProtocolo=[];
+    protected $arrCacheHierarquiaEstruturas=[];
 
     protected $arrPenMimeTypes = ["application/pdf", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.formula", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "text/xml", "text/rtf", "text/html", "text/plain", "text/csv", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/tiff", "image/bmp", "audio/mp4", "audio/midi", "audio/ogg", "audio/vnd.wave", "video/avi", "video/mpeg", "video/mp4", "video/ogg", "video/webm"];
 
@@ -2721,6 +2722,14 @@ class ExpedirProcedimentoRN extends InfraRN
         $objInfraException->adicionarValidacao('Unidade de destino não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
     }
 
+      $this->validarDestinoOrgaoRemetente(
+          $objInfraException,
+          $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
+          $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
+          $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
+          $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
+      );
+
       //TODO: Validar se motivo de urgncia foi devidamente informado, caso expedio urgente
     if ($objExpedirProcedimentoDTO->getBolSinUrgente() && InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdMotivoUrgencia())) {
         $objInfraException->adicionarValidacao('Motivo de urgência não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
@@ -2749,6 +2758,106 @@ class ExpedirProcedimentoRN extends InfraRN
           );
       }
     }
+  }
+
+  public function validarDestinoOrgaoRemetente(
+      InfraException $objInfraException,
+      $numIdRepositorioOrigem,
+      $numIdEstruturaOrigem,
+      $numIdRepositorioDestino,
+      $numIdEstruturaDestino,
+      $strAtributoValidacao = null
+  )
+    {
+    if (!InfraString::isBolVazia($numIdRepositorioOrigem) &&
+        !InfraString::isBolVazia($numIdEstruturaOrigem) &&
+        !InfraString::isBolVazia($numIdRepositorioDestino) &&
+        !InfraString::isBolVazia($numIdEstruturaDestino) &&
+        $this->estruturasPertencemAoMesmoOrgao(
+            $numIdRepositorioOrigem,
+            $numIdEstruturaOrigem,
+            $numIdRepositorioDestino,
+            $numIdEstruturaDestino
+        )) {
+        $strMensagem = 'Não é possível realizar o envio externo para o próprio órgão remetente. '
+            . 'Selecione o repositório de estruturas de outro órgão como destino.';
+
+      if (InfraString::isBolVazia($strAtributoValidacao)) {
+          $objInfraException->adicionarValidacao($strMensagem);
+      } else {
+          $objInfraException->adicionarValidacao($strMensagem, $strAtributoValidacao);
+      }
+    }
+  }
+
+  public function estruturasPertencemAoMesmoOrgao(
+      $numIdRepositorioOrigem,
+      $numIdEstruturaOrigem,
+      $numIdRepositorioDestino,
+      $numIdEstruturaDestino
+  )
+    {
+    if ((string) $numIdRepositorioOrigem !== (string) $numIdRepositorioDestino) {
+        return false;
+    }
+
+    if ((string) $numIdEstruturaOrigem === (string) $numIdEstruturaDestino) {
+        return true;
+    }
+
+      $arrHierarquiaOrigem = $this->obterIdentificadoresHierarquiaEstrutura(
+          $numIdRepositorioOrigem,
+          $numIdEstruturaOrigem
+      );
+      $arrHierarquiaDestino = $this->obterIdentificadoresHierarquiaEstrutura(
+          $numIdRepositorioDestino,
+          $numIdEstruturaDestino
+      );
+
+      return count(array_intersect($arrHierarquiaOrigem, $arrHierarquiaDestino)) > 0;
+  }
+
+  private function obterIdentificadoresHierarquiaEstrutura($numIdRepositorio, $numIdEstrutura)
+    {
+      $strChaveCache = (string) $numIdRepositorio.':'.(string) $numIdEstrutura;
+    if (isset($this->arrCacheHierarquiaEstruturas[$strChaveCache])) {
+        return $this->arrCacheHierarquiaEstruturas[$strChaveCache];
+    }
+
+      $objEstrutura = $this->objProcessoEletronicoRN->consultarEstrutura(
+          $numIdRepositorio,
+          $numIdEstrutura,
+          true
+      );
+
+      $arrIdentificadores = [(string) $numIdEstrutura];
+    if (isset($objEstrutura->numeroDeIdentificacaoDaEstrutura)) {
+        $arrIdentificadores[] = (string) $objEstrutura->numeroDeIdentificacaoDaEstrutura;
+    }
+
+    if (isset($objEstrutura->hierarquia) && is_array($objEstrutura->hierarquia)) {
+      foreach ($objEstrutura->hierarquia as $objNivel) {
+          $numIdNivel = is_array($objNivel)
+              ? ($objNivel['numeroDeIdentificacaoDaEstrutura'] ?? null)
+              : ($objNivel->numeroDeIdentificacaoDaEstrutura ?? null);
+        if (!InfraString::isBolVazia($numIdNivel)) {
+            $arrIdentificadores[] = (string) $numIdNivel;
+        }
+      }
+    }
+
+      $this->arrCacheHierarquiaEstruturas[$strChaveCache] = array_values(array_unique($arrIdentificadores));
+      return $this->arrCacheHierarquiaEstruturas[$strChaveCache];
+  }
+
+  public function obterIdEstruturaUnidadeAtual()
+    {
+      $objUnidadeDTO = new PenUnidadeDTO();
+      $objUnidadeDTO->retNumIdUnidadeRH();
+      $objUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+
+      $objUnidadeDTO = $this->objUnidadeRN->consultarRN0125($objUnidadeDTO);
+      return isset($objUnidadeDTO) ? $objUnidadeDTO->getNumIdUnidadeRH() : null;
   }
 
   private function validarDocumentacaoExistende(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false)

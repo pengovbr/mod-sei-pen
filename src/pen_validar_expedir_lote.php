@@ -17,6 +17,9 @@ try {
   }    
 
     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+    $objPenParametroRN = new PenParametroRN();
+    $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+    $numIdEstruturaOrigem = $objExpedirProcedimentosRN->obterIdEstruturaUnidadeAtual();
     $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, $arrProtocolosOrigem);
   if ($objInfraException->contemValidacoes()) {
       $arrErros = [];
@@ -57,6 +60,15 @@ try {
     if(!array_key_exists('hdnIdUnidade', $_POST) || empty($_POST['hdnIdUnidade'])) {
         $objInfraException->adicionarValidacao('Informe Unidade de destino', $strProtocoloFormatado);
     }
+
+      $objExpedirProcedimentosRN->validarDestinoOrgaoRemetente(
+          $objInfraException,
+          $numIdRepositorioOrigem,
+          $numIdEstruturaOrigem,
+          $_POST['selRepositorioEstruturas'] ?? null,
+          $_POST['hdnIdUnidade'] ?? null,
+          $strProtocoloFormatado
+      );
 
       $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));

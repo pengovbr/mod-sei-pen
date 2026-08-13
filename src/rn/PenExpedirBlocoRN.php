@@ -59,6 +59,14 @@ class PenExpedirBlocoRN extends InfraRN
         $objInfraException->adicionarValidacao('Unidade de destino não informado.');
     }
 
+      $this->objExpedirProcedimentoRN->validarDestinoOrgaoRemetente(
+          $objInfraException,
+          $objBlocoDTO->getNumIdRepositorioOrigem(),
+          $objBlocoDTO->getNumIdUnidadeOrigem(),
+          $objBlocoDTO->getNumIdRepositorioDestino(),
+          $objBlocoDTO->getNumIdUnidadeDestino()
+      );
+
       //TODO: Validar se usuário foi devidamente informada
     if (InfraString::isBolVazia($objBlocoDTO->getNumIdUsuario())) {
         $objInfraException->adicionarValidacao('Usuário não informado.');
