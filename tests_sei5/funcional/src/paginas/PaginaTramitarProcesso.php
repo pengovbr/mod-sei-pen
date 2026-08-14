@@ -93,18 +93,29 @@ class PaginaTramitarProcesso extends PaginaTeste
      */
   public function tramitar(): void
     {
+      $this->validarOpcaoMultiplosOrgaosOculta();
       $this->elByXPath("//button[@value='Enviar']")->click();
   }
 
   /**
-   * Seleciona a opção de múltiplos órgãos
+   * Valida que a opção de múltiplos órgãos não é exibida na tela de envio
+   */
+  public function validarOpcaoMultiplosOrgaosOculta(): void
+  {
+    $this->test->assertCount(
+        0,
+        $this->elementsByXPath("//input[@id='multiplosOrgaos']"),
+        'A opção de manter o processo aberto não deve ser exibida na tela de envio.'
+    );
+  }
+
+  /**
+   * Mantém compatibilidade com os cenários que solicitavam a funcionalidade
+   * antes de ela ser aplicada automaticamente.
    */
   public function selecionarMultiplosOrgaos(): void
   {
-    $element = $this->elByXPath("//input[@id='multiplosOrgaos']");
-    if (!$element->isSelected()) {
-      $this->driver->executeScript("arguments[0].click();", [$element]);
-    }
+    $this->validarOpcaoMultiplosOrgaosOculta();
   }
 
     /**
