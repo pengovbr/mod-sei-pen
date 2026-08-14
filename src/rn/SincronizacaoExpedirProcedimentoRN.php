@@ -104,7 +104,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $this->validarParametrosExpedicao($objInfraException, $objExpedirProcedimentoDTO);
 
       //Apresentao da mensagens de validao na janela da barra de progresso
-      if ($objInfraException->contemValidacoes() && $objExpedirProcedimentoDTO->getBolSinEnvioAutoMultiplosOrgaos() === false) {
+      if ($objInfraException->contemValidacoes()) {
         $objInfraException->lancarValidacoes();
       }
 

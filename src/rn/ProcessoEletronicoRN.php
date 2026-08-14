@@ -1480,8 +1480,6 @@ class ProcessoEletronicoRN extends InfraRN
       //Registra os dados do processo eletrônico
       $objProcessoEletronicoDTOFiltro = new ProcessoEletronicoDTO();
       $objProcessoEletronicoDTOFiltro->setStrNumeroRegistro($parObjProcessoEletronicoDTO->getStrNumeroRegistro());
-      $objProcessoEletronicoDTOFiltro->setDblIdProcedimento($parObjProcessoEletronicoDTO->getDblIdProcedimento());
-      $objProcessoEletronicoDTOFiltro->setStrStaTipoProtocolo($parObjProcessoEletronicoDTO->getStrStaTipoProtocolo());
       $objProcessoEletronicoDTOFiltro->retStrNumeroRegistro();
       $objProcessoEletronicoDTOFiltro->retDblIdProcedimento();
       $objProcessoEletronicoDTOFiltro->retStrStaTipoProtocolo();
@@ -1489,7 +1487,15 @@ class ProcessoEletronicoRN extends InfraRN
       $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
       $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTOFiltro);
 
-    if(empty($objProcessoEletronicoDTO)) {
+    if (isset($objProcessoEletronicoDTO)) {
+        $this->validarAssociacaoNumeroRegistro(
+            $parObjProcessoEletronicoDTO->getStrNumeroRegistro(),
+            $objProcessoEletronicoDTO->getDblIdProcedimento(),
+            $parObjProcessoEletronicoDTO->getDblIdProcedimento()
+        );
+    } else {
+        $objProcessoEletronicoDTOFiltro->setDblIdProcedimento($parObjProcessoEletronicoDTO->getDblIdProcedimento());
+        $objProcessoEletronicoDTOFiltro->setStrStaTipoProtocolo($parObjProcessoEletronicoDTO->getStrStaTipoProtocolo());
         $objProcessoEletronicoDTO = $objProcessoEletronicoBD->cadastrar($objProcessoEletronicoDTOFiltro);
     }
 
@@ -1555,6 +1561,18 @@ class ProcessoEletronicoRN extends InfraRN
 
       $objTramiteDTO->setArrObjComponenteDigitalDTO($arrObjComponenteDigitalDTO);
       return $objProcessoEletronicoDTO;
+  }
+
+  public function validarAssociacaoNumeroRegistro($strNumeroRegistro, $dblIdProcedimentoExistente, $dblIdProcedimentoInformado)
+    {
+    if (!InfraString::isBolVazia($dblIdProcedimentoExistente) &&
+        !InfraString::isBolVazia($dblIdProcedimentoInformado) &&
+        (string) $dblIdProcedimentoExistente !== (string) $dblIdProcedimentoInformado) {
+        throw new InfraException(
+            "Módulo do Tramita: O NRE $strNumeroRegistro já está associado ao processo "
+            . "$dblIdProcedimentoExistente e não pode ser associado ao processo $dblIdProcedimentoInformado."
+        );
+    }
   }
 
     /**

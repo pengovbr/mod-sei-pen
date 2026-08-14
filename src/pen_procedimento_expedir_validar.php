@@ -39,6 +39,16 @@ try {
       $objInfraException->adicionarValidacao('Informe Unidade de destino', $strProtocoloFormatado);
   }
 
+    $objPenParametroRN = new PenParametroRN();
+    $objExpedirProcedimentosRN->validarDestinoOrgaoRemetente(
+        $objInfraException,
+        $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM'),
+        $objExpedirProcedimentosRN->obterIdEstruturaUnidadeAtual(),
+        $_POST['selRepositorioEstruturas'] ?? null,
+        $_POST['hdnIdUnidade'] ?? null,
+        $strProtocoloFormatado
+    );
+
   if(!$objInfraException->contemValidacoes()) {
       $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
