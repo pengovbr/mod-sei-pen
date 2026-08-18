@@ -640,7 +640,7 @@ class PENIntegracao extends SeiIntegracao
 
   protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI,  $strDesativarExcluir)
   {
-    $excecao = new InfraException();
+    $arrStrNome = [];
     foreach ($arrObjSerieAPI as $objSerieAPI) {
       $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
       $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie($objSerieAPI->getIdSerie());
@@ -657,9 +657,15 @@ class PENIntegracao extends SeiIntegracao
       $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->contar($objPenRelTipoDocMapRecebidoDTO);
       
       if ($objPenRelTipoDocMapRecebidoDTO > 0 || $objPenRelTipoDocMapEnviadoDTO > 0) {
-          $excecao->lancarValidacao('Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' o tipo de documento "'. $objSerieAPI->getNome()
-          . '". Esse tipo de documento está mapeado em Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Documentos -> Envio/Recebimento');
+          $arrStrNome[$objSerieAPI->getNome()] = $objSerieAPI->getNome();
       }
+    }
+          
+    if (count($arrStrNome) > 0) {
+        $strAcao = ($strDesativarExcluir == 'excluir') ? 'excluídos' : 'desativados';
+        $strMensagem = 'Os tipos de documentos abaixo não podem ser '.$strAcao.' porque são utilizados na Administração do módulo Tramita Gov:\n- '.implode('\n- ', $arrStrNome);
+        $objInfraException = new InfraException();
+        $objInfraException->lancarValidacao($strMensagem);
     }
   }
 
@@ -673,7 +679,7 @@ class PENIntegracao extends SeiIntegracao
 
   protected function validarExcluirDesativarUnidade($arrObjUnidadeAPI, $strDesativarExcluir)
   {
-    $excecao = new InfraException();
+    $arrStrSigla = [];
     foreach ($arrObjUnidadeAPI as $objUnidadeAPI) {
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($objUnidadeAPI->getIdUnidade());
@@ -682,9 +688,15 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeRN = new PenUnidadeRN();
       $objPenUnidadeDTO = $objPenUnidadeRN->contar($objPenUnidadeDTO);
       if ($objPenUnidadeDTO > 0) {
-        $excecao->lancarValidacao('Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' a unidade "'. $objUnidadeAPI->getSigla()
-        . '". Essa unidade está mapeada em Administração -> Tramita GOV.BR -> Mapeamento de Unidades -> Listar' );
+        $arrStrSigla[$objUnidadeAPI->getSigla()] = $objUnidadeAPI->getSigla();
       }
+    }
+
+    if (count($arrStrSigla) > 0) {
+        $strAcao = ($strDesativarExcluir == 'excluir') ? 'excluídas' : 'desativadas';
+        $strMensagem = 'As unidades abaixo não podem ser '.$strAcao.' porque são utilizadas na Administração do módulo Tramita Gov:\n- '.implode('\n- ', $arrStrSigla);
+        $objInfraException = new InfraException();
+        $objInfraException->lancarValidacao($strMensagem);
     }
   }
 
@@ -697,40 +709,15 @@ class PENIntegracao extends SeiIntegracao
   }
 
   protected function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO, $strDesativarExcluir) {
-    
-    $mensagem = "Prezado(a) usuário(a), você está tentando ".$strDesativarExcluir." um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
-    ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
-    ."mencionados o Tipo de Processo: \"%s\".";
+
+    $strAcao = ($strDesativarExcluir == 'excluir') ? 'excluídos' : 'desativados';
+    $mensagem = 'Os tipos de processos abaixo não podem ser '.$strAcao.' porque são utilizados na Administração do módulo Tramita Gov:\n- %s';
 
     $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
     $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
 
-    $mensagem = 'Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' o Tipo de Processo "%s" '
-      . 'que se encontra mapeado para o Tipo de Processo Padrão. '
-      . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
-      . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
-
     $objPenParametroRN = new PenParametroRN();
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
-
-    $exception = new InfraException();
-    foreach ($arrObjTipoProcedimentoDTO as $objProcedimento) {
-        $objPenParametroDTO = new PenParametroDTO();
-        $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
-        $objPenParametroDTO->setStrValor($objProcedimento->getIdTipoProcedimento());
-        $objPenParametroRN = new PenParametroRN();
-        $objPenParametroDTO = $objPenParametroRN->contar($objPenParametroDTO);
-
-        $objProcedimentoDTO = new ProcedimentoDTO();
-        $objProcedimentoDTO->setNumIdTipoProcedimento($objProcedimento->getIdTipoProcedimento());
-        $objProcedimentoRN = new ProcedimentoRN();
-        $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
-
-      if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
-          $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
-      }
-    }
   }
 
     /**
