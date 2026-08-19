@@ -2661,6 +2661,32 @@ class ProcessoEletronicoRN extends InfraRN
       return $numIdUnidade;
   }
 
+  /**
+   * Busca a unidade ao qual o processo foi anteriormente expedido, caso exista algum andamento aberto.
+   * Caso não exista, considera a unidade atual
+   *
+   * @param  integer $parDblIdProcedimento
+   * @return integer Id da unidade
+   */
+  public static function obterUnidadeComAndamentoAberto($parDblIdProcedimento)
+    {
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+      $objAtividadeDTO->setDthConclusao(null);
+      $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdUnidade();
+
+      $objAtividadeRN = new AtividadeRN();
+      $arrObjAtividadeDTO = (array) $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+    if (!empty($arrObjAtividadeDTO)) {
+        return $arrObjAtividadeDTO[0]->getNumIdUnidade();
+    }
+
+      return self::obterUnidadeParaRegistroDocumento($parDblIdProcedimento);
+  }
+
     /**
      * Método responsável por obter os componentes digitais do documento
      *

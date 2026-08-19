@@ -70,6 +70,9 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     $numIdTramite = 0;
     $dblIdProcedimento = null;
     $deveConcluirProcessoNoFinal = false;
+    $idAtividadeExpedicao = null;
+    $numIdUnidadeSessaoOriginal = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+    $numIdUnidadeProcesso = null;
     try {
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
@@ -94,6 +97,19 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $deveConcluirProcessoNoFinal = !empty($objAtividadeDTO) && $objAtividadeDTO->getNumIdTarefa() == $idTarefaAutoEnvioConcluir;
 
       $numIdUnidade = $objExpedirProcedimentoDTO->getNumIdUnidade();
+
+      // O processo foi bloqueado na unidade de recebimento ao gerar a pendencia de
+      // envio automatico de multiplos orgaos. Passa-se a operar na unidade onde ele
+      // possui andamento aberto, para que o desbloqueio e os andamentos de envio
+      // sejam gerados na unidade correta (evita 'nao possui andamento aberto').
+      $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($dblIdProcedimento);
+      if (!is_null($numIdUnidadeProcesso)) {
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeProcesso);
+      }
+
+      // Desbloqueia no momento certo, antes das operacoes de envio, pois um processo
+      // bloqueado nao pode ser expedido ('Processo ... esta bloqueado').
+      $this->garantirProcessoDesbloqueado($dblIdProcedimento);
 
       $objInfraException = new InfraException();
       //Carregamento dos dados de processo e documento para validação e envio externo
@@ -236,45 +252,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
     } finally {
       if (!is_null($dblIdProcedimento)) {
-        $numIdUnidadeSessaoOriginal = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-        $numIdUnidadeDesbloqueio = null;
-
         try {
-          $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-          $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
-          $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-          $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
-
-          if (!is_null($objTramiteDTO)) {
-            $objUnidadeDTO = new PenUnidadeDTO();
-            $objUnidadeDTO->setNumIdUnidadeRH($objTramiteDTO->getNumIdEstruturaDestino());
-            $objUnidadeDTO->setStrSinAtivo('S');
-            $objUnidadeDTO->retNumIdUnidade();
-
-            $objUnidadeRN = new UnidadeRN();
-            $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
-            if (!is_null($objUnidadeDTO)) {
-              $numIdUnidadeDesbloqueio = $objUnidadeDTO->getNumIdUnidade();
-            }
-          }
-        } catch (\Exception $e) {
-          $this->gravarLogDebug("Erro ao identificar unidade para desbloqueio automatico do processo $dblIdProcedimento: $e", 2, true);
-        }
-
-        if (is_null($numIdUnidadeDesbloqueio)) {
-          try {
-            $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($dblIdProcedimento);
-          } catch (\Exception $e) {
-            $this->gravarLogDebug("Erro ao obter unidade fallback para desbloqueio automatico do processo $dblIdProcedimento: $e", 2, true);
-          }
-        }
-
-        try {
-          if (!is_null($numIdUnidadeDesbloqueio)) {
-            SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);
-          }
-
           if ($deveConcluirProcessoNoFinal) {
             $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
             $objEntradaConcluirProcessoAPI->setIdProcedimento($dblIdProcedimento);
@@ -282,19 +260,44 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
             $objSeiRN = new SeiRN();
             $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
           } else {
-            ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+            // Garante que o processo permaneca desbloqueado (estado normal) ao final
+            // do envio automatico, como ocorre no envio manual de multiplos orgaos.
+            $this->garantirProcessoDesbloqueado($dblIdProcedimento);
           }
         } catch (\Exception $e) {
-          $this->gravarLogDebug("Processo $dblIdProcedimento nao pode ser finalizado automaticamente", 2);
+          $this->gravarLogDebug("Processo $dblIdProcedimento nao pode ser finalizado automaticamente: $e", 2, true);
         } finally {
           try {
             SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoOriginal);
           } catch (\Exception $e) {
-            $this->gravarLogDebug("Nao foi possivel restaurar a unidade original apos tentativa de desbloqueio do processo $dblIdProcedimento: $e", 2, true);
+            $this->gravarLogDebug("Nao foi possivel restaurar a unidade original apos o envio automatico do processo $dblIdProcedimento: $e", 2, true);
           }
         }
       }
     }
+  }
+
+  /**
+   * Garante que o processo esteja desbloqueado para envio, caso esteja bloqueado.
+   * 
+   * @param  integer $dblIdProcedimento
+   * @return void
+   */
+  private function garantirProcessoDesbloqueado($dblIdProcedimento)
+  {
+    if (empty($dblIdProcedimento)) {
+      return;
+    }
+
+    $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
+
+    if ($objProcedimentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
+      return;
+    }
+
+    // A sessao ja deve estar posicionada na unidade onde o processo esta aberto.
+    ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+    $this->gravarLogDebug("Processo $dblIdProcedimento desbloqueado para o envio automatico de multiplos orgaos", 2, true);
   }
 
   protected function expedirSincronizarControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
@@ -627,7 +630,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $numIdUnidadeDesbloqueio = null;
 
       try {
-        $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($dblIdProcedimento);
+        $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($dblIdProcedimento);
 
         if (!empty($numIdUnidadeDesbloqueio)) {
           SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);

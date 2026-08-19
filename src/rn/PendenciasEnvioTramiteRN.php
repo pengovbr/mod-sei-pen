@@ -268,7 +268,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
       $numIdUnidadeSessaoOriginal = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
       try {
-        $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($dblIdProcedimento);
+        $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($dblIdProcedimento);
 
         if (!empty($numIdUnidadeDesbloqueio)) {
           SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);
