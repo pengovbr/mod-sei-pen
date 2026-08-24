@@ -636,6 +636,16 @@ class ExpedirProcedimentoRN extends InfraRN
         }
     }
 
+    if (!empty($dblIdProcedimento)) {
+        $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
+      if (!empty($objProcedimentoDTO->getStrNomeTipoPrioridade())) {
+          $cabecalho['propriedadesAdicionais'][] = [
+              'chave' => 'PEN_NOME_PRIORIDADE_PROCESSO',
+              'valor' => mb_convert_encoding($objProcedimentoDTO->getStrNomeTipoPrioridade(), 'UTF-8', 'ISO-8859-1')
+          ];
+      }
+    }
+
       return $cabecalho;
   }
 
@@ -1139,12 +1149,12 @@ class ExpedirProcedimentoRN extends InfraRN
         $this->atribuirDataHoraDeRegistroREST($documento, $documentoDTO->getDblIdProcedimento(), $documentoDTO->getDblIdDocumento());
         $documento = $this->atribuirEspecieDocumentalREST($documento, $documentoDTO, $parObjMetadadosTramiteAnterior);
         $documento = $this->atribuirNumeracaoDocumentoREST($documento, $documentoDTO);
-      if ($documentoDTO->getNumIdTipoConferencia() != null) {
-        $documento['identificacao']['complemento'] = json_encode([
-          'tipo_conferencia' => mb_convert_encoding($documentoDTO->getStrDescricaoTipoConferencia(), 'UTF-8', 'ISO-8859-1')
-        ]);
-      }
         
+        $identificacaoComplementar = json_decode($documento['identificacao']['complemento'] ?? '{}', true) ?: [];
+        $identificacaoComplementar['descricao'] = mb_convert_encoding($documentoDTO->getStrDescricaoProtocolo(), 'UTF-8', 'ISO-8859-1');
+        $identificacaoComplementar['nome_arvore'] = mb_convert_encoding($documentoDTO->getStrNomeArvore(), 'UTF-8', 'ISO-8859-1');
+        $documento['identificacao']['complemento'] = json_encode($identificacaoComplementar);
+
       if($documento['retirado'] === true) {
           $objComponenteDigitalDTO = new ComponenteDigitalDTO();
           $objComponenteDigitalDTO->retTodos();
@@ -2120,6 +2130,7 @@ class ExpedirProcedimentoRN extends InfraRN
       $objProcedimentoDTO->retDblIdProcedimento();
       $objProcedimentoDTO->retNumIdHipoteseLegalProtocolo();
       $objProcedimentoDTO->retStrProtocoloProcedimentoFormatadoPesquisa();
+      $objProcedimentoDTO->retStrNomeTipoPrioridade();
 
       return $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
   }
@@ -2227,6 +2238,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objDocumentoDTO->retStrNomeSerie();
         $objDocumentoDTO->retNumIdSerie();
         $objDocumentoDTO->retStrNumero();
+      $objDocumentoDTO->retStrNomeArvore();
         $objDocumentoDTO->retNumIdTipoConferencia();
         $objDocumentoDTO->retStrDescricaoTipoConferencia();
         $objDocumentoDTO->retStrStaDocumento();

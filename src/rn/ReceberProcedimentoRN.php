@@ -1058,7 +1058,8 @@ class ReceberProcedimentoRN extends InfraRN
       //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
       $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
 
-      //Realiza a alteração dos metadados do processo
+      // Sincroniza os metadados editaveis antes das restricoes de acesso.
+      $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
       $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
 
       $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
@@ -1286,6 +1287,42 @@ class ReceberProcedimentoRN extends InfraRN
       return $strNumeroProcesso;
   }
 
+  private function sincronizarMetadadosProcedimento($parNumIdProcedimento, $parObjProtocolo, $parObjMetadadosProcedimento)
+    {
+      $objProtocoloDTO = new ProtocoloDTO();
+      $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
+      $objProtocoloDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100), 'ISO-8859-1', 'UTF-8'));
+      $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO([]);
+      $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessados ?? []);
+
+      $objProcedimentoDTO = new ProcedimentoDTO();
+      $objProcedimentoDTO->setDblIdProcedimento($parNumIdProcedimento);
+      $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
+
+      $objDestinatario = $this->destinatarioReal ?: $parObjMetadadosProcedimento->destinatario;
+      $this->atribuirTipoProcedimento(
+          $objProcedimentoDTO,
+          $parObjMetadadosProcedimento->remetente,
+          $objDestinatario,
+          $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO'),
+          mb_convert_encoding($parObjProtocolo->processoDeNegocio, 'ISO-8859-1', 'UTF-8')
+      );
+
+      $strNomeTipoPrioridade = $this->obterValorPropriedadeAdicional($parObjMetadadosProcedimento->propriedadesAdicionais ?? [], 'PEN_NOME_PRIORIDADE_PROCESSO');
+    if ($strNomeTipoPrioridade !== null) {
+        $objTipoPrioridadeDTO = new TipoPrioridadeDTO();
+        $objTipoPrioridadeDTO->retNumIdTipoPrioridade();
+        $objTipoPrioridadeDTO->setStrNome(mb_convert_encoding($strNomeTipoPrioridade, 'ISO-8859-1', 'UTF-8'));
+        $objTipoPrioridadeRN = new TipoPrioridadeRN();
+        $objTipoPrioridadeDTO = $objTipoPrioridadeRN->consultar($objTipoPrioridadeDTO);
+      if ($objTipoPrioridadeDTO != null) {
+          $objProcedimentoDTO->setNumIdTipoPrioridade($objTipoPrioridadeDTO->getNumIdTipoPrioridade());
+      }
+    }
+
+      $this->objProcedimentoRN->alterarRN0202($objProcedimentoDTO);
+  }
+
   private function alterarMetadadosProcedimento($parNumIdProcedimento, $parObjMetadadoProcedimento, $parObjMetadadosProcedimento = null)
     {
       $arrPropriedadesAdicionais = (isset($parObjMetadadosProcedimento->propriedadesAdicionais) && is_array($parObjMetadadosProcedimento->propriedadesAdicionais))
@@ -1375,6 +1412,40 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function alterarMetadadosDocumento($parNumIdDocumento, $parObjMetadadoDocumento)
     {
+      $objDocumentoConsultaDTO = new DocumentoDTO();
+      $objDocumentoConsultaDTO->retStrStaDocumento();
+      $objDocumentoConsultaDTO->retDblIdProcedimento();
+      $objDocumentoConsultaDTO->setDblIdDocumento($parNumIdDocumento);
+      $objDocumentoRN = new DocumentoRN();
+      $objDocumentoConsultaDTO = $objDocumentoRN->consultarRN0005($objDocumentoConsultaDTO);
+
+      $objIdentificacao = $parObjMetadadoDocumento->identificacao ?? null;
+      $strComplemento = is_array($objIdentificacao) ? ($objIdentificacao['complemento'] ?? null) : ($objIdentificacao->complemento ?? null);
+      $arrMetadadosComplementares = json_decode($strComplemento, true) ?: [];
+
+      $objDocumentoDTO = new DocumentoDTO();
+      $objDocumentoDTO->setDblIdDocumento($parNumIdDocumento);
+      $objDocumentoDTO->setDblIdProcedimento($objDocumentoConsultaDTO->getDblIdProcedimento());
+      $objDocumentoDTO->setStrNomeArvore(mb_convert_encoding($arrMetadadosComplementares['nome_arvore'] ?? '', 'ISO-8859-1', 'UTF-8'));
+
+    if ($objDocumentoConsultaDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
+        $objDocumentoDTO->setStrNumero(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjMetadadoDocumento->descricao, 50), 'ISO-8859-1', 'UTF-8'));
+        $objSerieDTO = $this->obterSerieMapeada($parObjMetadadoDocumento);
+      if ($objSerieDTO != null) {
+          $objDocumentoDTO->setNumIdSerie($objSerieDTO->getNumIdSerie());
+      }
+    }
+
+      $objProtocoloMetadadosDTO = new ProtocoloDTO();
+      $objProtocoloMetadadosDTO->setDblIdProtocolo($parNumIdDocumento);
+      $objProtocoloMetadadosDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($arrMetadadosComplementares['descricao'] ?? $parObjMetadadoDocumento->descricao, 100), 'ISO-8859-1', 'UTF-8'));
+    if ($objDocumentoConsultaDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
+        $objProtocoloMetadadosDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($parObjMetadadoDocumento->dataHoraDeProducao));
+    }
+      $objDocumentoDTO->setObjProtocoloDTO($objProtocoloMetadadosDTO);
+      $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+
+      //
       //Realiza a alteração dos metadados do documento(Por hora, apenas do nível de sigilo e hipótese legal)
       $strNivelAcessoLocal = $this->obterNivelSigiloSEI($parObjMetadadoDocumento->nivelDeSigilo);
 
@@ -1872,12 +1943,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumentoDTO->setStrConteudo(null);
           $objDocumentoDTO->setStrStaDocumento(DocumentoRN::$TD_EXTERNO);
 
-          $identificacao = is_array($objDocumento->identificacao) ? json_decode($objDocumento->identificacao['complemento'], true) : json_decode($objDocumento->identificacao->complemento, true);
           $bolAutenticacao = false;
-        if (is_array($identificacao) && array_key_exists('tipo_conferencia', $identificacao)) {
-            $bolAutenticacao = true;
-            $objDocumentoDTO->setNumIdTipoConferencia(999);
-        }
 
           $objProtocoloDTO = new ProtocoloDTO();
           $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
