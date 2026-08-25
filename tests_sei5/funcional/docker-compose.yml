@@ -25,6 +25,14 @@ services:
     links:
       - org1-http:org1-http
       - org2-http:org2-http
+  # Servidor de fila do Gearman. O modulo funciona sem ele -- cai no
+  # processamento sincrono --, mas so com ele o caminho assincrono e exercitado.
+  # Ligue os testes nesse modo com PEN_TESTE_SEGUNDO_PLANO=1 (ver Makefile).
+  gearmand:
+    image: artefactual/gearmand:latest
+    ports:
+      - "4730:4730"
+
   solr:
     image: ${SOLR_IMAGE}:${ENVIRONMENT_VERSION}
     ports:
@@ -50,6 +58,7 @@ services:
       - org1-database
       - org2-database
       - selenium
+      - gearmand
     volumes:
       #Permite o container de teste se comunicar com o Docker da máquina que subiu o ambiente, para que ele possa mandar comandos aos outros containers (org1-http-1, org2-http-1)
       - /var/run/docker.sock:/var/run/docker.sock

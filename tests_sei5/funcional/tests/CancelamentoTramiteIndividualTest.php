@@ -113,7 +113,30 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
         $this->paginaAgendamentos->executarAgendamento('PENAgendamentoRN :: processarTarefasRecebimentoPEN');
 
         $this->paginaBase->navegarParaControleProcesso();
-        $this->waitUntil(function() use ($strProtocoloTeste) {
+
+        // No modo assincrono (Gearman) uma execucao do agendamento apenas
+        // ENFILEIRA um passo da cadeia de recebimento; os passos seguintes so
+        // avancam na proxima execucao do monitoramento. Em producao o
+        // agendamento do SEI repete sozinho; aqui ele e disparado uma unica vez.
+        //
+        // A primeira versao desta correcao usava 4 rodadas FIXAS, numero
+        // calibrado observando o MySQL. Numero magico nao se sustenta: quantas
+        // rodadas sao necessarias depende da velocidade do banco e de quanto o
+        // barramento ja acumulou de trafego. No SQL Server, com a suite inteira
+        // rodada antes, 4 nao bastaram e a espera estourou.
+        //
+        // Agora o monitoramento roda DENTRO da espera, uma vez por tentativa,
+        // ate o processo chegar ou o tempo acabar -- sem numero para calibrar.
+        // So o recebimento do DESTINATARIO: rodar a cadeia inteira faria o org1
+        // processar o recibo e encerrar o tramite, tirando da arvore o icone de
+        // cancelamento que este teste precisa encontrar logo adiante.
+        $bolAssincrono = $this->modoSegundoPlanoAtivo();
+        $this->waitUntil(function () use ($strProtocoloTeste, $bolAssincrono) {
+            if ($bolAssincrono) {
+                shell_exec('docker exec -e XDEBUG_MODE=off funcional-org2-http-1 '
+                    . 'php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php -d');
+                $this->aguardarFilaGearmanDrenar(60);
+            }
             try {
                 $this->paginaBase->refresh();
                 $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
@@ -121,7 +144,6 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
             } catch (\Exception $e) {
                 return false;
             }
-
         }, PEN_WAIT_TIMEOUT);
 
         
