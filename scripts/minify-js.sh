@@ -2,12 +2,10 @@
 
 set -e
 
-npm install -g terser >/dev/null
 # Versao fixada: este script reescreve todo o JS que vai no pacote distribuido.
 # --ignore-scripts evita postinstall.
 npm install -g --ignore-scripts terser@5 >/dev/null
 
-find /app -name '*.js' | while IFS= read -r file; do
 # vendor fica de fora: todo .js de la e' do php_codesniffer (require-dev), apagado
 # logo depois pelo 'composer install --no-dev'.
 find /app -path '/app/vendor' -prune -o -name '*.js' -print | while IFS= read -r file; do
