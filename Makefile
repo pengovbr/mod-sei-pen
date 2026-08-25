@@ -281,6 +281,58 @@ test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
 
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --debug /tests/tests/$(addsuffix .php,$(teste))
 
+# Testes funcionais exercitando o caminho ASSINCRONO (Gearman).
+# O alvo test-functional roda tudo pelo processamento sincrono, entao o caminho
+# com Gearman -- o usado em producao com supervisor -- nunca era testado.
+# Sobe os workers antes e os derruba ao final.
+# Testes funcionais exercitando o caminho ASSINCRONO (Gearman).
+#
+# O alvo test-functional roda tudo pelo processamento sincrono, entao o caminho
+# com Gearman -- o usado em producao com supervisor -- nunca era testado.
+#
+# O Gearman fica DESLIGADO por padrao na configuracao do modulo. Este alvo o
+# liga, sobe os workers, roda os testes e devolve tudo ao estado original --
+# inclusive se o teste falhar.
+#
+# Ligar o Gearman na configuracao SEM manter workers vivos faz o recebimento
+# parar em silencio: o agendamento do SEI passa a enfileirar (ver
+# PENAgendamentoRN::processarTarefasRecebimentoPEN) e ninguem consome. Por isso
+# configuracao e workers andam juntos, dentro deste alvo.
+CONFIG_MOD_PEN = $(PEN_TEST_FUNC)/assets/config/ConfiguracaoModPEN.php
+
+test-functional-gearman: .env $(FILE_VENDOR_FUNCIONAL) up vendor
+	@printf "\n⌛ Ajustando permissões...\n"
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n⚙️  Ligando o Gearman na configuração do módulo...\n"
+	@cp $(CONFIG_MOD_PEN) $(CONFIG_MOD_PEN).semgearman
+	@sed -i \
+		-e 's|^\( *\)// \("Gearman" => array($$\)|\1\2|' \
+		-e 's|^\( *\)//     \("Servidor" => "gearmand",$$\)|\1    \2|' \
+		-e 's|^\( *\)//     \("Porta" => 4730,$$\)|\1    \2|' \
+		-e 's|^\( *\)// \(),$$\)|\1\2|' \
+		$(CONFIG_MOD_PEN)
+	@grep -q '"Servidor" => "gearmand"' $(CONFIG_MOD_PEN) && printf "   ✅ Gearman ligado.\n" \
+		|| { printf "   ❌ Falha ao ligar o Gearman na configuração.\n"; cp $(CONFIG_MOD_PEN).semgearman $(CONFIG_MOD_PEN); exit 1; }
+
+	@printf "\n⚙️  Subindo workers (org1 e org2)...\n"
+	@for org in org1 org2; do \
+		for i in 1 2; do \
+			docker exec -d funcional-$$org-http-1 sh -c 'while true; do php /opt/sei/scripts/mod-pen/ProcessamentoTarefasPEN.php >/dev/null 2>&1; sleep 1; done'; \
+		done; \
+	done
+	@sleep 6
+	@printf "   ✅ Workers no ar.\n\n"
+
+	-$(CMD_COMPOSE_FUNC) run --rm -e PEN_TESTE_SEGUNDO_PLANO=true php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --debug /tests/tests/$(addsuffix .php,$(teste))
+
+	@printf "\n🧹 Encerrando workers e restaurando a configuração...\n"
+	@for org in org1 org2; do \
+		docker exec funcional-$$org-http-1 sh -c 'for p in $$(ps -eo pid,args | grep "[P]rocessamentoTarefasPEN" | awk "{print \$$1}"); do kill -9 $$p; done' 2>/dev/null || true; \
+	done
+	@mv $(CONFIG_MOD_PEN).semgearman $(CONFIG_MOD_PEN)
+	@printf "   ✅ Gearman desligado, ambiente devolvido ao padrão.\n"
+
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
 

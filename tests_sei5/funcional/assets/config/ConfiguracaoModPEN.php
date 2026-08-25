@@ -66,10 +66,14 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // As mensagem recebidas são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para
                 // processamento paralelo. Caso este parâmetro não seja configurado ou o servidor este indisponível, o processamento será
                 // feito diretamente pelo sistema na periodicidade definida pelo agendamento da tarefa PENAgendamento::receberProcessos
+                // Aponta para o servico gearmand do docker-compose dos testes.
+                // Com o gearmand no ar e workers rodando, os testes exercitam o
+                // caminho assincrono (ver PEN_TESTE_SEGUNDO_PLANO no phpunit.xml).
+                // Sem workers, o modulo cai no processamento sincrono.
                 // "Gearman" => array(
-                //     "Servidor" => "",
-                //     "Porta" => "", //Padrão: 4730
-                // )
+                //     "Servidor" => "gearmand",
+                //     "Porta" => 4730,
+                // ),
 
                 "ControleURL" => array(
                     "atual"=>"servidor.gov.br",

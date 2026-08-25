@@ -260,6 +260,16 @@ class CenarioBaseTestCase extends TestCase
 
   public function setUp(): void
     {
+      // Reancora o driver numa janela valida antes de qualquer comando.
+      //
+      // O cancelamento de tramite externo fecha a janela corrente ao terminar,
+      // e o teste seguinte morre com NoSuchWindowException sem que a sessao do
+      // Selenium tenha caido. Com uma janela so, isto e no-op.
+      $arrJanelas = self::$driver->getWindowHandles();
+      if (!empty($arrJanelas)) {
+          self::$driver->switchTo()->window(end($arrJanelas));
+      }
+
       self::$driver->manage()->deleteAllCookies();
       $this->setUpPage();
   }
@@ -639,15 +649,131 @@ class CenarioBaseTestCase extends TestCase
 
   public function executarTramitarPendenciasSimples(): void
     {
-        $scriptEnvio       = 'php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php';
-        $scriptRecebimento = 'php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php';
+        // O -d poe o monitoramento em modo assincrono (Gearman). Sem ele a suite
+        // so exercita o caminho sincrono.
+        $strModo = $this->modoSegundoPlanoAtivo() ? ' -d' : '';
 
+        $scriptEnvio       = 'php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php' . $strModo;
+        $scriptRecebimento = 'php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php' . $strModo;
+
+        // No modo sincrono uma passada basta. No assincrono cada execucao avanca
+        // so um passo da cadeia, entao sao necessarias varias rodadas.
+        $numRodadasMonitoramento = $this->modoSegundoPlanoAtivo() ? 6 : 1;
+
+    for ($numRodada = 0; $numRodada < $numRodadasMonitoramento; $numRodada++) {
         shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptEnvio}");
+        $this->aguardarFilaGearmanDrenar();
         shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptRecebimento}");
+        $this->aguardarFilaGearmanDrenar();
         shell_exec("docker exec -e XDEBUG_MODE=off funcional-org2-http-1 {$scriptEnvio}");
+        $this->aguardarFilaGearmanDrenar();
         shell_exec("docker exec -e XDEBUG_MODE=off funcional-org2-http-1 {$scriptRecebimento}");
+        $this->aguardarFilaGearmanDrenar();
         shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptRecebimento}");
+        $this->aguardarFilaGearmanDrenar();
     }
+    }
+
+    /**
+     * Aguarda a fila do Gearman drenar.
+     *
+     * No modo sincrono (padrao da suite) retorna de imediato -- o trabalho ja
+     * terminou quando o script de monitoramento retorna. No modo assincrono o
+     * monitoramento apenas ENFILEIRA, entao sem esta espera o teste avanca para
+     * as assercoes com o worker ainda processando. Em documento grande o job
+     * passa de 15 segundos, e a suite trava esperando no Selenium.
+     *
+     * A leitura usa o comando 'status' do protocolo administrativo do gearmand,
+     * que devolve uma linha por funcao no formato:
+     *
+     *     <funcao>\t<na fila>\t<rodando>\t<workers disponiveis>
+     *
+     * Exige algumas leituras zeradas seguidas, porque a fila fica vazia por
+     * instantes entre um enfileiramento e o proximo.
+     *
+     * @param int $numTimeoutSegundos tempo maximo de espera
+     */
+    /**
+     * Indica se os testes devem processar as pendencias pelo Gearman.
+     *
+     * Vem da constante PEN_TESTE_SEGUNDO_PLANO do phpunit.xml; a variavel de
+     * ambiente de mesmo nome sobrepoe, para uso pontual em linha de comando.
+     */
+  protected function modoSegundoPlanoAtivo()
+    {
+    if (getenv('PEN_TESTE_SEGUNDO_PLANO') !== false) {
+        return filter_var(getenv('PEN_TESTE_SEGUNDO_PLANO'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+      return defined('PEN_TESTE_SEGUNDO_PLANO')
+        && filter_var(PEN_TESTE_SEGUNDO_PLANO, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  protected function aguardarFilaGearmanDrenar($numTimeoutSegundos = 600)
+    {
+    if (!$this->modoSegundoPlanoAtivo()) {
+        return;
+    }
+
+      $strServidor = getenv('PEN_GEARMAN_SERVIDOR') ?: 'gearmand';
+      $numPorta = (int) (getenv('PEN_GEARMAN_PORTA') ?: 4730);
+      $numLimite = time() + $numTimeoutSegundos;
+      $numLeiturasVazias = 0;
+
+    while (time() < $numLimite) {
+        $numTarefas = $this->contarTarefasGearman($strServidor, $numPorta);
+
+      if ($numTarefas === null) {
+          // Sem gearmand acessivel nao ha fila a esperar.
+          return;
+      }
+
+      if ($numTarefas === 0) {
+        if (++$numLeiturasVazias >= 3) {
+            return;
+        }
+      } else {
+          $numLeiturasVazias = 0;
+      }
+
+        sleep(1);
+    }
+  }
+
+    /**
+     * Total de tarefas na fila mais em execucao, somando todas as funcoes.
+     *
+     * @return int|null null quando o gearmand nao esta acessivel
+     */
+  private function contarTarefasGearman($strServidor, $numPorta)
+    {
+      $objSocket = @fsockopen($strServidor, $numPorta, $numErro, $strErro, 5);
+
+    if ($objSocket === false) {
+        return null;
+    }
+
+      fwrite($objSocket, "status\n");
+      $numTotal = 0;
+
+    while (($strLinha = fgets($objSocket)) !== false) {
+        $strLinha = trim($strLinha);
+
+      if ($strLinha === '.' || $strLinha === '') {
+          break;
+      }
+
+        $arrCampos = preg_split('/\s+/', $strLinha);
+
+      if (count($arrCampos) >= 3) {
+          $numTotal += (int) $arrCampos[1] + (int) $arrCampos[2];
+      }
+    }
+
+      fclose($objSocket);
+
+      return $numTotal;
+  }
 
   public function gerarDadosProcessoTeste($contextoProducao)
     {

@@ -31,6 +31,11 @@
 
     <!-- Flag para desativar agendamento, de modo que o comando de tramitação aconteça sob demanda, e não pelo prazo configurado no SEI -->
     <const name="DESATIVAR_AGENDAMENTO" value="true" />
+
+    <!-- true faz os testes processarem as pendencias pelo Gearman, em vez do
+         processamento sincrono. Exige o servico gearmand no ar e workers
+         rodando: use "make test-functional-gearman". -->
+    <const name="PEN_TESTE_SEGUNDO_PLANO" value="false" />
  
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de
     Serviços do PEN -->
