@@ -370,11 +370,21 @@ class PenMetaBD extends InfraMetaBD
       return $this;
   }
 
+  /**
+   * Exclui o indice apenas se ele existir.
+   *
+   * Importa porque criarIndice() usa este metodo para derrubar indice homonimo
+   * com colunas diferentes; sem isso a criacao seguinte aborta por nome duplicado.
+   */
   public function excluirIndice($strTabela, $strIndex)
     {
-    if($this->isChaveExiste($strTabela, $strFk)) {
+      $arrIndices = $this->obterIndices(null, $strTabela);
+
+    if (isset($arrIndices[$strTabela][$strIndex])
+        || isset($arrIndices[strtolower($strTabela)][strtolower($strIndex)])) {
         parent::excluirIndice($strTabela, $strIndex);
     }
+
       return $this;
   }
 
