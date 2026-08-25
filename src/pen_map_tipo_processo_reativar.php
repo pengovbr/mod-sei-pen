@@ -138,10 +138,11 @@ try {
         $strResultado .= ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
 
         $strResultado .= '<td align="center">' . $objPagina->getTrCheck($i, $arrObjMapeamentoAssuntoDTO[$i]->getDblId() . ';' . $arrObjMapeamentoAssuntoDTO[$i]->getStrAtivo(), '') . '</td>';
-        $strResultado .= '<td align="center">'. $arrObjMapeamentoAssuntoDTO[$i]->getStrOrgaoOrigem() . '';
-        $strResultado .= '<td align="center">'. $arrObjMapeamentoAssuntoDTO[$i]->getStrOrgaoDestino() . '</td>';
-        $strResultado .= '<td>' . $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcesso() . '</td>';
-        $strResultado .= '<td>' . $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcedimento() . '</td>';
+        // Nome importado de fonte externa: escapar antes de renderizar.
+        $strResultado .= '<td align="center">'. PaginaSEI::tratarHTML($arrObjMapeamentoAssuntoDTO[$i]->getStrOrgaoOrigem()) . '';
+        $strResultado .= '<td align="center">'. PaginaSEI::tratarHTML($arrObjMapeamentoAssuntoDTO[$i]->getStrOrgaoDestino()) . '</td>';
+        $strResultado .= '<td>' . PaginaSEI::tratarHTML($arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcesso()) . '</td>';
+        $strResultado .= '<td>' . PaginaSEI::tratarHTML($arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcedimento()) . '</td>';
         $strResultado .= '<td align="center">';
 
         $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_tipo_processo_reativar&acao_origem=' . $acaoOrigem . '&id=' . $arrObjMapeamentoAssuntoDTO[$i]->getDblId());

@@ -227,7 +227,8 @@ class TramiteEmBlocoRN extends InfraRN
     try {
 
         //Valida Permissao
-        //           / SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cadastrar',__METHOD__,$objTramiteEmBlocoDTO);
+        // Sem esta validacao, criar bloco fica autorizado so pela listagem.
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cadastrar', __METHOD__, $objTramiteEmBlocoDTO);
 
         //Regras de Negocio
         $objInfraException = new InfraException();
@@ -363,6 +364,9 @@ class TramiteEmBlocoRN extends InfraRN
   protected function cancelarControlado(array $blocoIds)
     {
     try {
+        // Autorizacao no cancelamento, como nas demais operacoes desta classe.
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cancelar', __METHOD__, $blocoIds);
+
         $objBloco = new PenBlocoProcessoDTO();
       foreach ($blocoIds as $blocoId) {
         $objBloco->setNumIdBloco($blocoId);
