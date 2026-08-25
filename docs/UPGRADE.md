@@ -452,8 +452,77 @@ Para utilizar os arquivos `.br`, o servidor HTTP deve estar configurado para:
 
 Com essa configuração, os clientes compatíveis receberão automaticamente as versões compactadas dos arquivos **SVG**, **JS** e **CSS**, proporcionando uma entrega de conteúdo mais eficiente.
 
+
 ---
----
+
+### 1.4. Atualização para a versão 4.1.0 em instalações com Gearman
+
+**Só se aplica a quem usa Gearman.** Se o parâmetro `Gearman` do
+`ConfiguracaoModPEN.php` está vazio, siga o procedimento normal.
+
+### O que mudou
+
+Até a 4.0.x, cada situação de trâmite era enfileirada numa função diferente
+(`receberProcedimento`, `receberReciboTramite`, `receberTramitesRecusados`). A
+chave única do Gearman impede processamento duplicado, mas **só dentro da mesma
+função** — então um trâmite podia entrar por duas delas e ser processado em
+paralelo. É a causa da issue #1180.
+
+A 4.1.0 passa a usar uma função única, `processarPendencia`, e com isso o
+próprio gearmand garante um trâmite por vez.
+
+
+
+### Procedimento
+
+1. Desative os agendamentos `PENAgendamentoRN::processarTarefasEnvioPEN` e
+   `PENAgendamentoRN::processarTarefasRecebimentoPEN` em todos os nós.
+2. Aguarde a fila esvaziar — `gearadmin --status`, com as colunas de fila e de
+   execução zeradas em todas as funções.
+3. Pare os workers em todos os nós.
+4. Atualize **todos** os nós para a 4.1.0.
+5. Suba os workers e reative os agendamentos.
+
+### Conferência
+
+`gearadmin --status` deve listar `processarPendencia` com workers disponíveis.
+As três funções antigas continuam listadas — registradas de propósito — mas não
+devem acumular fila.
+
+O `verifica_instalacao_modulo_pen.php` deve reportar "Conexão com o servidor de
+processamento de tarefas Gearman realizada com sucesso".
+
+
+### 1.5. Atualização para a versão 4.1.0 — agendamento de tarefas
+
+**Aplica-se a toda atualização para a 4.1.0.** Esta versão executa a migração
+dos anexos de documentos internos, que move registros e arquivos enquanto roda.
+
+O SEI e o módulo possuem rotinas agendadas de limpeza de arquivos que atuam
+sobre os mesmos anexos. Para evitar interferência, mantenha-as paradas durante
+o procedimento.
+
+### Procedimento
+
+1. Desative o agendamento `AgendamentoRN::removerAquivosNaoUtilizados` em
+   Administração → Infraestrutura → Agendamento de Tarefas.
+2. Pare o agendador de tarefas do SEI.
+3. Execute a atualização normalmente.
+4. Após a migração concluir, religue o agendador e reative o agendamento.
+
+> Em caso de erro de limite de transação durante a migração, é possível
+> reduzir o tamanho do lote (padrão 500) definindo a variável de ambiente
+> `PEN_MIGRACAO_ANEXOS_LOTE` ao executar o script:
+>
+> ```bash
+> PEN_MIGRACAO_ANEXOS_LOTE=200 php -c /etc/php.ini <DIRETÓRIO RAIZ>/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
+> ```
+
+> O script de atualização cadastra rotinas próprias de limpeza do módulo
+> (`PENAgendamentoRN::removerArquivosExcluidosModSeiPen` e
+> `PENAgendamentoRN::removerArquivosNaoUtilizadosModSeiPen`), ativas a partir da
+> instalação. Com o agendador parado, elas só entram em operação depois que a
+> migração terminar.
 
 ## 2. CONFIGURAÇÕES
 
