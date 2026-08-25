@@ -22,11 +22,6 @@ jobs:
           make minify-svg
           make generate-brotli
           make dist
-      
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-        shell: bash
 
       - name: Create Release
         id: create_release
@@ -34,10 +29,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
           body_path: dist/NOTAS_VERSAO.md
           draft: false
           prerelease: true
           files: |
-            dist/mod-sei-tramitagovbr-${{ steps.get_version.outputs.VERSION }}.zip
+            dist/mod-sei-tramitagovbr-${{ github.ref_name }}.zip
             compatibilidade.json
