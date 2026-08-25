@@ -199,7 +199,8 @@ try {
           $idBlocoTramite = $linha['id'];
 
         if (!is_null($linha[$key]) && $key != 'id') {
-            $strResultado .= "<td align='center'> {$linha[$key]} </td>";
+            // A descricao vem do usuario: escapar antes de renderizar.
+            $strResultado .= "<td align='center'> " . PaginaSEI::tratarHTML($linha[$key]) . " </td>";
         }
       
       }

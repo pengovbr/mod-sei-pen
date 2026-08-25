@@ -98,6 +98,10 @@ try {
           // Ação padrão desta tela
           break;
       case 'pen_map_orgaos_importar_tipos_processos':
+          // A importacao tem recurso proprio no SIP: exigir a permissao dela, e
+          // nao apenas a de listagem.
+          $objSessao->validarPermissao('pen_map_orgaos_importar_tipos_processos');
+
         try {
             $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
             $arrProcedimentoDTO = [];
@@ -288,9 +292,10 @@ try {
         $strResultado .= '<tr class="' . $strCssTr . '">';
         $strResultado .= '<td align="center">' . $objPagina->getTrCheck($index, $objPenOrgaoExternoDTO->getDblId() . ';' . $objPenOrgaoExternoDTO->getStrAtivo(), '') . '</td>';
         $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoOrigem() . '</td>';
-        $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoOrigem() . '</td>';
+        // Nome de orgao vem de entrada do usuario: escapar antes de renderizar.
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoOrigem()) . '</td>';
         $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoDestino() . '</td>';
-        $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoDestino() . '</td>';
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoDestino()) . '</td>';
         $strResultado .= '<td align="center">';
 
         $strResultado .= '<a href="'

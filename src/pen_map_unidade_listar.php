@@ -39,6 +39,10 @@ try {
     switch($_GET['acao']) {
 
       case PEN_RECURSO_BASE.'_excluir':
+          // A pagina autentica a permissao de listagem, mas trata tambem a
+          // exclusao. Cada acao exige a sua propria permissao.
+          $objSessao->validarPermissao(PEN_RECURSO_BASE.'_excluir');
+
         if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
 
             $objPenUnidadeDTO = new PenUnidadeDTO();

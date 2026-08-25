@@ -13,6 +13,10 @@ try {
 
     SessaoSEI::getInstance()->validarLink();
 
+    // O link assinado garante a integridade dos parametros, mas nao substitui
+    // autorizacao: o cancelamento exige a permissao de expedir.
+    SessaoSEI::getInstance()->validarPermissao('pen_procedimento_expedir');
+
     $objPaginaSEI = PaginaSEI::getInstance();
 
     $strParametros = '';

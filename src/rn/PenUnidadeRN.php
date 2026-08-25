@@ -106,6 +106,9 @@ class PenUnidadeRN extends InfraRN
   protected function excluirControlado(UnidadeDTO $objDTO)
     {
     try {
+        // Defesa em profundidade: a autorizacao nao fica so na tela.
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_unidade_excluir', __METHOD__, $objDTO);
+
         $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
         return $objBD->excluir($objDTO);
     } 
