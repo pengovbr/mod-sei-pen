@@ -296,7 +296,10 @@ class VerificadorInstalacaoRN extends InfraRN
       $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
       $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
       $strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
-      $strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
+      // Issue #1180: com a Porta em branco (ou ausente) esta expressao produzia
+      // string vazia, e addServer() lanca TypeError no PHP 8 -- o parametro e
+      // int e string vazia nao e coercivel. Converte e cai no padrao 4730.
+      $strGearmanPorta = (int) trim(@$arrObjGearman["Porta"] ?: null) ?: 4730;
 
       if(empty($strGearmanServidor)) {
         // Não processa a verificação da instalação do Gearman caso não esteja configurado

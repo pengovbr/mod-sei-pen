@@ -10,6 +10,15 @@ class ProcessarPendenciasRN extends InfraRN
     private $strGearmanPorta;
 
     const TIMEOUT_PROCESSAMENTO_JOB = 5400; // valores em segundos, 5400 = 90 minutos
+
+    /**
+     * O timeout do addFunction e em MILISSEGUNDOS, nao em segundos.
+     *
+     * Passar 5400 valia 5,4 s, e nao os 90 minutos pretendidos: job mais
+     * demorado era reentregue pelo gearmand e processado por dois workers ao
+     * mesmo tempo. So aparece em documentos grandes, que passam de 5,4 s.
+     */
+    const TIMEOUT_PROCESSAMENTO_JOB_MS = self::TIMEOUT_PROCESSAMENTO_JOB * 1000;
     const TIMEOUT_PROCESSAMENTO_EVENTOS = 300000; // valores em milisegundos, 300000 = 5 minutos
 
     const NUMERO_WORKERS_GEARMAN = 4;
@@ -40,7 +49,10 @@ class ProcessarPendenciasRN extends InfraRN
       // Parâmetro opcional. Não ativar o processamento por fila de tarefas, deixando o agendamento do SEI executar tal operação
       $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
       $this->strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
-      $this->strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
+      // Issue #1180: com a Porta em branco (ou ausente) esta expressao produzia
+      // string vazia, e addServer() lanca TypeError no PHP 8 -- o parametro e
+      // int e string vazia nao e coercivel. Converte e cai no padrao 4730.
+      $this->strGearmanPorta = (int) trim(@$arrObjGearman["Porta"] ?: null) ?: 4730;
 
     if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
         throw new InfraException("Módulo do Tramita: Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
@@ -432,49 +444,97 @@ class ProcessarPendenciasRN extends InfraRN
       $this->objGearmanWorker->addFunction(
           "enviarProcesso", function ($job): void {
               $this->enviarProcesso($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
       $this->objGearmanWorker->addFunction(
           "enviarComponenteDigital", function ($job): void {
               $this->enviarComponenteDigital($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
+      // Funcao unica de recebimento. O monitor enfileira tudo por aqui, com o
+      // IDT como chave unica, para que o gearmand impeca o processamento
+      // concorrente do mesmo tramite (issue #1180). A situacao vem no payload e
+      // decide qual dos metodos abaixo roda.
+      $this->objGearmanWorker->addFunction(
+          "processarPendencia", function ($job): void {
+              $arrPendencia = json_decode($job->workload(), true);
+
+              if (!is_array($arrPendencia) || !isset($arrPendencia['idt'], $arrPendencia['status'])) {
+                  $this->gravarLogDebug("Payload de pendencia invalido: " . $job->workload(), 0, true);
+                  return;
+              }
+
+              $numIdTramite = $arrPendencia['idt'];
+
+              switch ((int) $arrPendencia['status']) {
+                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
+                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
+                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
+                      $this->receberProcedimento($numIdTramite);
+                      break;
+
+                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+                      $this->receberReciboTramite($numIdTramite);
+                      break;
+
+                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+                      $this->receberTramitesRecusados($numIdTramite);
+                      break;
+
+                  // Exclusivo da 4.2.0-beta: pedido de sincronizacao de multiplos
+                  // orgaos. A 4.2.0-beta despachava 'enviarSincronizacaoTramite',
+                  // mas nenhum worker registrava essa funcao - o job ficava na fila
+                  // sem consumidor. Aqui ele passa a ser efetivamente tratado.
+                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA:
+                      $objSincronizacaoRN = new SincronizacaoExpedirProcedimentoRN();
+                      $objSincronizacaoRN->enviarSincronizacaoTramite($numIdTramite);
+                      break;
+
+                  default:
+                      $this->gravarLogDebug("Situacao do tramite ({$arrPendencia['status']}) nao pode ser tratada.", 0, true);
+                      break;
+              }
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
+      );
+
+      // As tres funcoes antigas seguem registradas para consumir jobs deixados
+      // na fila por versao anterior do modulo.
       $this->objGearmanWorker->addFunction(
           "receberReciboTramite", function ($job): void {
               $this->receberReciboTramite($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
       $this->objGearmanWorker->addFunction(
           "receberProcedimento", function ($job): void {
               $this->receberProcedimento($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
       $this->objGearmanWorker->addFunction(
           "receberTramitesRecusados", function ($job): void {
               $this->receberTramitesRecusados($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
       $this->objGearmanWorker->addFunction(
           "receberComponenteDigital", function ($job): void {
               $this->receberComponenteDigital($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
       $this->objGearmanWorker->addFunction(
           "enviarReciboTramiteProcesso", function ($job): void {
               $this->enviarReciboTramiteProcesso($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
       $this->objGearmanWorker->addFunction(
           "expedirBloco", function ($job): void {
               $this->expedirBloco($job->workload());
-          }, null, self::TIMEOUT_PROCESSAMENTO_JOB
+          }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 
   }
@@ -531,7 +591,10 @@ class ProcessarPendenciasRN extends InfraRN
       $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
       $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
       $strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
-      $strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
+      // Issue #1180: com a Porta em branco (ou ausente) esta expressao produzia
+      // string vazia, e addServer() lanca TypeError no PHP 8 -- o parametro e
+      // int e string vazia nao e coercivel. Converte e cai no padrao 4730.
+      $strGearmanPorta = (int) trim(@$arrObjGearman["Porta"] ?: null) ?: 4730;
 
     if(!empty($strGearmanServidor)) {
       try {
