@@ -56,7 +56,10 @@ class PendenciasTramiteRN extends InfraRN
       // Parâmetro opcional. Não ativar o processamento por fila de tarefas, deixando o agendamento do SEI executar tal operação
       $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
       $this->strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
-      $this->strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
+      // Issue #1180: com a Porta em branco (ou ausente) esta expressao produzia
+      // string vazia, e addServer() lanca TypeError no PHP 8 -- o parametro e
+      // int e string vazia nao e coercivel. Converte e cai no padrao 4730.
+      $this->strGearmanPorta = (int) trim(@$arrObjGearman["Porta"] ?: null) ?: 4730;
   }
 
     /**
@@ -411,25 +414,30 @@ class PendenciasTramiteRN extends InfraRN
         $numIDT = strval($objPendencia->getNumIdentificacaoTramite());
         $numStatus = strval($objPendencia->getStrStatus());
 
-      switch ($numStatus) {
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-            $client->addTaskBackground('receberProcedimento', $numIDT, null, $numIDT);
-            break;
+      // Uma unica funcao, com a situacao no payload e o IDT como chave unica.
+      //
+      // A chave unica do Gearman impede processamento duplicado, mas so DENTRO
+      // da mesma funcao. Com tres nomes, o mesmo tramite podia entrar por dois
+      // deles -- quando a situacao avanca durante um recebimento demorado -- e
+      // ser processado em paralelo.
+        $arrSituacoesProcessaveis = array(
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+        );
 
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-            $client->addTaskBackground('receberReciboTramite', $numIDT, null, $numIDT);
-            break;
-
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-            $client->addTaskBackground("receberTramitesRecusados", $numIDT, null, $numIDT);
-            break;
-
-        default:
-            $this->gravarLogDebug("Situação do trâmite ($numStatus ) não pode ser tratada.");
-            break;
-      }
+    if (in_array((int) $numStatus, $arrSituacoesProcessaveis, true)) {
+        $client->addTaskBackground(
+            'processarPendencia',
+            json_encode(array('idt' => $numIDT, 'status' => $numStatus)),
+            null,
+            $numIDT
+        );
+    } else {
+        $this->gravarLogDebug("Situação do trâmite ($numStatus ) não pode ser tratada.");
+    }
 
         $client->runTasks();
     }
