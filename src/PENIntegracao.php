@@ -1164,7 +1164,18 @@ class PENIntegracao extends SeiIntegracao
           break;
 
       case 'pen_procedimento_expedir_cancelar':
-          $numIdTramite = $_POST['id_tramite'];
+          // A assinatura do link cobre so a query string, nao o corpo POST. O
+          // id_tramite passa a vir da query assinada, para que nao seja possivel
+          // trocar o alvo do cancelamento. A permissao de expedir tambem e exigida.
+          SessaoSEI::getInstance()->validarLink();
+          SessaoSEI::getInstance()->validarPermissao('pen_procedimento_expedir');
+
+          $numIdTramite = InfraUtil::retirarFormatacao($_GET['id_tramite']);
+
+        if (empty($numIdTramite)) {
+            throw new InfraException('Módulo do Tramita: Trâmite não informado para cancelamento.');
+        }
+
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
           $result = json_encode($objProcessoEletronicoRN->cancelarTramite($numIdTramite));
           InfraAjax::enviarJSON($result);
