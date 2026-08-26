@@ -2659,7 +2659,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         $objInfraBanco = BancoSEI::getInstance();
       
-        $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from md_pen_anexo_documento');
+        // A sequencia parte do maior id de `anexo`, nao da tabela nova (vazia
+        // neste ponto). Comecando baixo, um id novo colidiria com o id antigo de
+        // uma linha ainda nao migrada, apontando o vinculo para o anexo errado.
+        $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from anexo');
         $numMaxId = $rs[0]['total'] ?? 0;
         $objInfraBanco->criarSequencialNativa('md_pen_seq_anexo_documento', $numMaxId + 1);
   
@@ -2671,9 +2674,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         if (!empty($arrObjInfraSequenciaDTO)) {
           $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
         }
-          
 
-        $this->migrarAnexosDocumentosInternosV4100();
         // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
         $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
         $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos mod-sei-pen excluídos.');
@@ -2699,18 +2700,110 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
   
       }
+
+      // Indice unico de id_serie (#1207). Vem antes da migracao: falha em
+      // segundos, nao depois de horas. As duplicatas saem primeiro, senao a
+      // criacao aborta justamente nas bases que sofrem do bug.
+      $this->removerDuplicidadesMapeamentoEnvioV4100();
+      $this->garantirIndiceUnicoMapeamentoEnvioV4100();
+
+      // Fora do if acima de proposito: dentro dele, uma falha deixaria a base
+      // meio migrada e marcada como completa. Reexecutar retoma de onde parou.
+      // Sem este indice a consulta varre a tabela inteira a cada lote.
+      $objMetaBanco->criarIndice('md_pen_componente_digital', 'i01_md_pen_comp_dig_anexo_imut', ['id_anexo_imutavel'], false);
+      // O MySQL indexa coluna de FK automaticamente; o Oracle nao. Sem este
+      // indice, o Oracle faz varredura completa a cada lote.
+      $objMetaBanco->criarIndice('md_pen_componente_digital', 'i02_md_pen_comp_dig_anexo', ['id_anexo'], false);
+
+
+      // Migracao dos anexos de documentos internos, em lotes. O laco fica fora
+      // de um metodo Controlado: dentro dele tudo rodaria numa transacao so.
+      $numTamanhoLote = (int) getenv('PEN_MIGRACAO_ANEXOS_LOTE');
+      if ($numTamanhoLote < 1) {
+          $numTamanhoLote = self::TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100;
+      }
+
+      $numLote = 0;
+      $numTotal = 0;
+      $numUltimoIdAnexo = 0;
+      $numInicioGeral = microtime(true);
+
+      // O log de debug do INFRA grava uma linha por consulta ao banco: medido,
+      // 3,9 GB para 1M de anexos. Fica desligado so aqui; o log do modulo (as linhas
+      // MIGRACAO_ANEXOS_V4100 abaixo) usa outra flag e continua ativo.
+      $bolDebugInfraAnterior = InfraDebug::getInstance()->isBolDebugInfra();
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+
+      do {
+          $numInicioLote = microtime(true);
+          $arrAnexosLote = $this->listarAnexoDocumentosInternos($numTamanhoLote, $numUltimoIdAnexo);
+          $numTempoConsulta = microtime(true) - $numInicioLote;
+
+          if (!empty($arrAnexosLote)) {
+              $arrUltimo = end($arrAnexosLote);
+              $numUltimoIdAnexo = $arrUltimo['id_anexo'];
+
+              $numLote++;
+              $arrTempos = $this->migrarLoteAnexosDocumentosInternosV4100($arrAnexosLote);
+              $numTotal += count($arrAnexosLote);
+
+              $this->logar(sprintf(
+                  'MIGRACAO_ANEXOS_V4100 lote=%d linhas=%d consulta=%.4f banco=%.4f arquivos=%.4f lote_total=%.4f acumulado=%d decorrido=%.2f',
+                  $numLote,
+                  count($arrAnexosLote),
+                  $numTempoConsulta,
+                  $arrTempos['banco'],
+                  $arrTempos['arquivos'],
+                  microtime(true) - $numInicioLote,
+                  $numTotal,
+                  microtime(true) - $numInicioGeral
+              ));
+          }
+      } while (!empty($arrAnexosLote));
+
+      InfraDebug::getInstance()->setBolDebugInfra($bolDebugInfraAnterior);
+
+      if ($numTotal > 0) {
+          $numDecorrido = microtime(true) - $numInicioGeral;
+          $this->logar(sprintf(
+              'MIGRACAO_ANEXOS_V4100 FIM total=%d lotes=%d tamanho_lote=%d tempo=%.2fs media=%.4fms_por_anexo',
+              $numTotal, $numLote, $numTamanhoLote, $numDecorrido, ($numDecorrido * 1000) / $numTotal
+          ));
+      }        
+  
+      //----------------------------------------------------------------------
+      // Correção da FK md_pen_componente_digital -> anexo para ON DELETE SET NULL.
+      // Sem isso, o expurgo definitivo de um anexo pela limpeza da lixeira falha.
+      //----------------------------------------------------------------------
+      $objMetaBanco->excluirChaveEstrangeira('md_pen_componente_digital', 'fk_md_pen_comp_dig_anexo');
+      $objMetaBanco->criarChaveEstrangeiraComExclusao(
+        'fk_md_pen_comp_dig_anexo',
+        'md_pen_componente_digital',
+        ['id_anexo'],
+        'anexo',
+        ['id_anexo'],
+        'SET NULL'
+      );
+
       
+
       $this->atualizarNumeroVersao("4.1.0");
   }
 
-  protected function migrarAnexosDocumentosInternosV4100Controlado()
-  {
-    $arrObjAnexoDocumentosInternosDTO = $this->listarAnexoDocumentosInternos();
-    if (!empty($arrObjAnexoDocumentosInternosDTO)) {
+  const TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100 = 500;
+
+protected function migrarLoteAnexosDocumentosInternosV4100Controlado($arrAnexos)
+    {
       $objPenAnexoDocumentoRN = new PenAnexoDocumentoRN();
       $objAnexoRN = new AnexoRN();
       $objAnexoBD = new AnexoBD(BancoSEI::getInstance());
-          foreach($arrObjAnexoDocumentosInternosDTO as $objAnexoDocumentoInternoDTO) {
+
+      $numTempoBanco = 0;
+      $numTempoArquivos = 0;
+
+    foreach ($arrAnexos as $objAnexoDocumentoInternoDTO) {
+        $numMarca = microtime(true);
+
         $objPenAnexoDocumentoDTO = new PenAnexoDocumentoDTO();
         $objPenAnexoDocumentoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
         $objPenAnexoDocumentoDTO->setStrNome($objAnexoDocumentoInternoDTO['nome']);
@@ -2719,12 +2812,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPenAnexoDocumentoDTO->setNumIdUnidade($objAnexoDocumentoInternoDTO['id_unidade']);
         $objPenAnexoDocumentoDTO->setNumIdUsuario($objAnexoDocumentoInternoDTO['id_usuario']);
         $objPenAnexoDocumentoDTO->setNumTamanho($objAnexoDocumentoInternoDTO['tamanho']);
-        $objPenAnexoDocumentoDTO->setDthInclusao(DateTime::createFromFormat('Y-m-d H:i:s', $objAnexoDocumentoInternoDTO['dth_inclusao'])->format('d/m/Y H:i:s'));
+        $objPenAnexoDocumentoDTO->setDthInclusao($this->normalizarDataHoraMigracaoV4100($objAnexoDocumentoInternoDTO['dth_inclusao']));
         $objPenAnexoDocumentoDTO->setNumIdBaseConhecimento($objAnexoDocumentoInternoDTO['id_base_conhecimento']);
         $objPenAnexoDocumentoDTO->setNumIdProjeto($objAnexoDocumentoInternoDTO['id_projeto']);
         $objPenAnexoDocumentoDTO->setStrHash($objAnexoDocumentoInternoDTO['hash']);
-            
+
+        // O insert atribui um id novo (PK e sequencia nativa). O vinculo em
+        // md_pen_componente_digital aponta para o id antigo e precisa acompanhar.
+        $numIdAnexoOriginal = $objAnexoDocumentoInternoDTO['id_anexo'];
         $objPenAnexoDocumentoRN->cadastrar($objPenAnexoDocumentoDTO);
+        $this->atualizarVinculoComponenteDigital(
+            $numIdAnexoOriginal,
+            $objPenAnexoDocumentoDTO->getNumIdAnexo()
+        );
 
         $objAnexoDTO = new AnexoDTO();
         $objAnexoDTO->retNumIdAnexo();
@@ -2732,19 +2832,194 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objAnexoDTO->retNumIdUnidade();
         $objAnexoDTO->retNumIdUsuario();
         $objAnexoDTO->retStrNome();
-        $objAnexoDTO->retDblIdProtocolo();
         $objAnexoDTO->retDthInclusao();
         $objAnexoDTO->retNumTamanho();
         $objAnexoDTO->retStrHash();
         $objAnexoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
-
         $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
-          
+
+        $numTempoBanco += microtime(true) - $numMarca;
+
+        $numMarca = microtime(true);
         $strCaminhoNomeArquivo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
         $objPenAnexoDocumentoRN->consolidarAnexoFilesystemModuloPen($objPenAnexoDocumentoDTO, $strCaminhoNomeArquivo);
+        $numTempoArquivos += microtime(true) - $numMarca;
+
+        $numMarca = microtime(true);
         $objAnexoBD->excluir($objAnexoDTO);
+        $numTempoBanco += microtime(true) - $numMarca;
+    }
+
+      return array('banco' => $numTempoBanco, 'arquivos' => $numTempoArquivos);
+  }
+
+private function atualizarVinculoComponenteDigital($numIdAnexoOriginal, $numIdAnexoNovo)
+    {
+    if ($numIdAnexoOriginal == $numIdAnexoNovo) {
+        return;
+    }
+
+      $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+
+      $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+      $objComponenteDigitalDTO->setDblIdAnexoImutavel($numIdAnexoOriginal);
+      $objComponenteDigitalDTO->retTodos();
+
+    foreach ($objComponenteDigitalBD->listar($objComponenteDigitalDTO) as $objDTO) {
+        $objDTO->setDblIdAnexoImutavel($numIdAnexoNovo);
+        $objComponenteDigitalBD->alterar($objDTO);
+    }
+  }
+
+private function garantirIndiceUnicoMapeamentoEnvioV4100()
+    {
+      $objMetaBanco = $this->inicializarObjMetaBanco();
+
+      $strTabela = 'md_pen_rel_doc_map_enviado';
+      $strIndice = 'ak1_rel_doc_map_enviado';
+      $strIndiceTemporario = 'ak1_rel_doc_map_env_tmp';
+      $arrColunas = array('id_serie');
+
+      $strIndiceUnicoExistente = $this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, true);
+
+    if ($strIndiceUnicoExistente === $strIndice) {
+        // Ja esta como deve ser.
+        return;
+    }
+
+    if ($strIndiceUnicoExistente !== null) {
+        // Indice unico com outro nome: sobra de execucao interrompida entre
+        // criar o temporario e renomea-lo. Falta so o rename.
+        $objMetaBanco->renomearIndice($strTabela, $strIndiceUnicoExistente, $strIndice, $arrColunas);
+
+        $this->logar(sprintf(
+            'MAPEAMENTO_ENVIO_V4100 indice unico %s renomeado para %s',
+            $strIndiceUnicoExistente, $strIndice
+        ));
+
+        return;
+    }
+
+      $strIndiceNaoUnico = $this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, null);
+
+    if ($strIndiceNaoUnico === null) {
+        $objMetaBanco->criarIndice($strTabela, $strIndice, $arrColunas, true);
+        return;
+    }
+
+      // O antigo nao pode sair primeiro: no MySQL a FK depende dele (ERROR 1553).
+      // Cria-se o unico com nome temporario, o antigo sai, depois vem o rename.
+      $objInfraBanco = $objMetaBanco->getObjInfraIBanco();
+
+    if ($this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, null) !== $strIndiceTemporario) {
+        $objInfraBanco->executarSql(
+            'create unique index ' . $strIndiceTemporario . ' on ' . $strTabela . ' (' . implode(',', $arrColunas) . ')'
+        );
+    }
+
+      // O antigo pode ja ter sumido: o InnoDB descarta o indice da FK quando
+      // vira redundante. Excluir nesse estado abortaria a atualizacao.
+      $arrIndicesAtuais = $objMetaBanco->obterIndices(null, $strTabela);
+
+    if (isset($arrIndicesAtuais[$strTabela][$strIndiceNaoUnico])) {
+        $objMetaBanco->excluirIndice($strTabela, $strIndiceNaoUnico);
+    }
+
+      $objMetaBanco->renomearIndice($strTabela, $strIndiceTemporario, $strIndice, $arrColunas);
+
+      $this->logar(sprintf(
+          'MAPEAMENTO_ENVIO_V4100 indice %s recriado como UNICO (o anterior, %s, nao era unico)',
+          $strIndice, $strIndiceNaoUnico
+      ));
+  }
+
+private function obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, $bolSomenteUnique)
+    {
+      $arrIndices = $objMetaBanco->obterIndices(null, $strTabela, $bolSomenteUnique);
+
+    if (!isset($arrIndices[$strTabela])) {
+        return null;
+    }
+
+    foreach ($arrIndices[$strTabela] as $strNomeIndice => $arrColunasIndice) {
+      if (count($arrColunasIndice) == 1 && strtolower(trim(reset($arrColunasIndice))) == 'id_serie') {
+          return $strNomeIndice;
       }
     }
+
+      return null;
+  }
+
+private function removerDuplicidadesMapeamentoEnvioV4100()
+    {
+      $objMapBD = new PenRelTipoDocMapEnviadoBD(BancoSEI::getInstance());
+
+      $objMapDTO = new PenRelTipoDocMapEnviadoDTO();
+      $objMapDTO->retDblIdMap();
+      $objMapDTO->retNumIdSerie();
+      $objMapDTO->retNumCodigoEspecie();
+      $objMapDTO->setOrd('IdMap', InfraDTO::$TIPO_ORDENACAO_ASC);
+
+      $arrObjMapDTO = $objMapBD->listar($objMapDTO);
+
+      $arrUltimoPorSerie = array();
+    foreach ($arrObjMapDTO as $objDTO) {
+        $arrUltimoPorSerie[$objDTO->getNumIdSerie()] = $objDTO->getDblIdMap();
+    }
+
+      $numRemovidos = 0;
+    foreach ($arrObjMapDTO as $objDTO) {
+      if ($objDTO->getDblIdMap() == $arrUltimoPorSerie[$objDTO->getNumIdSerie()]) {
+          continue;
+      }
+
+        $objExcluirDTO = new PenRelTipoDocMapEnviadoDTO();
+        $objExcluirDTO->setDblIdMap($objDTO->getDblIdMap());
+        $objMapBD->excluir($objExcluirDTO);
+        $numRemovidos++;
+
+        $this->logar(sprintf(
+            'MAPEAMENTO_ENVIO_V4100 duplicidade removida: id_mapeamento=%s id_serie=%s codigo_especie=%s (mantido id_mapeamento=%s)',
+            $objDTO->getDblIdMap(),
+            $objDTO->getNumIdSerie(),
+            $objDTO->getNumCodigoEspecie(),
+            $arrUltimoPorSerie[$objDTO->getNumIdSerie()]
+        ));
+    }
+
+    if ($numRemovidos > 0) {
+        $this->logar(sprintf(
+            'MAPEAMENTO_ENVIO_V4100 total de duplicidades removidas: %d', $numRemovidos
+        ));
+    }
+  }
+
+private function normalizarDataHoraMigracaoV4100($mixDataHora)
+    {
+    if ($mixDataHora instanceof DateTimeInterface) {
+        return $mixDataHora->format('d/m/Y H:i:s');
+    }
+
+    if ($mixDataHora === null || $mixDataHora === '') {
+        throw new InfraException('Módulo do Tramita: dth_inclusao vazia na migração de anexos.');
+    }
+
+      $arrFormatos = array('Y-m-d H:i:s', 'Y-m-d H:i:s.u', 'd/m/Y H:i:s', 'd/m/Y H:i:s.u');
+
+    foreach ($arrFormatos as $strFormato) {
+        $objData = DateTime::createFromFormat($strFormato, $mixDataHora);
+      if ($objData !== false) {
+          $arrErros = DateTime::getLastErrors();
+          // PHP 8.2+ devolve false quando nao ha erro; versoes anteriores, array zerado
+        if ($arrErros === false || (empty($arrErros['warning_count']) && empty($arrErros['error_count']))) {
+            return $objData->format('d/m/Y H:i:s');
+        }
+      }
+    }
+
+      throw new InfraException(
+          'Módulo do Tramita: formato de dth_inclusao não reconhecido na migração de anexos: ' . $mixDataHora
+      );
   }
 
   // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -2834,17 +3109,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("4.2.0-Beta");
   }
 
-  private function listarAnexoDocumentosInternos()
+  private function listarAnexoDocumentosInternos($numLimite, $numUltimoIdAnexo = 0)
     {
-    $objInfraBanco = BancoSEI::getInstance();
-    $sql = "SELECT a.id_anexo, a.nome, a.id_protocolo, a.sin_ativo, a.id_unidade, a.id_usuario, a.tamanho, a.dth_inclusao, a.id_base_conhecimento, a.id_projeto, a.hash
-                FROM anexo a, protocolo p
-                WHERE 
-                a.id_protocolo = p.id_protocolo
-                AND p.sta_protocolo = 'G'
+      $objInfraBanco = BancoSEI::getInstance();
+      // A ancora em id_anexo mantem o custo constante. Sem ela a consulta sobe
+      // de 0,015 s para 2,019 s ao longo de 4 milhoes de anexos.
+      $sql = "SELECT a.id_anexo, a.nome, a.id_protocolo, a.sin_ativo, a.id_unidade, a.id_usuario, a.tamanho, a.dth_inclusao, a.id_base_conhecimento, a.id_projeto, a.hash
+                FROM anexo a
+                INNER JOIN protocolo p ON p.id_protocolo = a.id_protocolo
+                WHERE p.sta_protocolo = 'G'
+                  AND a.id_anexo > " . (int) $numUltimoIdAnexo . "
+                  AND a.id_anexo IN (
+                        SELECT id_anexo FROM md_pen_componente_digital WHERE id_anexo IS NOT NULL
+                        UNION
+                        SELECT id_anexo_imutavel FROM md_pen_componente_digital WHERE id_anexo_imutavel IS NOT NULL)
+                ORDER BY a.id_anexo
                 ";
 
-    return $objInfraBanco->consultarSql($sql);
+      return $objInfraBanco->limitarSql($sql, $numLimite);
   }
 
     /**

@@ -370,11 +370,21 @@ class PenMetaBD extends InfraMetaBD
       return $this;
   }
 
+  /**
+   * Exclui o indice apenas se ele existir.
+   *
+   * Importa porque criarIndice() usa este metodo para derrubar indice homonimo
+   * com colunas diferentes; sem isso a criacao seguinte aborta por nome duplicado.
+   */
   public function excluirIndice($strTabela, $strIndex)
     {
-    if($this->isChaveExiste($strTabela, $strFk)) {
+      $arrIndices = $this->obterIndices(null, $strTabela);
+
+    if (isset($arrIndices[$strTabela][$strIndex])
+        || isset($arrIndices[strtolower($strTabela)][strtolower($strIndex)])) {
         parent::excluirIndice($strTabela, $strIndex);
     }
+
       return $this;
   }
 
@@ -383,6 +393,51 @@ class PenMetaBD extends InfraMetaBD
     if($this->isChaveExiste($strTabela, $strFk)) {
         parent::excluirChaveEstrangeira($strTabela, $strFk);
     }
+      return $this;
+  }
+
+  /**
+   * Cria uma chave estrangeira definindo a acao de exclusao (ON DELETE),
+   * recurso nao oferecido por InfraMetaBD::adicionarChaveEstrangeira().
+   *
+   * Acoes tratadas: 'SET NULL' e 'CASCADE' (geram a clausula ON DELETE).
+   * Qualquer outro valor cria a FK sem clausula, ou seja, com o comportamento
+   * padrao RESTRICT/NO ACTION (compativel com Oracle, que nao aceita ON DELETE
+   * NO ACTION explicito). A sintaxe ON DELETE SET NULL e ON DELETE CASCADE e
+   * compativel com Oracle, MySQL/InnoDB, PostgreSQL e SQL Server.
+   *
+   * @param string $strNomeFK       Nome da constraint
+   * @param string $strTabela       Tabela filha
+   * @param array  $arrCampos       Colunas da FK na tabela filha
+   * @param string $strTabelaOrigem Tabela referenciada
+   * @param array  $arrCamposOrigem Colunas referenciadas
+   * @param string $strAcaoExclusao Acao ON DELETE (ex.: 'SET NULL', 'CASCADE')
+   * @param bool   $bolCriarIndice  Cria indice para as colunas da FK
+   * @return PenMetaBD
+   */
+  public function criarChaveEstrangeiraComExclusao($strNomeFK, $strTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem, $strAcaoExclusao = '', $bolCriarIndice = false)
+    {
+
+    if($this->isChaveExiste($strTabela, $strNomeFK)) {
+        return $this;
+    }
+
+    if($bolCriarIndice) {
+        $this->criarIndice($strTabela, $strNomeFK, $arrCampos);
+    }
+
+      $strSql = 'alter table '.$strTabela
+        .' add constraint '.$strNomeFK
+        .' foreign key ('.implode(',', $arrCampos).')'
+        .' references '.$strTabelaOrigem.' ('.implode(',', $arrCamposOrigem).')';
+
+      $strAcao = strtoupper(trim($strAcaoExclusao));
+    if($strAcao === 'SET NULL' || $strAcao === 'CASCADE') {
+        $strSql .= ' on delete '.strtolower($strAcao);
+    }
+
+      $this->getObjInfraIBanco()->executarSql($strSql);
+
       return $this;
   }
 }
