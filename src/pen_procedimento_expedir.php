@@ -249,11 +249,12 @@ try {
 
       $objPenEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
 
-      // O 'S' exige mapeamento com multiplos orgaos ATIVO; sem ele, bastaria o
-      // mapeamento existir. Devolver exige ativo. O botao de sincronizar, em
-      // PENIntegracao, omite o argumento de proposito: sincronizar != devolver.
+      // Sem 'S' de proposito: quem devolve e o DESTINATARIO, e a unidade de origem
+      // nunca esta no array EnvioMultiplosOrgaos, que lista quem RECEBE. Basta o
+      // mapeamento existir. Unica validacao deste caminho: com tramite pendente a
+      // tela usa SincronizacaoExpedirProcedimentoRN, que nao passa pela RN.
       if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos &&
-          !$objPenEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos, 'S')) {
+          !$objPenEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos)) {
           $bloquearEnvioSemMapeamentoParcial = true;
           $strMensagemBloqueioEnvio = 'O processo <strong>'.PaginaSEI::tratarHTML($strProtocoloProcedimentoFormatado).'</strong>, compartilhado com múltiplos órgãos, não pode ser devolvido para a unidade de origem <strong>'.PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos).'</strong>: é necessário que o Mapeamento de Envio Parcial esteja ativo, para a referida unidade, no seu órgão.';
       }
