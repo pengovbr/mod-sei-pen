@@ -2843,10 +2843,14 @@ class ExpedirProcedimentoRN extends InfraRN
         $this->objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($numIdProcedimento)) {
 
         $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+
+        // Sem 'S': validarProcessoMultiplosOrgaos() so e verdadeiro no orgao de
+        // DESTINO, entao aqui quem expede e o destinatario devolvendo. A unidade
+        // de origem nunca esta no array EnvioMultiplosOrgaos, que lista quem
+        // recebe. Mesmo criterio da tela pen_procedimento_expedir.php.
       if (!$objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos(
           $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
-          $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
-          'S'
+          $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
       )) {
           $strNomeUnidadeDestino = $objExpedirProcedimentoDTO->getStrUnidadeDestino();
           $strComplementoUnidade = InfraString::isBolVazia($strNomeUnidadeDestino) ? '' : ' <b>'.$strNomeUnidadeDestino.'</b>';
