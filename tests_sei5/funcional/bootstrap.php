@@ -1,6 +1,20 @@
 <?php
 
 require_once __DIR__ . '/vendor/autoload.php';
+
+// Fixa sebastian/diff do vendor de testes ANTES de carregar o SEI: o autoloader
+// do SEI e prependado e traz uma copia antiga, cujo Differ recebe uma string.
+// Com a copia errada, ComparisonFailure::getDiff() lancava Error e o PHPUnit
+// DESCARTAVA a falha - assertEquals com string/array passava em silencio.
+class_exists(\SebastianBergmann\Diff\Differ::class);
+class_exists(\SebastianBergmann\Diff\Output\UnifiedDiffOutputBuilder::class);
+class_exists(\SebastianBergmann\Diff\Output\DiffOnlyOutputBuilder::class);
+class_exists(\SebastianBergmann\Diff\Chunk::class);
+class_exists(\SebastianBergmann\Diff\Diff::class);
+class_exists(\SebastianBergmann\Diff\Line::class);
+class_exists(\SebastianBergmann\Diff\LongestCommonSubsequenceCalculator::class);
+class_exists(\SebastianBergmann\Diff\TimeEfficientLongestCommonSubsequenceCalculator::class);
+class_exists(\SebastianBergmann\Diff\MemoryEfficientLongestCommonSubsequenceCalculator::class);
  
 define("DIR_SEI_VENDOR", __DIR__ . '/vendor');
 
