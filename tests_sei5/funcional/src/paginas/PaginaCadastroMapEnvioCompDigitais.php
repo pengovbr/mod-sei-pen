@@ -91,6 +91,31 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
   }
 
     /**
+     * Retorna o estado do checkbox "Habilitar a opcao de manter o processo aberto
+     * na unidade selecionada" da tela de cadastro de Mapeamento de Envio Parcial.
+     *
+     * Usado pelos testes de regra de negocio da whitelist EnvioMultiplosOrgaos.
+     *
+     * @return array{presente: bool, visivel: bool, marcado: bool}
+     */
+  public function estadoCheckboxMultiplosOrgaos(): array
+    {
+      $arrObjCheckbox = $this->driver->findElements(WebDriverBy::id('sinMultiplosOrgaos'));
+
+    if (count($arrObjCheckbox) === 0) {
+      return array('presente' => false, 'visivel' => false, 'marcado' => false);
+    }
+
+      $objCheckbox = $arrObjCheckbox[0];
+
+      return array(
+          'presente' => true,
+          'visivel'  => $objCheckbox->isDisplayed(),
+          'marcado'  => $objCheckbox->isSelected(),
+      );
+  }
+
+    /**
      * Seleciona botão editar da primeira linha de tabela
      * 
      * @return void
