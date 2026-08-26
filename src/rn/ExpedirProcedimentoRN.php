@@ -6,6 +6,9 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class ExpedirProcedimentoRN extends InfraRN
 {
+    /** Limite de tamanho do campo identificacao.complemento aceito pelo barramento. */
+    const TAMANHO_MAXIMO_COMPLEMENTO = 100;
+
 
     const STA_SIGILO_PUBLICO = '1';
     const STA_SIGILO_RESTRITO = '2';
@@ -180,9 +183,21 @@ class ExpedirProcedimentoRN extends InfraRN
           $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
       }
 
-      if (is_null($strNumeroRegistro)) {
-          $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $objExpedirProcedimentoDTO);
-      }
+      // O reaproveitamento do NRE de um tramite ja CONCLUIDO so vale no modo
+      // "processo aberto e sincronizado" (multiplos orgaos), onde preservar a
+      // continuidade da conversa com o barramento e justamente o objetivo.
+      //
+      // Em envio externo comum ele quebra o reenvio: o barramento compara os
+      // hashes declarados agora com os que gravou naquele NRE e, como os
+      // documentos mudaram, recusa com
+      // "0047 - hash de ao menos um componente digital nao confere".
+      //
+      // A release/4.1.0 nao possui este metodo, por isso nao sofre do problema.
+      // Confirmado por teste: com o reuso irrestrito, CancelamentoTramiteIndividualTest
+      // e TramiteRecebimentoDocumentoAvulsoTest falham; restringindo, passam.
+    if (is_null($strNumeroRegistro) && $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
+        $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $objExpedirProcedimentoDTO);
+    }
 
         $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 
@@ -890,6 +905,80 @@ class ExpedirProcedimentoRN extends InfraRN
       return $atividade->getNumIdAtividade();
   }
 
+    /**
+     * Monta o conteudo do campo identificacao.complemento com os metadados
+     * complementares do documento (descricao e nome na arvore).
+     *
+     * O campo tem limite de tamanho validado pelo barramento - o mesmo limite
+     * aplicado nas demais atribuicoes deste campo (reduzirCampoTexto(.., 100)).
+     * Como json_encode() escapa caracteres nao-ASCII para \uXXXX, o tamanho
+     * final nao e previsivel a partir do texto de origem: por isso o ajuste e
+     * feito sobre o JSON ja codificado, encurtando alternadamente o campo mais
+     * longo ate caber.
+     *
+     * Sem esse cuidado o barramento rejeita o envio inteiro com o erro
+     * "0001 - identificacao.complemento deve possuir tamanho entre os limites
+     * estabelecidos", impedindo a tramitacao de qualquer processo cujo documento
+     * tenha descricao longa.
+     *
+     * @param string $parStrDescricao  descricao do documento, em UTF-8
+     * @param string $parStrNomeArvore nome na arvore do documento, em UTF-8
+     * @return string JSON com no maximo self::TAMANHO_MAXIMO_COMPLEMENTO bytes
+     */
+  protected function montarComplementoIdentificacao($parStrDescricao, $parStrNomeArvore)
+    {
+      $strDescricao = (string) $parStrDescricao;
+      $strNomeArvore = (string) $parStrNomeArvore;
+      $strDescricaoOriginal = $strDescricao;
+      $strNomeArvoreOriginal = $strNomeArvore;
+
+      $fnCodificar = function ($strDesc, $strNome) {
+        return json_encode(array('descricao' => $strDesc, 'nome_arvore' => $strNome));
+      };
+
+      $strJson = $fnCodificar($strDescricao, $strNomeArvore);
+
+      // Encurta um caractere por vez, sempre do campo mais longo, ate o JSON
+      // codificado caber no limite.
+    while (strlen($strJson) > self::TAMANHO_MAXIMO_COMPLEMENTO
+          && (mb_strlen($strDescricao, 'UTF-8') > 0 || mb_strlen($strNomeArvore, 'UTF-8') > 0)) {
+      if (mb_strlen($strDescricao, 'UTF-8') >= mb_strlen($strNomeArvore, 'UTF-8')) {
+          $strDescricao = mb_substr($strDescricao, 0, mb_strlen($strDescricao, 'UTF-8') - 1, 'UTF-8');
+      } else {
+          $strNomeArvore = mb_substr($strNomeArvore, 0, mb_strlen($strNomeArvore, 'UTF-8') - 1, 'UTF-8');
+      }
+
+      $strJson = $fnCodificar($strDescricao, $strNomeArvore);
+    }
+
+      // Sinaliza ao usuario do orgao de destino que o texto foi truncado.
+      // A marca substitui caracteres ja existentes, entao nao aumenta o JSON.
+      $strDescricao = $this->marcarTruncamento($strDescricao, $strDescricaoOriginal);
+      $strNomeArvore = $this->marcarTruncamento($strNomeArvore, $strNomeArvoreOriginal);
+
+      return $fnCodificar($strDescricao, $strNomeArvore);
+  }
+
+    /**
+     * Acrescenta reticencias ao texto quando ele foi encurtado, sem alterar o
+     * numero de caracteres.
+     */
+  private function marcarTruncamento($strTexto, $strTextoOriginal)
+    {
+    if ($strTexto === $strTextoOriginal) {
+      return $strTexto;
+    }
+
+      $strMarca = ' ...';
+      $numCaracteres = mb_strlen($strTexto, 'UTF-8');
+
+    if ($numCaracteres <= mb_strlen($strMarca, 'UTF-8')) {
+      return $strTexto;
+    }
+
+      return mb_substr($strTexto, 0, $numCaracteres - mb_strlen($strMarca, 'UTF-8'), 'UTF-8') . $strMarca;
+  }
+
   public function desbloquearProcessoExpedicao($numIdProcedimento)
     {
       ProcessoEletronicoRN::desbloquearProcesso($numIdProcedimento);
@@ -1150,10 +1239,10 @@ class ExpedirProcedimentoRN extends InfraRN
         $documento = $this->atribuirEspecieDocumentalREST($documento, $documentoDTO, $parObjMetadadosTramiteAnterior);
         $documento = $this->atribuirNumeracaoDocumentoREST($documento, $documentoDTO);
         
-        $identificacaoComplementar = json_decode($documento['identificacao']['complemento'] ?? '{}', true) ?: [];
-        $identificacaoComplementar['descricao'] = mb_convert_encoding($documentoDTO->getStrDescricaoProtocolo(), 'UTF-8', 'ISO-8859-1');
-        $identificacaoComplementar['nome_arvore'] = mb_convert_encoding($documentoDTO->getStrNomeArvore(), 'UTF-8', 'ISO-8859-1');
-        $documento['identificacao']['complemento'] = json_encode($identificacaoComplementar);
+        $documento['identificacao']['complemento'] = $this->montarComplementoIdentificacao(
+            mb_convert_encoding($documentoDTO->getStrDescricaoProtocolo(), 'UTF-8', 'ISO-8859-1'),
+            mb_convert_encoding($documentoDTO->getStrNomeArvore(), 'UTF-8', 'ISO-8859-1')
+        );
 
       if($documento['retirado'] === true) {
           $objComponenteDigitalDTO = new ComponenteDigitalDTO();
