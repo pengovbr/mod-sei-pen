@@ -992,9 +992,9 @@ class ReceberProcedimentoRN extends InfraRN
         $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
     }
 
-      //Busca a unidade em ao qual o processo foi anteriormente expedido
-      //Esta unidade deverá ser considerada para posterior desbloqueio do processo e reabertura
-      $numIdUnidade = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($parDblIdProcedimento);
+      // Unidade com andamento aberto; nao havendo, cai na unidade da ultima
+      // expedicao. Ela sera usada para desbloqueio e reabertura do processo.
+      $numIdUnidade = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($parDblIdProcedimento);
       SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidade);
 
     try {
@@ -1058,9 +1058,20 @@ class ReceberProcedimentoRN extends InfraRN
       //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
       $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
 
-      // Sincroniza os metadados editaveis antes das restricoes de acesso.
-      $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
-      $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+      // A atualizacao de metadados exige uma unidade com andamento aberto (PR #1231).
+      // Alem de destravar a gravacao no cenario "processo aberto e sincronizado",
+      // alinha SessaoSEI com a unidade que ProtocoloRN::alterarRN0202 usa para validar
+      // remocao de participantes - do que depende listarParticipantesDeOutrasUnidades().
+      $numIdUnidadeSessaoAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+      $numIdUnidadeAndamentoAberto = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento());
+      SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeAndamentoAberto);
+
+    try {
+        $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+        $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+    } finally {
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoAtual);
+    }
 
       $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
 
@@ -1293,6 +1304,22 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
       $objProtocoloDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100), 'ISO-8859-1', 'UTF-8'));
       $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO([]);
+
+      // Sincronizacao de interessados (#1225), coerente com a regra do nucleo.
+      //
+      // ProtocoloRN::alterarRN0202() so recusa a remocao de participante quando
+      // ele pertence a unidade DIFERENTE da unidade atual da sessao. A unidade
+      // atual pode remover os que ela mesma cadastrou.
+      //
+      // Por isso a lista nova e montada como:
+      //     (participantes de OUTRAS unidades, preservados) + (os recebidos)
+      //
+      // A unica remocao possivel passa a ser de participante da unidade atual -
+      // permitida pelo nucleo. A tentativa anterior definia a lista completa a
+      // partir apenas dos recebidos, o que removia implicitamente os das outras
+      // unidades e abortava o recebimento inteiro com
+      // "O interessado ... nao pode ser excluido porque foi adicionado por outra unidade".
+      $objProtocoloDTO->setArrObjParticipanteDTO($this->listarParticipantesDeOutrasUnidades($parNumIdProcedimento));
       $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessados ?? []);
 
       $objProcedimentoDTO = new ProcedimentoDTO();
@@ -1410,8 +1437,63 @@ class ReceberProcedimentoRN extends InfraRN
       return null;
   }
 
+
+    /**
+     * Lista os participantes do protocolo que pertencem a unidades diferentes da
+     * unidade atual da sessao.
+     *
+     * Sao os que o nucleo do SEI proibe remover (ProtocoloRN::alterarRN0202) e
+     * que, portanto, precisam ser preservados na sincronizacao de interessados.
+     *
+     * @param  int $numIdProtocolo
+     * @return ParticipanteDTO[]
+     */
+  protected function listarParticipantesDeOutrasUnidades($numIdProtocolo)
+    {
+      $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+
+      // Campos pedidos explicitamente: NomeContato e SiglaContato vem de juncao
+      // com contato e nao sao trazidos por retTodos(). Sem eles, prepararParticipantes()
+      // falha com "Atributo [NomeContato] nao recebeu valor".
+      $objParticipanteDTO = new ParticipanteDTO();
+      $objParticipanteDTO->retNumIdUnidade();
+      $objParticipanteDTO->retNumIdContato();
+      $objParticipanteDTO->retStrNomeContato();
+      $objParticipanteDTO->retStrSiglaContato();
+      $objParticipanteDTO->retStrStaParticipacao();
+      $objParticipanteDTO->retNumSequencia();
+      $objParticipanteDTO->setDblIdProtocolo($numIdProtocolo);
+      $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_INTERESSADO);
+
+      $objParticipanteRN = new ParticipanteRN();
+      $arrObjParticipanteDTO = $objParticipanteRN->listarRN0189($objParticipanteDTO);
+
+      $arrPreservados = array();
+
+    foreach ($arrObjParticipanteDTO as $objDTO) {
+      if ($objDTO->getNumIdUnidade() != $numIdUnidadeAtual) {
+          $arrPreservados[] = $objDTO;
+      }
+    }
+
+      return $arrPreservados;
+  }
+
   private function alterarMetadadosDocumento($parNumIdDocumento, $parObjMetadadoDocumento)
     {
+      // Issue #1228: documento cancelado na origem nao pode ter seus metadados
+      // atualizados no recebimento. A tentativa de altera-lo interrompia o
+      // processamento do tramite inteiro, e os documentos novos enviados junto
+      // deixavam de ser incluidos na arvore do destino.
+      $objProtocoloEstadoDTO = new ProtocoloDTO();
+      $objProtocoloEstadoDTO->setDblIdProtocolo($parNumIdDocumento);
+      $objProtocoloEstadoDTO->retStrStaEstado();
+      $objProtocoloEstadoDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloEstadoDTO);
+
+    if ($objProtocoloEstadoDTO !== null && $objProtocoloEstadoDTO->getStrStaEstado() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+      return;
+    }
+
       $objDocumentoConsultaDTO = new DocumentoDTO();
       $objDocumentoConsultaDTO->retStrStaDocumento();
       $objDocumentoConsultaDTO->retDblIdProcedimento();
@@ -1423,27 +1505,44 @@ class ReceberProcedimentoRN extends InfraRN
       $strComplemento = is_array($objIdentificacao) ? ($objIdentificacao['complemento'] ?? null) : ($objIdentificacao->complemento ?? null);
       $arrMetadadosComplementares = json_decode($strComplemento, true) ?: [];
 
-      $objDocumentoDTO = new DocumentoDTO();
-      $objDocumentoDTO->setDblIdDocumento($parNumIdDocumento);
-      $objDocumentoDTO->setDblIdProcedimento($objDocumentoConsultaDTO->getDblIdProcedimento());
-      $objDocumentoDTO->setStrNomeArvore(mb_convert_encoding($arrMetadadosComplementares['nome_arvore'] ?? '', 'ISO-8859-1', 'UTF-8'));
-
-    if ($objDocumentoConsultaDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
-        $objDocumentoDTO->setStrNumero(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjMetadadoDocumento->descricao, 50), 'ISO-8859-1', 'UTF-8'));
-        $objSerieDTO = $this->obterSerieMapeada($parObjMetadadoDocumento);
-      if ($objSerieDTO != null) {
-          $objDocumentoDTO->setNumIdSerie($objSerieDTO->getNumIdSerie());
-      }
-    }
-
-      $objProtocoloMetadadosDTO = new ProtocoloDTO();
-      $objProtocoloMetadadosDTO->setDblIdProtocolo($parNumIdDocumento);
-      $objProtocoloMetadadosDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($arrMetadadosComplementares['descricao'] ?? $parObjMetadadoDocumento->descricao, 100), 'ISO-8859-1', 'UTF-8'));
-    if ($objDocumentoConsultaDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
-        $objProtocoloMetadadosDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($parObjMetadadoDocumento->dataHoraDeProducao));
-    }
-      $objDocumentoDTO->setObjProtocoloDTO($objProtocoloMetadadosDTO);
-      $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+      // ------------------------------------------------------------------
+      // COR-06 - sincronizacao de metadados de DOCUMENTO desativada.
+      //
+      // O PR #1229 (issue #1225) passou a gravar aqui descricao, nome na arvore,
+      // numero, serie e data de producao do documento recebido. Bisecao contra a
+      // suite mostrou que essa gravacao quebra cenarios centrais:
+      //
+      //   TramiteProcessoContendoDocumentoMovidoDestinoTest  5 metodos
+      //   CancelamentoTramiteIndividualTest                  1 metodo
+      //
+      // A COR-10 tentou reativa-la restrita ao fluxo de sincronizacao
+      // (multiplos orgaos). Esse enquadramento veio de uma leitura invertida da
+      // OBS. da issue e nao se sustenta: o "Comportamento esperado" da #1225
+      // cobre explicitamente o envio normal. Alem disso, o ciclo vermelho/verde
+      // revelou DEGRADACAO DE DADOS:
+      // o complemento de identificacao e truncado a cada envio para caber em
+      // 100 bytes, e persistir o valor truncado faz a descricao encolher a cada
+      // ida e volta. Revertida. Diagnostico em docs/to-do-erro.md.
+      //
+      // Permanece o que existia antes do #1229: nivel de sigilo e hipotese legal.
+      // ------------------------------------------------------------------
+      //
+      // O PR #1229 (issue #1225) passou a gravar aqui descricao, nome na arvore,
+      // numero, serie e data de producao do documento recebido. Bisecao contra a
+      // suite mostrou que essa gravacao quebra cenarios centrais:
+      //
+      //   TramiteProcessoContendoDocumentoMovidoDestinoTest  5 metodos
+      //   CancelamentoTramiteIndividualTest                  1 metodo
+      //
+      // Com a gravacao ativa esses testes falham; sem ela passam. O commit
+      // caef7593 ja havia produzido outros dois defeitos pela mesma via
+      // (COR-02 e COR-03), o que indica que a entrega da #1225 precisa de
+      // redesenho, e nao de remendo campo a campo.
+      //
+      // Permanece o que existia antes do #1229: nivel de sigilo e hipotese legal.
+      // A entrega dos metadados descritivos ao destino fica pendente de decisao -
+      // ver docs/correções.md.
+      // ------------------------------------------------------------------
 
       //
       //Realiza a alteração dos metadados do documento(Por hora, apenas do nível de sigilo e hipótese legal)

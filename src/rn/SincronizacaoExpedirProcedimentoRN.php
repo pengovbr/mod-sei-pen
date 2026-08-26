@@ -442,7 +442,9 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
       if (!empty($objProtocoloDTO)){
         $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
-        $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+        // Andamento aberto, nao ultimo registro de expedicao: no processo mantido
+        // aberto e a unidade com andamento em curso que pode gravar.
+        $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProtocoloDTO->getDblIdProtocolo());
 
         $objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
 
@@ -538,7 +540,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
         try {
           $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
-          $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+          // Ver nota acima: unidade com andamento aberto.
+          $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProtocoloDTO->getDblIdProtocolo());
 
           $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
 
