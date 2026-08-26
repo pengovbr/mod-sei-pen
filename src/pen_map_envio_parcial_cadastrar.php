@@ -518,10 +518,11 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
   </div>
 
   <?php
+    $existeConfigMultiplosOrgao = (is_array($podeEnvioMultiplosOrgaos) && in_array($hdnIdUnidade, $podeEnvioMultiplosOrgaos));
     $displayNone = (is_array($podeEnvioMultiplosOrgaos) && in_array($hdnIdUnidade, $podeEnvioMultiplosOrgaos)) ? '' : 'display: none;';
   ?>
   <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; <?php echo $displayNone; ?>">
-    <input type="checkbox" id="sinMultiplosOrgaos" name="sinMultiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" <?php echo $sinMultiplosOrgaos === 'S' || !empty($displayNone) ? 'checked' : '' ?> />
+    <input type="checkbox" id="sinMultiplosOrgaos" name="sinMultiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" <?php echo $existeConfigMultiplosOrgao && ($sinMultiplosOrgaos === 'S' || !empty($displayNone)) ? 'checked' : '' ?> />
     <label id="lblSinMultiplosOrgaos" for="sinMultiplosOrgaos" class="infraLabelCheckbox">
       Habilitar a opção de manter o processo aberto na unidade selecionada.
       <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>

@@ -994,7 +994,7 @@ class ReceberProcedimentoRN extends InfraRN
 
       //Busca a unidade em ao qual o processo foi anteriormente expedido
       //Esta unidade deverá ser considerada para posterior desbloqueio do processo e reabertura
-      $numIdUnidade = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($parDblIdProcedimento);
+      $numIdUnidade = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($parDblIdProcedimento);
       SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidade);
 
     try {
@@ -1058,9 +1058,16 @@ class ReceberProcedimentoRN extends InfraRN
       //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
       $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
 
-      // Sincroniza os metadados editaveis antes das restricoes de acesso.
-      $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
-      $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+      // A atualizacao de metadados exige uma unidade com andamento aberto.
+      $numIdUnidadeSessaoAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+      $numIdUnidade = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento());
+      SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidade);
+      try {
+        $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+        $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+      } finally {
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoAtual);
+      }
 
       $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
 
@@ -1412,6 +1419,15 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function alterarMetadadosDocumento($parNumIdDocumento, $parObjMetadadoDocumento)
     {
+      $objProtocoloEstadoDTO = new ProtocoloDTO();
+      $objProtocoloEstadoDTO->setDblIdProtocolo($parNumIdDocumento);
+      $objProtocoloEstadoDTO->retStrStaEstado();
+      $objProtocoloEstadoDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloEstadoDTO);
+
+    if ($objProtocoloEstadoDTO->getStrStaEstado() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+        return;
+    }
+
       $objDocumentoConsultaDTO = new DocumentoDTO();
       $objDocumentoConsultaDTO->retStrStaDocumento();
       $objDocumentoConsultaDTO->retDblIdProcedimento();

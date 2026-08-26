@@ -442,7 +442,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
       if (!empty($objProtocoloDTO)){
         $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
-        $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+        $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProtocoloDTO->getDblIdProtocolo());
 
         $objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
 
@@ -538,7 +538,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
         try {
           $objProcedimentoDTO = $this->consultarProcedimento($objProtocoloDTO->getDblIdProtocolo());
-          $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+          $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProtocoloDTO->getDblIdProtocolo());
 
           $this->concluirAtividadePendenteSincronizacao($objProcedimentoDTO->getDblIdProcedimento());
 
