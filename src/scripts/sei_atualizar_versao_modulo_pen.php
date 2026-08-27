@@ -2676,7 +2676,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
           
 
-        $this->migrarAnexosDocumentosInternosV4100();
         // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
         $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
         $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos mod-sei-pen excluídos.');
