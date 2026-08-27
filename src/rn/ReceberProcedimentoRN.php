@@ -85,6 +85,16 @@ class ReceberProcedimentoRN extends InfraRN
           // Processa o recebimento do processo em uma transação isolada
           $objMetadadosProcedimento->arrHashComponenteBaixados = $arrHashComponenteBaixados;
           $objProcedimentoDTO = $this->receberProcedimentoInterno($objMetadadosProcedimento);
+
+          // receberProcedimentoInternoControlado devolve false em dois casos normais:
+          // o tramite ja esta sendo recebido por outro processo concorrente, ou ja foi
+          // registrado antes. Sem esta guarda, as validacoes abaixo recebiam um bool e
+          // estouravam com fatal, derrubando o script de monitoramento inteiro.
+        if ($objProcedimentoDTO === false) {
+            $this->gravarLogDebug("Recebimento do tramite $parNumIdentificacaoTramite nao produziu procedimento (ja em processamento ou ja registrado)", 3);
+            return;
+        }
+
           // Verificar se precisa reordenar processo
           $this->validarReordenacaoProcesso($objMetadadosProcedimento, $objProcedimentoDTO);
 
