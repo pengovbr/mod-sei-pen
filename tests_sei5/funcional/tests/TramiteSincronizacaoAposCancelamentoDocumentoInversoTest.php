@@ -49,7 +49,15 @@ class TramiteSincronizacaoAposCancelamentoDocumentoInversoTest extends FixtureCe
      * Habilita o Mapeamento de Envio Parcial para multiplos orgaos no orgao
      * logado, apontando para a unidade da contraparte.
      */
-    private function habilitarMultiplosOrgaos(array $arrContrapartida, string $strContexto): void
+    /**
+     * Cria o Mapeamento de Envio Parcial para a contraparte.
+     *
+     * $bolAtivarMultiplosOrgaos so vale para quem ORIGINA o envio com processo
+     * aberto. O DESTINATARIO nao precisa da flag para devolver: o array
+     * EnvioMultiplosOrgaos lista as unidades que recebem, entao a unidade de
+     * origem nunca esta nele. Ver pen_procedimento_expedir.php.
+     */
+    private function habilitarMultiplosOrgaos(array $arrContrapartida, string $strContexto, bool $bolAtivarMultiplosOrgaos = true): void
     {
         $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
         $this->paginaCadastroMapEnvioCompDigitais->excluirMapeamentosExistentes();
@@ -66,7 +74,7 @@ class TramiteSincronizacaoAposCancelamentoDocumentoInversoTest extends FixtureCe
         $objBanco = new DatabaseUtils($strContexto);
         $objBanco->execute(
             'update md_pen_envio_comp_digitais set sin_multiplos_orgaos = ? where id_unidade_pen = ?',
-            array('S', $arrContrapartida['ID_ESTRUTURA'])
+            array($bolAtivarMultiplosOrgaos ? 'S' : 'N', $arrContrapartida['ID_ESTRUTURA'])
         );
     }
 
@@ -107,7 +115,7 @@ class TramiteSincronizacaoAposCancelamentoDocumentoInversoTest extends FixtureCe
             self::$destinatario['LOGIN'],
             self::$destinatario['SENHA']
         );
-        $this->habilitarMultiplosOrgaos(self::$remetente, CONTEXTO_ORGAO_A);
+        $this->habilitarMultiplosOrgaos(self::$remetente, CONTEXTO_ORGAO_A, false);
 
         $this->encerrarSessoes();
         $this->acessarSistema(
