@@ -94,7 +94,7 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
         );
         $this->assertNotEmpty($arr, 'Processo nao encontrado no destino.');
 
-        return (int) $arr[0]['id_protocolo'];
+        return (int) $arr[0]['ID_PROTOCOLO'];
     }
 
     private function contarInteressadosDaOutraUnidade(int $numIdProtocolo): int
@@ -106,7 +106,7 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
             array($numIdProtocolo, self::ID_UNIDADE_OUTRA, 'I')
         );
 
-        return (int) $arr[0]['total'];
+        return (int) $arr[0]['TOTAL'];
     }
 
     /**
@@ -161,8 +161,13 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
 
         $objBanco = new DatabaseUtils(CONTEXTO_ORGAO_B);
 
-        $arrContato = $objBanco->query('select id_contato from contato limit 1', array());
-        $this->assertNotEmpty($arrContato, 'Nenhum contato disponivel no destino.');
+        // min() em vez de "limit 1": LIMIT nao existe no Oracle 11g e produz
+        // ORA-00933. min() e portavel entre os quatro bancos suportados.
+        $arrContato = $objBanco->query('select min(id_contato) as id_contato from contato', array());
+        $this->assertNotEmpty(
+            $arrContato[0]['ID_CONTATO'] ?? null,
+            'Nenhum contato disponivel no destino.'
+        );
 
         $arrProxId = $objBanco->query('select coalesce(max(id_participante), 0) + 1 as prox from participante', array());
         $arrProxSeq = $objBanco->query(
@@ -174,12 +179,12 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
             'insert into participante (id_participante, id_protocolo, id_contato, id_unidade, sta_participacao, sequencia)
              values (?, ?, ?, ?, ?, ?)',
             array(
-                (int) $arrProxId[0]['prox'],
+                (int) $arrProxId[0]['PROX'],
                 $numIdProtocolo,
-                (int) $arrContato[0]['id_contato'],
+                (int) $arrContato[0]['ID_CONTATO'],
                 self::ID_UNIDADE_OUTRA,
                 'I',
-                (int) $arrProxSeq[0]['prox'],
+                (int) $arrProxSeq[0]['PROX'],
             )
         );
 

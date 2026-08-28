@@ -9,7 +9,15 @@ class DatabaseUtils
       $dns = getenv($nomeContexto . '_DB_SEI_DSN');
       $user = getenv("SEI_DATABASE_USER");
       $password = getenv("SEI_DATABASE_PASSWORD");
-      $this->connection = new PDO($dns, $user, $password);
+      // CASE_UPPER torna o acesso as colunas agnostico de banco: o driver OCI
+      // devolve os nomes em MAIUSCULAS e os demais como declarados. Sem isto,
+      // $linha['coluna'] vira null no Oracle e o teste falha comparando string
+      // vazia, sem defeito algum na aplicacao.
+      // MAIUSCULA e a convencao ja adotada pela suite - ver os
+      // array_change_key_case(..., CASE_UPPER) do CenarioBaseTestCase.
+      $this->connection = new PDO($dns, $user, $password, array(
+          PDO::ATTR_CASE => PDO::CASE_UPPER,
+      ));
   }
 
 

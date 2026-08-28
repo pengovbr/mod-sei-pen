@@ -91,7 +91,7 @@ class MultiplosOrgaosAtivacaoTest extends FixtureCenarioBaseTestCase
             array($numIdEstrutura)
         );
 
-        return empty($arrResultado) ? '' : (string) $arrResultado[0]['sin_multiplos_orgaos'];
+        return empty($arrResultado) ? '' : (string) $arrResultado[0]['SIN_MULTIPLOS_ORGAOS'];
     }
 
     /**

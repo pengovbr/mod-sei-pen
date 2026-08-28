@@ -53,6 +53,26 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
             'update md_pen_envio_comp_digitais set sin_multiplos_orgaos = ? where id_unidade_pen = ?',
             array($bolAtivar ? 'S' : 'N', $arrContrapartida['ID_ESTRUTURA'])
         );
+
+        // Conferencia da pre-condicao. O UPDATE acima nao reclama quando nao
+        // encontra linha, e a gravacao pela tela pode falhar em silencio - sem
+        // esta checagem o teste seguia como se o mapeamento existisse, e os
+        // verdes desta classe nao provavam que o fluxo multiplos orgaos foi
+        // realmente exercitado.
+        $arrFlag = $objBanco->query(
+            'select sin_multiplos_orgaos from md_pen_envio_comp_digitais where id_unidade_pen = ?',
+            array($arrContrapartida['ID_ESTRUTURA'])
+        );
+        $this->assertNotEmpty(
+            $arrFlag,
+            'Pre-condicao: Mapeamento de Envio Parcial nao gravado para a estrutura '
+                . $arrContrapartida['ID_ESTRUTURA'] . ' no contexto ' . $strContexto . '.'
+        );
+        $this->assertEquals(
+            $bolAtivar ? 'S' : 'N',
+            trim((string) $arrFlag[0]['SIN_MULTIPLOS_ORGAOS']),
+            'Pre-condicao: a flag de multiplos orgaos nao ficou no estado esperado.'
+        );
     }
 
     private function encerrarSessoes(): void

@@ -115,7 +115,7 @@ class EnvioMultiplosOrgaosWhitelistTest extends FixtureCenarioBaseTestCase
 
         $this->assertEquals(
             'N',
-            $arrResultado[0]['sin_multiplos_orgaos'],
+            $arrResultado[0]['SIN_MULTIPLOS_ORGAOS'],
             'FALHA ABERTA: mapeamento gravado com sin_multiplos_orgaos = S sem que a unidade '
             . 'estivesse na whitelist EnvioMultiplosOrgaos e sem o administrador marcar a opcao.'
         );
