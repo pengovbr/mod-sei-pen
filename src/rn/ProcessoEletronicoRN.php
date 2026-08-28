@@ -1096,7 +1096,7 @@ class ProcessoEletronicoRN extends InfraRN
       $bolSalvaLogs = $objInfraParametro->getValor('MOD_SEI_PEN_SALVA_HTTP_LOGS', false, 0);
 
       if ($bolSalvaLogs) {
-        $arrGuzzleConfig['handler'] = $this->getStackParaLog();
+        $arrConfigGuzzle['handler'] = $this->getStackParaLog();
       }
 
       $strClientGuzzle = new GuzzleHttp\Client($arrConfigGuzzle);
@@ -1177,7 +1177,7 @@ class ProcessoEletronicoRN extends InfraRN
         $bolSalvaLogs = $objInfraParametro->getValor('MOD_SEI_PEN_SALVA_HTTP_LOGS', false, 0);
 
         if ($bolSalvaLogs) {
-          $arrGuzzleConfig['handler'] = $this->getStackParaLog();
+          $arrConfigGuzzle['handler'] = $this->getStackParaLog();
         }
 
         $strClientGuzzle = new GuzzleHttp\Client($arrConfigGuzzle);
