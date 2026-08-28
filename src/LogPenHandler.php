@@ -108,7 +108,12 @@ class LogPenHandler
         $doc->url = $data['request']['uri'];
         $doc->method = $data['request']['method'];
         $doc->request_headers = json_encode($data['request']['headers']);
-        $doc->request_body = $data['request']['body'] ?? null;
+        $body = mb_convert_encoding(
+            $data['request']['body'] ?? '',
+            'UTF-8',
+            'ISO-8859-1'
+        );
+        $doc->request_body = mb_strcut($body, 0, 10 * 1024, 'UTF-8');
 
         $doc->response_status = $data['response']['status'] ?? null;
         $doc->response_headers = json_encode($data['response']['headers'] ?? []);
