@@ -102,10 +102,114 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
      * A devolucao e a sincronizacao sao sequencias de dois tramites, e cada um
      * avanca alguns status por ciclo (armadilha 4). Uma execucao so nao basta.
      */
-    private function processarPendencias(int $numCiclos = 8): void
+    /**
+     * Abre o processo e so devolve quando a arvore terminou de montar.
+     *
+     * abrirProcesso() da classe base retorna sem garantir que a tela carregou:
+     * ela tenta abrir pelo Controle de Processos e, se falhar, cai numa busca
+     * alternativa - mas nao confere o resultado. Sob carga de suite, o comando
+     * seguinte procura o iframe da arvore antes de ele existir e o teste morre
+     * com "Unable to locate element: //iframe[@id='ifrArvore']".
+     *
+     * A espera e por CONDICAO, nao por relogio: repete ate o iframe existir.
+     * O try/catch e obrigatorio - WebDriverWait::until repete o RETORNO da
+     * closure, mas nao sobrevive a uma excecao, entao NoSuchElement abortaria
+     * a espera em vez de tentar de novo.
+     */
+    private function abrirProcessoEAguardarArvore(string $strProtocolo): void
     {
-        for ($i = 0; $i < $numCiclos; $i++) {
+        $this->abrirProcesso($strProtocolo);
+
+        try {
+            $this->waitUntil(function () {
+                try {
+                    $this->paginaBase->frame(null);
+                    $this->paginaBase->elByXPath("//iframe[@id='ifrArvore' or @name='ifrArvore']");
+                    return true;
+                } catch (\Exception $e) {
+                    return null;
+                }
+            }, PEN_WAIT_TIMEOUT);
+        } catch (\Exception $e) {
+            // A espera esgotou: a arvore nunca montou. Sem diagnostico, o erro
+            // sobe como TimeoutException seco e nao diz em que tela paramos.
+            // Captura o estado real para distinguir sessao expirada, tela errada
+            // ou processo que nao abriu.
+            throw new \Exception(
+                'ARVORE NAO MONTOU apos abrir ' . $strProtocolo . '. ' . $this->diagnosticarTela(),
+                0,
+                $e
+            );
+        }
+
+        $this->paginaBase->frame(null);
+    }
+
+    /**
+     * Coleta o estado da tela para diagnostico quando uma espera esgota.
+     * Cada leitura vai em try/catch proprio: se o navegador estiver num estado
+     * ruim, uma falha aqui nao pode mascarar o erro original.
+     */
+    private function diagnosticarTela(): string
+    {
+        $arrInfo = array();
+
+        try { $arrInfo[] = 'url=' . self::$driver->getCurrentURL(); }
+        catch (\Exception $e) { $arrInfo[] = 'url=<indisponivel>'; }
+
+        try { $arrInfo[] = 'titulo=' . $this->paginaBase->titulo(); }
+        catch (\Exception $e) { $arrInfo[] = 'titulo=<indisponivel>'; }
+
+        try {
+            $this->paginaBase->frame(null);
+            $arrFrames = $this->paginaBase->elementsByXPath('//iframe');
+            $arrNomes = array();
+            foreach ($arrFrames as $objFrame) {
+                $strId = (string) $objFrame->getAttribute('id');
+                $arrNomes[] = $strId !== '' ? $strId : '<sem-id>';
+            }
+            $arrInfo[] = 'iframes=[' . implode(',', $arrNomes) . ']';
+        } catch (\Exception $e) {
+            $arrInfo[] = 'iframes=<indisponivel>';
+        }
+
+        try {
+            $strTexto = preg_replace('/\s+/', ' ', $this->paginaBase->getConteudoBody());
+            $arrInfo[] = 'corpo="' . substr($strTexto, 0, 300) . '"';
+        } catch (\Exception $e) {
+            $arrInfo[] = 'corpo=<indisponivel>';
+        }
+
+        return implode(' | ', $arrInfo);
+    }
+
+    private function processarPendenciasAte(callable $fnCondicao, int $numCiclosMax = 45): void
+    {
+        for ($i = 0; $i < $numCiclosMax; $i++) {
             $this->executarTramitarPendenciasSimples();
+
+            // Espera pelo EFEITO, nao pelo relogio. A versao anterior fazia
+            // 8 ciclos fixos com sleep(3): quando o barramento demorava mais que
+            // isso o teste falhava, e quando respondia rapido desperdicava tempo.
+            //
+            // O teto precisa ser ALTO por causa da fila. O monitoramento
+            // processa um lote limitado por execucao (ver NUMERO_PROCESSOS_MONITORAMENTO
+            // e MAXIMO_PROCESSOS_MONITORAMENTO em PendenciasTramiteRN), e ao rodar
+            // dentro da suite a fila ja chega com quase 200 pendencias deixadas
+            // pelas classes anteriores. O tramite deste teste entra atras de todas
+            // elas. Isolado a fila e curta e bastam poucos ciclos - foi por isso
+            // que a classe passava sozinha e falhava na suite.
+            //
+            // Ciclos extras custam pouco: a condicao consulta o banco e o laco
+            // encerra assim que o efeito chega.
+            try {
+                if ($fnCondicao()) {
+                    return;
+                }
+            } catch (\Exception $e) {
+                // segue para o proximo ciclo
+            }
+
             sleep(3);
         }
     }
@@ -138,10 +242,31 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
         );
     }
 
+    /**
+     * Conta os documentos do processo direto no banco do orgao informado.
+     *
+     * Serve como CONDICAO de espera, onde contarDocumentos() nao pode ser usada:
+     * aquela dirige o navegador e, quando o processo ainda nao chegou, gasta o
+     * PEN_WAIT_TIMEOUT inteiro (360s) esperando a arvore. Doze ciclos assim dao
+     * mais de uma hora. A consulta ao banco responde em milissegundos.
+     */
+    private function contarDocumentosNoBanco(string $strContexto): int
+    {
+        $objBanco = new DatabaseUtils($strContexto);
+        $arrResultado = $objBanco->query(
+            'select count(*) as total from documento
+              where id_procedimento = (select id_protocolo from protocolo
+                                        where protocolo_formatado = ?)',
+            array(self::$processoTeste['PROTOCOLO'])
+        );
+
+        return empty($arrResultado) ? 0 : (int) $arrResultado[0]['TOTAL'];
+    }
+
     private function contarDocumentos(array $arrOrgao): int
     {
         $this->entrarComo($arrOrgao);
-        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        $this->abrirProcessoEAguardarArvore(self::$processoTeste['PROTOCOLO']);
         $arrDocumentos = $this->paginaProcesso->listarDocumentos();
 
         return is_array($arrDocumentos) ? count($arrDocumentos) : 0;
@@ -173,7 +298,7 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
         $arrDoc1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
         $this->cadastrarDocumentoExternoFixture($arrDoc1, $objProtocoloDTO->getDblIdProtocolo());
 
-        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        $this->abrirProcessoEAguardarArvore(self::$processoTeste['PROTOCOLO']);
         $this->tramitarProcessoExternamente(
             self::$processoTeste['PROTOCOLO'],
             self::$destinatario['REP_ESTRUTURAS'],
@@ -185,6 +310,18 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
             true,
             true
         );
+
+        // O tramite dispara UM ciclo de pendencias dentro de
+        // tramitarProcessoExternamente(). Isso basta com a maquina ociosa, mas
+        // nao sob carga de suite: o processo ainda nao chegou ao destino, e
+        // abrirProcesso() cai no fallback de busca - a tela fica em
+        // "SEI - Pesquisa", sem iframe, e a espera pela arvore esgota.
+        //
+        // Os demais casos desta classe (cu06, cu09, cu10) ja esperavam pelas
+        // pendencias; o cu04 era o unico que nao esperava.
+        $this->processarPendenciasAte(function () {
+            return $this->contarDocumentosNoBanco(CONTEXTO_ORGAO_B) === 1;
+        });
 
         $this->assertEquals(
             1,
@@ -208,7 +345,7 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
         );
 
         $this->entrarComo(self::$destinatario);
-        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        $this->abrirProcessoEAguardarArvore(self::$processoTeste['PROTOCOLO']);
         $this->assertTrue(
             $this->paginaProcesso->validarBotaoExiste('Sincronizar Processo'),
             'CU-06: o botao Sincronizar Processo deveria estar disponivel no destino.'
@@ -216,7 +353,9 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
         $this->solicitarSincronizacaoEConfirmar();
 
         putenv('DATABASE_HOST=org1-database');
-        $this->processarPendencias();
+        $this->processarPendenciasAte(function () {
+            return $this->contarDocumentosNoBanco(CONTEXTO_ORGAO_B) === 2;
+        });
 
         $this->assertEquals(
             2,
@@ -234,13 +373,15 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
         $this->incluirDocumentoExterno(self::$destinatario, 'org2-database', 'arquivo_pequeno_C.pdf');
 
         $this->entrarComo(self::$destinatario);
-        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        $this->abrirProcessoEAguardarArvore(self::$processoTeste['PROTOCOLO']);
 
         // Tela de devolucao em modo multiplos orgaos: destino fixo (armadilha 5).
         $this->tramitarProcessoExternamenteMultiplosOrgaoDestinatario(true);
 
         putenv('DATABASE_HOST=org1-database');
-        $this->processarPendencias();
+        $this->processarPendenciasAte(function () {
+            return $this->contarDocumentosNoBanco(CONTEXTO_ORGAO_A) === 3;
+        });
 
         $this->assertEquals(
             3,
@@ -258,11 +399,13 @@ class ProcessoAbertoSincronizacaoFluxoTest extends FixtureCenarioBaseTestCase
         $this->incluirDocumentoExterno(self::$remetente, 'org1-database', 'arquivo_pequeno.txt');
 
         $this->entrarComo(self::$destinatario);
-        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        $this->abrirProcessoEAguardarArvore(self::$processoTeste['PROTOCOLO']);
         $this->solicitarSincronizacaoEConfirmar();
 
         putenv('DATABASE_HOST=org1-database');
-        $this->processarPendencias();
+        $this->processarPendenciasAte(function () {
+            return $this->contarDocumentosNoBanco(CONTEXTO_ORGAO_B) === 4;
+        });
 
         $this->assertEquals(
             4,
