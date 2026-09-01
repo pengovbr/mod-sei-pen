@@ -97,6 +97,50 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
         return (int) $arr[0]['ID_PROTOCOLO'];
     }
 
+    /**
+     * Reserva um id de participante pelo MESMO mecanismo que a aplicacao usa.
+     *
+     * `participante` nao tem auto_increment nem IDENTITY: o SEI gera o id por
+     * uma sequencia propria, que e um objeto SEQUENCE em Oracle e PostgreSQL e
+     * uma TABELA com identidade em MySQL e SQL Server (ver
+     * InfraSqlServer::getValorSequencia).
+     *
+     * Calcular max(id)+1, como esta classe fazia, entrega um numero que a
+     * sequencia ainda vai distribuir. A insercao manual o "rouba" e a proxima
+     * insercao feita pela APLICACAO colide na chave primaria. O estrago nao fica
+     * nesta classe: o recebimento de qualquer processo passa a falhar com
+     * "Erro cadastrando registro em participante", derrubando as classes
+     * seguintes da suite.
+     *
+     * Tirando o valor da propria sequencia, ela avanca junto e nao ha colisao.
+     */
+    private function reservarIdParticipante(DatabaseUtils $objBanco): int
+    {
+        switch ($objBanco->getBdType()) {
+            case 'oci':
+                $arr = $objBanco->query('select seq_participante.nextval as prox from dual', array());
+                return (int) $arr[0]['PROX'];
+
+            case 'pgsql':
+                $arr = $objBanco->query("select nextval('seq_participante') as prox", array());
+                return (int) $arr[0]['PROX'];
+
+            case 'sqlsrv':
+            case 'dblib':
+                $arr = $objBanco->query(
+                    'insert into seq_participante output cast(inserted.id as varchar) as prox values (null)',
+                    array()
+                );
+                return (int) $arr[0]['PROX'];
+
+            default: // mysql
+                // Mesma instrucao do InfraMySqli::getValorSequencia().
+                $objBanco->execute("insert into seq_participante (campo) values ('0')", array());
+                $arr = $objBanco->query('select last_insert_id() as prox', array());
+                return (int) $arr[0]['PROX'];
+        }
+    }
+
     private function contarInteressadosDaOutraUnidade(int $numIdProtocolo): int
     {
         $objBanco = new DatabaseUtils(CONTEXTO_ORGAO_B);
@@ -169,7 +213,7 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
             'Nenhum contato disponivel no destino.'
         );
 
-        $arrProxId = $objBanco->query('select coalesce(max(id_participante), 0) + 1 as prox from participante', array());
+
         $arrProxSeq = $objBanco->query(
             'select coalesce(max(sequencia), 0) + 1 as prox from participante where id_protocolo = ?',
             array($numIdProtocolo)
@@ -179,7 +223,7 @@ class ProcessoAbertoInteressadosOutraUnidadeTest extends FixtureCenarioBaseTestC
             'insert into participante (id_participante, id_protocolo, id_contato, id_unidade, sta_participacao, sequencia)
              values (?, ?, ?, ?, ?, ?)',
             array(
-                (int) $arrProxId[0]['PROX'],
+                $this->reservarIdParticipante($objBanco),
                 $numIdProtocolo,
                 (int) $arrContato[0]['ID_CONTATO'],
                 self::ID_UNIDADE_OUTRA,
