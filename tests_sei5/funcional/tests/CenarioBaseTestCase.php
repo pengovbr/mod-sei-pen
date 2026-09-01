@@ -826,18 +826,44 @@ class CenarioBaseTestCase extends TestCase
         // so um passo da cadeia, entao sao necessarias varias rodadas.
         $numRodadasMonitoramento = $this->modoSegundoPlanoAtivo() ? 6 : 1;
 
-    for ($numRodada = 0; $numRodada < $numRodadasMonitoramento; $numRodada++) {
-        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptEnvio}");
-        $this->aguardarFilaGearmanDrenar();
-        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptRecebimento}");
-        $this->aguardarFilaGearmanDrenar();
-        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org2-http-1 {$scriptEnvio}");
-        $this->aguardarFilaGearmanDrenar();
-        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org2-http-1 {$scriptRecebimento}");
-        $this->aguardarFilaGearmanDrenar();
-        shell_exec("docker exec -e XDEBUG_MODE=off funcional-org1-http-1 {$scriptRecebimento}");
-        $this->aguardarFilaGearmanDrenar();
+        for ($numRodada = 0; $numRodada < $numRodadasMonitoramento; $numRodada++) {
+            $this->executarMonitoramentoNoContainer('funcional-org1-http-1', $scriptEnvio);
+            $this->executarMonitoramentoNoContainer('funcional-org1-http-1', $scriptRecebimento);
+            $this->executarMonitoramentoNoContainer('funcional-org2-http-1', $scriptEnvio);
+            $this->executarMonitoramentoNoContainer('funcional-org2-http-1', $scriptRecebimento);
+            $this->executarMonitoramentoNoContainer('funcional-org1-http-1', $scriptRecebimento);
+        }
     }
+
+    /**
+     * Executa um script de monitoramento de pendencias dentro do container informado.
+     *
+     * Antes o disparo era feito com shell_exec(), que descarta saida e codigo de
+     * retorno. Quando o binario do docker montado no container de teste nao era
+     * executavel (imagem alpine + binario glibc do host), nenhuma pendencia era
+     * processada e a suite falhava em massa com "Unable to locate element
+     * ifrArvore", sem nenhuma pista da causa real. Aqui a falha e explicita.
+     */
+    private function executarMonitoramentoNoContainer(string $strContainer, string $strScript): void
+    {
+        $strComando = sprintf('docker exec -e XDEBUG_MODE=off %s %s 2>&1', $strContainer, $strScript);
+
+        $arrSaida  = array();
+        $numStatus = 0;
+        exec($strComando, $arrSaida, $numStatus);
+
+        if ($numStatus !== 0) {
+            throw new \Exception(sprintf(
+                "Falha ao processar pendencias em %s (exit=%d)." . PHP_EOL
+                . "Comando: %s" . PHP_EOL . "Saida:" . PHP_EOL . "%s",
+                $strContainer,
+                $numStatus,
+                $strComando,
+                implode(PHP_EOL, array_slice($arrSaida, -15))
+            ));
+        }
+
+        $this->aguardarFilaGearmanDrenar();
     }
 
     /**
