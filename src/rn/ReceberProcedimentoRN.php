@@ -285,6 +285,14 @@ class ReceberProcedimentoRN extends InfraRN
       $qtdComponentesEnviadosRecebidos = $numQtdComponentes - $numQtdComponentesPresentes;
       $this->gravarLogDebug("Serão enviado(s)/recebido(s) {$qtdComponentesEnviadosRecebidos} Componente(s) digital(is)", 2);
 
+      $arrHashSemCopiaLocalValida = $this->identificarComponentesSemCopiaLocalValida(
+          $arrHashComponentesProtocolo, $arrHashPendentesRecebimento, $parObjMetadadosProcedimento
+      );
+    if(!empty($arrHashSemCopiaLocalValida)) {
+        $this->gravarLogDebug(count($arrHashSemCopiaLocalValida) . " componente(s) digital(is) sem copia local valida serao rebaixados do barramento", 2);
+        $arrHashPendentesRecebimento = array_values(array_merge($arrHashPendentesRecebimento, $arrHashSemCopiaLocalValida));
+    }
+
       // Percorre os componentes que precisam ser recebidos
     foreach($arrHashPendentesRecebimento as $key => $strHashComponentePendente){
         $numOrdemComponente = $numQtdComponentesPresentes + $key + 1;
@@ -3177,6 +3185,94 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
+
+  /**
+   * Identifica, dentre os componentes descritos nos metadados deste tramite, os
+   * hashes que o barramento NAO listou como pendentes (por deduplicar por hash),
+   * mas que tambem NAO possuem copia local valida para clonagem - ou seja, nao ha
+   * no processo nenhum documento nao cancelado, com anexo, cujo componente tenha
+   * aquele hash.
+   *
+   * @param  array    $parArrHashComponentesProtocolo Hashes dos componentes dos documentos nao retirados do tramite
+   * @param  array    $parArrHashPendentesRecebimento Hashes que o barramento indicou como pendentes de recebimento
+   * @param  stdClass $parObjMetadadosProcedimento    Metadados do tramite, usados para localizar o processo local
+   * @return array    Lista de hashes sem copia local valida, que devem ser rebaixados
+   */
+  private function identificarComponentesSemCopiaLocalValida($parArrHashComponentesProtocolo, $parArrHashPendentesRecebimento, $parObjMetadadosProcedimento)
+    {
+      // Hashes descritos no tramite que o barramento considerou ja presentes no destino
+      $arrHashPresumidamentePresentes = array_values(array_unique(array_diff($parArrHashComponentesProtocolo, $parArrHashPendentesRecebimento)));
+    if(empty($arrHashPresumidamentePresentes)) {
+        return [];
+    }
+
+      // Localiza o processo ja existente no destino. Nao existindo (primeiro
+      // recebimento), nao ha copia local alguma e a lista do barramento ja basta.
+      $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
+      $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
+      [$dblIdProcedimento, ] = $this->consultarProcedimentoExistente($strNumeroRegistro, $objProtocolo->protocolo);
+    if(is_null($dblIdProcedimento)) {
+        return [];
+    }
+
+      $arrHashSemCopiaLocal = [];
+    foreach($arrHashPresumidamentePresentes as $strHash) {
+      if(!$this->possuiComponenteLocalComAnexo($dblIdProcedimento, $strHash)) {
+          $arrHashSemCopiaLocal[] = $strHash;
+      }
+    }
+
+      return $arrHashSemCopiaLocal;
+  }
+
+  /**
+   * Verifica se o processo possui ao menos um documento nao cancelado, com anexo
+   * fisico, cujo componente digital tenha o hash informado - isto e, uma copia
+   * local valida que a clonagem (clonarComponentesJaExistentesNoProcesso) poderia
+   * reaproveitar em vez de rebaixar o componente do barramento.
+   *
+   * @param  int    $parDblIdProcedimento
+   * @param  string $parStrHashComponenteDigital
+   * @return bool
+   */
+  private function possuiComponenteLocalComAnexo($parDblIdProcedimento, $parStrHashComponenteDigital)
+    {
+      $objComponenteDigitalConsultaDTO = new ComponenteDigitalDTO();
+      $objComponenteDigitalConsultaDTO->setDblIdProcedimento($parDblIdProcedimento);
+      $objComponenteDigitalConsultaDTO->setStrHashConteudo($parStrHashComponenteDigital);
+      $objComponenteDigitalConsultaDTO->retDblIdDocumento();
+
+      $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+      $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalConsultaDTO);
+    if(empty($arrObjComponenteDigitalDTO)) {
+        return false;
+    }
+
+      $objAnexoRN = new AnexoRN();
+    foreach($arrObjComponenteDigitalDTO as $objComponenteDigitalItemDTO) {
+        $dblIdDocumento = $objComponenteDigitalItemDTO->getDblIdDocumento();
+
+        // Documento cancelado nao serve de fonte: o SEI ja removeu o anexo dele
+        $objProtocoloDTO = new ProtocoloDTO();
+        $objProtocoloDTO->setDblIdProtocolo($dblIdDocumento);
+        $objProtocoloDTO->retStrStaEstado();
+        $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
+      if(is_null($objProtocoloDTO) || $objProtocoloDTO->getStrStaEstado() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+          continue;
+      }
+
+        // Existe anexo fisico para clonar?
+        $objAnexoDTO = new AnexoDTO();
+        $objAnexoDTO->retNumIdAnexo();
+        $objAnexoDTO->setDblIdProtocolo($dblIdDocumento);
+        $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+      if(!empty($arrObjAnexoDTO)) {
+          return true;
+      }
+    }
+
+      return false;
+  }
 
     /**
      * Verifica se existe documentos com pendência de download de seus componentes digitais
