@@ -1784,7 +1784,7 @@ class PENIntegracao extends SeiIntegracao
   {
     $numUltimoStatusTramite = null;
 
-    if (!$this->isProcessoRecebidoTramita($objProcedimentoAPIPrincipal)) {
+    if (!$this->processoAnexadoPossuiComponentesTramitados($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado)) {
 
       $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
       if ($objAtividadeAnexacaoDTO === null) {
@@ -1800,28 +1800,6 @@ class PENIntegracao extends SeiIntegracao
         return null;
       }
       $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
-
-    } else {
-        $objComponentesDigital = new ComponenteDigitalDTO();
-        $objComponentesDigital->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
-        $objComponentesDigital->setStrProtocoloProcedimentoAnexado($objProcedimentoAPIAnexado->getNumeroProtocolo());
-        $objComponentesDigital->setStrNumeroRegistro(null, InfraDTO::$OPER_DIFERENTE);
-        $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
-      if ($objComponenteDigitalBD->contar($objComponentesDigital) == 0) {
-        $objAtividadeAnexacaoDTO = $this->retornarAtividadeAnexacaoProcessoPai($objProcedimentoAPIPrincipal, $objProcedimentoAPIAnexado);
-        if ($objAtividadeAnexacaoDTO === null) {
-          return null;
-        }
-
-        $numIdAtividadeTramitacaoExterna = $this->retornarIdAtividadeTramitacaoExternaProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
-        if ($numIdAtividadeTramitacaoExterna === null) {
-          return null;
-        }
-        if (!$this->processoPaiPossuiTramiteValidoAposAnexacao($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO)) {
-          return null;
-        }
-        $numUltimoStatusTramite = $this->retornarUltimoStatusTramiteProcessoPai($objProcedimentoAPIPrincipal, $objAtividadeAnexacaoDTO);
-      }
     }
     $nomeModulo = $this->getNome();
     $mensagem = $nomeModulo . ': Prezado(a) usuário(a), não é possível desanexar o processo '
@@ -1902,20 +1880,28 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Verifica se o processo pai já teve um tramite recebido registrado no Tramita GOV.BR, buscando pela tarefa de processo recebido no historico do processo pai.
-   * Esta verificação é importante para validar se o processo pai já teve algum tramite iniciado no Tramita GOV.BR, o que impacta nas regras de desanexação dos processos filhos.
+   * Verifica se o processo anexado (filho) já possui componentes digitais transmitidos (tramitados ou
+   * sincronizados) ao órgão de destino, sob o processo principal (pai), via Tramita GOV.BR.
+   *
+   * Considera-se transmitido o componente digital do processo anexado que já possui número de registro
+   * (NRE) associado a um trâmite, indicando que o documento foi enviado ao destinatário. Nesse caso a
+   * desanexação não pode ser permitida, pois removeria da estrutura já sincronizada um documento que o
+   * órgão de destino espera encontrar em sincronizações posteriores, gerando inconsistência.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @return bool
    */
-  private function isProcessoRecebidoTramita(ProcedimentoAPI $objProcedimentoAPIPrincipal)
+  private function processoAnexadoPossuiComponentesTramitados(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
-    $objAtividadeDTO = new AtividadeDTO();
-    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoAPIPrincipal->getIdProcedimento());
-    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
-    $objAtividadeDTO->retNumIdAtividade();
-    $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_ASC);
-    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+    $objComponenteDigitalDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
+    $objComponenteDigitalDTO->setStrProtocoloProcedimentoAnexado($objProcedimentoAPIAnexado->getNumeroProtocolo());
+    $objComponenteDigitalDTO->setStrNumeroRegistro(null, InfraDTO::$OPER_DIFERENTE);
 
-    $objAtividadeRN = new AtividadeRN();
-    return $objAtividadeRN->contarRN0035($objAtividadeDTO);
+    $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+
+    return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
   }
 
   /**
