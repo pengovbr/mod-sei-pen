@@ -273,6 +273,18 @@ class ReceberProcedimentoRN extends InfraRN
       // mantida pela aplicação.
       $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProtocolo);
       $arrHashPendentesRecebimento = $parObjTramite->hashDosComponentesPendentesDeRecebimento;
+      $arrHashPendentesRecebimento = array_values(array_filter((array) $arrHashPendentesRecebimento, function ($strHash) {
+          return !is_null($strHash);
+      }));
+
+    foreach (array_unique($arrHashComponentesProtocolo) as $strHashComponenteProtocolo) {
+      if (!in_array($strHashComponenteProtocolo, $arrHashPendentesRecebimento)
+          && !$this->existeComponenteDigitalComAnexoAtivo($parObjMetadadosProcedimento->metadados->NRE, $strHashComponenteProtocolo)) {
+          $arrHashPendentesRecebimento[] = $strHashComponenteProtocolo;
+          $this->gravarLogDebug("Componente digital $strHashComponenteProtocolo sera recebido novamente porque nao ha anexo ativo reutilizavel no processo", 2);
+      }
+    }
+
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
@@ -345,6 +357,18 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       return $arrHashComponentesBaixados;
+  }
+
+  private function existeComponenteDigitalComAnexoAtivo($parStrNumeroRegistro, $parStrHashComponenteDigital)
+    {
+      $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+      $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+      $objComponenteDigitalDTO->setStrHashConteudo($parStrHashComponenteDigital);
+      $objComponenteDigitalDTO->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE);
+      $objComponenteDigitalDTO->setStrStaEstadoProtocolo(ProtocoloRN::$TE_DOCUMENTO_CANCELADO, InfraDTO::$OPER_DIFERENTE);
+
+      $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+      return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
   }
 
 
