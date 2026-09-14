@@ -8,6 +8,12 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 * O módulo é compatível com as seguintes versões do **SEI**:
   * SEI 5.0.0, 5.0.1, 5.0.2, 5.0.3, 5.0.4 e 5.1.0
 
+> [!NOTE]  
+> Os novos endereços para integração do módulo com o Tramita GOV.BR são os seguintes:
+> **Homologação**: https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v4/
+> **Produção**: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/rest/v4/
+> **Se o endereço não for modificado durante a instalação desta versão, o módulo não funcionará corretamente.**
+
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
 * **INSTALACAO.md** - Procedimento de instalação e configuração do módulo
@@ -29,45 +35,63 @@ Antes de atualizar:
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
-#### **NOVAS FUNCIONALIDADES / MELHORIAS**
 
-#### Nesta versão, foram contempladas as seguintes melhorias:
+### Erros Corrigidos
 
-* **Compatibilização do SEI 5.1.0 com o módulo do Tramita:** Libera a compatibilização do módulo do Tramita 4.1.0 com o SEI versão 5.1.0;
+* **Influência do parâmetro no acesso ao SEI (#1096)** 
+Corrigido o erro que bloqueava completamente o acesso ao SEI para usuários que não possuíam o parâmetro `md_pen_tramita_em_bloco` configurado no perfil.
 
-* **Erro ao duplicar processo tramitado:** Corrige o erro "Documento não pode receber anexos" ao duplicar um processo que já foi tramitado pelo Tramita GOV.BR. Os anexos de documentos internos passam a ser mantidos em tabela e repositório próprios do módulo, preservando o documento imutável recebido do barramento. [#1127](https://github.com/pengovbr/mod-sei-pen/issues/1127);
+* **Mensagem ao excluir mapeamento de envio parcial (#1099)** 
+A mensagem de confirmação de exclusão foi ajustada para exibir o nome correto da unidade, e não as informações do repositório.
 
-* **Desanexação de processo já tramitado:** Permite desanexar um processo de outro processo quando já houve tramitação externa, com as validações necessárias para preservar a integridade do trâmite. [#1128](https://github.com/pengovbr/mod-sei-pen/issues/1128), [#1210](https://github.com/pengovbr/mod-sei-pen/issues/1210);
+* **Inativação de tipo de processo no Oracle (#1120)** 
+Resolvido um erro específico no banco de dados Oracle que impedia os usuários de inativarem tipos de processo.
 
-* **Restrição de mapeamento duplicado de tipo de documento:** Impede o cadastro de mais de um mapeamento de envio para o mesmo tipo de documento. A atualização também remove as duplicidades já existentes na base antes de aplicar a restrição. [#1213](https://github.com/pengovbr/mod-sei-pen/issues/1213), [#1207](https://github.com/pengovbr/mod-sei-pen/issues/1207);
+* **Erro ao duplicar processo tramitado (#1127)** 
+Consertada a falha que exibia uma mensagem de erro na tela sempre que o usuário tentava duplicar um processo que já havia tramitado. Agora o módulo apresenta o seguinte comportamento:
 
-* **Influência do parâmetro md_pen_tramita_em_bloco no acesso ao SEI:** Ajusta o comportamento do parâmetro de tramitação em bloco para que não interfira no acesso ao sistema. [#1109](https://github.com/pengovbr/mod-sei-pen/issues/1109);
+> Processo Bloqueado:  a funcionalidade não é apresentada para o usuário;
+   Processo não Bloqueado: a funcionalidade é exibida.
 
-* **Mensagem na exclusão de mapeamento de envio parcial:** Corrige a mensagem exibida na confirmação de exclusão de mapeamento de envio parcial. [#1108](https://github.com/pengovbr/mod-sei-pen/issues/1108);
+* **Tramitação de processos com documentos grandes (#1180)** 
+Corrigida a falha que causava a recusa frequente na conclusão do envio de processos com arquivos muito grandes.
 
-* **Assinatura sem nome ou cargo informado:** Trata os casos de assinatura com nome e/ou cargo ausentes, substituindo a mensagem de erro genérica por informação compreensível ao usuário. [#1177](https://github.com/pengovbr/mod-sei-pen/issues/1177), [#1183](https://github.com/pengovbr/mod-sei-pen/issues/1183), [#1193](https://github.com/pengovbr/mod-sei-pen/issues/1193);
+* **Erro ao enviar bloco de processo externo (#1198)** 
+Solucionado o erro que travava os blocos de processos externos durante a tentativa de envio, impedindo o cancelamento ou a realocação do processo.
 
-#### **CORREÇÕES DE PROBLEMAS**
+* **Duplicidade na consulta de tipo de documentos (#1207)** 
+Cada tipo de documento do SEI precisa ter uma única correspondência no módulo. Na hora de enviar o processo, o sistema busca essa correspondência; porém, quando ele encontrava mais de uma opção cadastrada, não sabia qual escolher, abortava o envio e exibia o erro na tela.
 
-#### Nesta versão, foram corrigidos os seguintes erros:
+* **Limpeza da lixeira do SEI (#1211)** 
+Resolvido o problema que impedia a rotina automática de limpeza da lixeira do SEI de excluir definitivamente documentos cancelados de processos tramitados pela plataforma Tramita GOVBR.
 
-* **Erro ao enviar bloco de processo externo:** Corrige falha identificada no envio de bloco contendo processo externo. [#1202](https://github.com/pengovbr/mod-sei-pen/issues/1202);
+* **Alteração do parâmetro SEI_FEDERACAO_NUMERO_PROCESSO após recebimento de trâmite (#1041)** 
+Foi corrigido o erro em que o parâmetro SEI_FEDERACAO_NUMERO_PROCESSO é setado para o valor "0", ainda que configurado com esse valor, gerando assim um lock no banco ao atualizar o registro, e por consequência gerava uma recusa no recebimento do processo no SEI.
 
-* **Erro na tramitação de processos com documentos grandes:** Corrige falha na tramitação de processos que contêm documentos de grande volume. [#1194](https://github.com/pengovbr/mod-sei-pen/issues/1194);
+### Melhorias
 
-* **Erro ORA-00932 em base Oracle:** Corrige o erro "ORA-00932: inconsistent datatypes: expected - got CLOB" durante a consulta de componentes digitais. [#1137](https://github.com/pengovbr/mod-sei-pen/issues/1137);
+* **Desanexação de processos já tramitados (#1114)** 
+O sistema passou a bloquear a desanexação de processos após a tramitação para evitar falhas na validação de segurança (hash) em envios futuros. Agora a seguinte mensagem é apresentada para o usuário, após a tentativa de desanexação:
 
-* **Lock recorrente no banco de dados:** Corrige atualização repetida de registro que provocava bloqueio no banco de dados durante o processamento de trâmites. [#1041](https://github.com/pengovbr/mod-sei-pen/issues/1041);
+>Não é possível desanexar o processo [Nº] do processo [Nº], pois já houve tramitação via Tramita GOV.BR.
+ 
+* **Clareza na mensagem de erro de assinatura (#1174)**
+O texto da mensagem exibida quando falta o nome ou cargo do assinante foi alterado para ser mais claro e orientar melhor o usuário sobre o que precisa ser tratado. Agora a seguinte mensagem é apresentada para o usuário: 
 
-* **Falha na limpeza da lixeira ao excluir documento definitivamente:** A chave estrangeira entre `md_pen_componente_digital` e `anexo` passa a usar `ON DELETE SET NULL`, permitindo que a tarefa agendada de limpeza da lixeira do SEI conclua a exclusão definitiva. [#1217](https://github.com/pengovbr/mod-sei-pen/issues/1217);
+>Não foi adicionado o nome e nem o tratamento/cargo do assinante no documento [Identificador do documento] de ordem [Nº da ordem do documento]. Por favor, corrija e realize uma nova tentativa de envio.
+OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.
 
-* **Processamento assíncrono de pendências pelo Gearman:** Corrige o tempo limite de registro das funções no Gearman, unifica o despacho das pendências em uma única função e trata a porta do servidor quando informada em branco ou como texto, evitando falha na verificação da instalação. [#1180](https://github.com/pengovbr/mod-sei-pen/issues/1180);
+* **Compatibilidade com o SEI 5.1.0 (#1175)**
+Agora o módulo é compatível com a versão 5.1.0 do SEI.
 
-* **Controle de acesso e tratamento de conteúdo nas telas do módulo:** Reforça a verificação de permissão nas rotas de expedição e de mapeamento e aplica tratamento ao conteúdo dinâmico exibido nas telas de administração do módulo, melhorando, assim, a segurança do módulo.
+* **Preenchimento de dados de assinatura para SEI 5.1.0 (#1178)** 
+O módulo agora preenche automaticamente os metadados Cargo e Nome com o texto "Informação inexistente" em assinaturas feitas em versões anteriores ao SEI 5.1.0, evitando que os processos sejam recusados. Caso os metadados não sejam preenchidos, a recusa da #1174 será emitida pelo sistema de destino.
 
+* **Segurança na migração de anexos (#1186)** 
+O roteiro técnico de migração de arquivos foi aprimorado para não deletar o arquivo original até que a operação seja totalmente concluída, evitando a perda de dados caso aconteça alguma falha no meio do processo.
 
-* **Preservação de arquivos migrados:** Ajusta o tratamento dos arquivos já migrados para que não sejam corrompidos em atualizações subsequentes. [#1187](https://github.com/pengovbr/mod-sei-pen/issues/1187);
-
+* **Controle de acesso e tratamento de conteúdo nas telas do módulo:** 
+Reforça a verificação de permissão nas rotas de expedição e de mapeamento e aplica tratamento ao conteúdo dinâmico exibido nas telas de administração do módulo, melhorando, assim, a segurança do módulo. 
 
 #### Instruções
 
