@@ -116,6 +116,7 @@ dist: cria_json_compatibilidade
 	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/verifica_instalacao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/verifica_anexos_migracao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoEnvioTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoRecebimentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/

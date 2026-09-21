@@ -2703,13 +2703,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->removerDuplicidadesMapeamentoEnvioV4100();
       $this->garantirIndiceUnicoMapeamentoEnvioV4100();
 
-      // Fora do if acima de proposito: dentro dele, uma falha deixaria a base
-      // meio migrada e marcada como completa. Reexecutar retoma de onde parou.
-      // Sem este indice a consulta varre a tabela inteira a cada lote.
+      // Indices de apoio da consulta de migracao. Ficam fora do if acima de
+      // proposito: sem eles cada lote varre as tabelas inteiras. Indice ja
+      // existente e reaproveitado.
       $objMetaBanco->criarIndice('md_pen_componente_digital', 'i01_md_pen_comp_dig_anexo_imut', ['id_anexo_imutavel'], false);
-      // O MySQL indexa coluna de FK automaticamente; o Oracle nao. Sem este
-      // indice, o Oracle faz varredura completa a cada lote.
       $objMetaBanco->criarIndice('md_pen_componente_digital', 'i02_md_pen_comp_dig_anexo', ['id_anexo'], false);
+      $objMetaBanco->criarIndice(
+          'md_pen_processo_eletronico',
+          'i03_md_pen_proc_eletr_proced',
+          ['id_procedimento'],
+          false
+      );
+
+      // A FK precisa virar ON DELETE SET NULL ANTES do laco: enquanto ela for
+      // restritiva, excluir a linha de `anexo` falha se algum componente digital
+      // ainda a referenciar por id_anexo, e o anexo acaba ignorado.
+      //----------------------------------------------------------------------
+      // Correcao da FK md_pen_componente_digital -> anexo para ON DELETE SET NULL.
+      // Sem isso, o expurgo definitivo de um anexo pela limpeza da lixeira falha.
+      //----------------------------------------------------------------------
+      $objMetaBanco->excluirChaveEstrangeira('md_pen_componente_digital', 'fk_md_pen_comp_dig_anexo');
+      $objMetaBanco->criarChaveEstrangeiraComExclusao(
+        'fk_md_pen_comp_dig_anexo',
+        'md_pen_componente_digital',
+        ['id_anexo'],
+        'anexo',
+        ['id_anexo'],
+        'SET NULL'
+      );
 
 
       // Migracao dos anexos de documentos internos, em lotes. O laco fica fora
@@ -2724,8 +2745,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $numUltimoIdAnexo = 0;
       $numInicioGeral = microtime(true);
 
-      // O log de debug do INFRA grava uma linha por consulta ao banco: medido,
-      // 3,9 GB para 1M de anexos. Fica desligado so aqui; o log do modulo (as linhas
+      // O log de debug do INFRA grava uma linha por consulta ao banco e enche o
+      // disco em base grande. Fica desligado so aqui; o log do modulo (as linhas
       // MIGRACAO_ANEXOS_V4100 abaixo) usa outra flag e continua ativo.
       $bolDebugInfraAnterior = InfraDebug::getInstance()->isBolDebugInfra();
       InfraDebug::getInstance()->setBolDebugInfra(false);
@@ -2762,24 +2783,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       if ($numTotal > 0) {
           $numDecorrido = microtime(true) - $numInicioGeral;
           $this->logar(sprintf(
-              'MIGRACAO_ANEXOS_V4100 FIM total=%d lotes=%d tamanho_lote=%d tempo=%.2fs media=%.4fms_por_anexo',
-              $numTotal, $numLote, $numTamanhoLote, $numDecorrido, ($numDecorrido * 1000) / $numTotal
+              'MIGRACAO_ANEXOS_V4100 FIM total=%d ignorados=%d lotes=%d tamanho_lote=%d'
+              . ' tempo=%.2fs media=%.4fms_por_anexo',
+              $numTotal, count($this->arrAnexosIgnoradosV4100), $numLote, $numTamanhoLote,
+              $numDecorrido, ($numDecorrido * 1000) / $numTotal
           ));
+      }
+
+      // O resumo repete a lista para quem le so o fim do log: sao os anexos que
+      // continuam em `anexo` e precisam de tratamento depois da atualizacao.
+      if (!empty($this->arrAnexosIgnoradosV4100)) {
+          $strResumo = sprintf(
+              'MIGRACAO_ANEXOS_V4100 ATENCAO %d anexo(s) ignorado(s) por problema no arquivo: %s',
+              count($this->arrAnexosIgnoradosV4100),
+              implode(', ', $this->arrAnexosIgnoradosV4100)
+          );
+          $this->logar($strResumo);
+          $this->gravarLinhaIgnoradosV4100($strResumo);
+
+          if (!empty($this->resArquivoIgnoradosV4100)) {
+              @fclose($this->resArquivoIgnoradosV4100);
+              $this->resArquivoIgnoradosV4100 = false;
+              $this->logar(sprintf(
+                  'MIGRACAO_ANEXOS_V4100 ATENCAO a lista dos ignorados esta em %s',
+                  $this->strArquivoIgnoradosV4100
+              ));
+          }
       }        
   
-      //----------------------------------------------------------------------
-      // Correção da FK md_pen_componente_digital -> anexo para ON DELETE SET NULL.
-      // Sem isso, o expurgo definitivo de um anexo pela limpeza da lixeira falha.
-      //----------------------------------------------------------------------
-      $objMetaBanco->excluirChaveEstrangeira('md_pen_componente_digital', 'fk_md_pen_comp_dig_anexo');
-      $objMetaBanco->criarChaveEstrangeiraComExclusao(
-        'fk_md_pen_comp_dig_anexo',
-        'md_pen_componente_digital',
-        ['id_anexo'],
-        'anexo',
-        ['id_anexo'],
-        'SET NULL'
-      );
 
       
 
@@ -2790,15 +2821,28 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   /**
    * Tamanho padrao do lote de migracao de anexos, cada um em transacao propria.
    * PEN_MIGRACAO_ANEXOS_LOTE reduz o lote se a base esbarrar em limite de
-   * transacao. Nao altera o desempenho: medido, 1,2% entre lote 100 e 5000.
+   * transacao. O tamanho do lote praticamente nao altera o desempenho.
    */
   const TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100 = 500;
+
+  /** Ids dos anexos que a migracao ignorou por problema no arquivo. */
+  private $arrAnexosIgnoradosV4100 = array();
+
+  /** Arquivo com as linhas IGNORADO, criado so quando o primeiro anexo e ignorado. */
+  private $strArquivoIgnoradosV4100 = null;
+  private $resArquivoIgnoradosV4100 = null;
 
   /**
    * Migra um lote de anexos, em transacao propria.
    *
+   * Anexo cujo arquivo esteja ausente, ilegivel ou corrompido e IGNORADO: fica
+   * como esta, em `anexo`, e a migracao segue. O id e o motivo vao para o log,
+   * para o resumo do final e para um arquivo em <tmp>, que e a unica copia
+   * duravel da lista. Nada se perde -- o documento continua acessivel --, mas
+   * nesses processos o erro ao duplicar processo (#1127) pode persistir.
+   *
    * @param  array $arrAnexos linhas de listarAnexoDocumentosInternos()
-   * @return array tempos do lote: 'banco' e 'arquivos', em segundos
+   * @return array tempos do lote ('banco', 'arquivos') e quantidade de ignorados
    */
   protected function migrarLoteAnexosDocumentosInternosV4100Controlado($arrAnexos)
     {
@@ -2809,7 +2853,40 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $numTempoBanco = 0;
       $numTempoArquivos = 0;
 
+      $numIgnorados = 0;
+
     foreach ($arrAnexos as $objAnexoDocumentoInternoDTO) {
+        // A leitura do anexo de origem vem antes de qualquer escrita: assim um
+        // arquivo problematico e descartado sem ter alterado nada no banco.
+        $numMarca = microtime(true);
+        $objAnexoDTO = new AnexoDTO();
+        $objAnexoDTO->retNumIdAnexo();
+        $objAnexoDTO->retDblIdProtocolo();
+        $objAnexoDTO->retNumIdUnidade();
+        $objAnexoDTO->retNumIdUsuario();
+        $objAnexoDTO->retStrNome();
+        $objAnexoDTO->retDthInclusao();
+        $objAnexoDTO->retNumTamanho();
+        $objAnexoDTO->retStrHash();
+        $objAnexoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
+        $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
+        $numTempoBanco += microtime(true) - $numMarca;
+
+        $numMarca = microtime(true);
+        $strCaminhoNomeArquivo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+        $strMotivo = $this->motivoArquivoInvalidoV4100($strCaminhoNomeArquivo, $objAnexoDocumentoInternoDTO['tamanho']);
+        $numTempoArquivos += microtime(true) - $numMarca;
+
+      if ($strMotivo !== null) {
+          $this->registrarAnexoIgnoradoV4100(
+              $objAnexoDocumentoInternoDTO['id_anexo'],
+              $strCaminhoNomeArquivo,
+              $strMotivo
+          );
+          $numIgnorados++;
+          continue;
+      }
+
         $numMarca = microtime(true);
 
         $objPenAnexoDocumentoDTO = new PenAnexoDocumentoDTO();
@@ -2828,39 +2905,172 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         // O insert atribui um id novo (PK e sequencia nativa). O vinculo em
         // md_pen_componente_digital aponta para o id antigo e precisa acompanhar.
         $numIdAnexoOriginal = $objAnexoDocumentoInternoDTO['id_anexo'];
-        $objPenAnexoDocumentoRN->cadastrar($objPenAnexoDocumentoDTO);
-        $this->atualizarVinculoComponenteDigital(
-            $numIdAnexoOriginal,
-            $objPenAnexoDocumentoDTO->getNumIdAnexo()
-        );
 
-        $objAnexoDTO = new AnexoDTO();
-        $objAnexoDTO->retNumIdAnexo();
-        $objAnexoDTO->retDblIdProtocolo();
-        $objAnexoDTO->retNumIdUnidade();
-        $objAnexoDTO->retNumIdUsuario();
-        $objAnexoDTO->retStrNome();
-        $objAnexoDTO->retDthInclusao();
-        $objAnexoDTO->retNumTamanho();
-        $objAnexoDTO->retStrHash();
-        $objAnexoDTO->setNumIdAnexo($objAnexoDocumentoInternoDTO['id_anexo']);
-        $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
+      try {
+          $objPenAnexoDocumentoRN->cadastrar($objPenAnexoDocumentoDTO);
+          $this->atualizarVinculoComponenteDigital(
+              $numIdAnexoOriginal,
+              $objPenAnexoDocumentoDTO->getNumIdAnexo()
+          );
+          $numTempoBanco += microtime(true) - $numMarca;
 
-        $numTempoBanco += microtime(true) - $numMarca;
+          $numMarca = microtime(true);
+          $objPenAnexoDocumentoRN->consolidarAnexoFilesystemModuloPen($objPenAnexoDocumentoDTO, $strCaminhoNomeArquivo);
+          $numTempoArquivos += microtime(true) - $numMarca;
 
-        $numMarca = microtime(true);
-        $strCaminhoNomeArquivo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
-        $objPenAnexoDocumentoRN->consolidarAnexoFilesystemModuloPen($objPenAnexoDocumentoDTO, $strCaminhoNomeArquivo);
-        $numTempoArquivos += microtime(true) - $numMarca;
-
-        $numMarca = microtime(true);
-        $objAnexoBD->excluir($objAnexoDTO);
-        $numTempoBanco += microtime(true) - $numMarca;
+          $numMarca = microtime(true);
+          $objAnexoBD->excluir($objAnexoDTO);
+          $numTempoBanco += microtime(true) - $numMarca;
+      } catch (Exception $e) {
+          // Falha depois das escritas (tipicamente MD5 divergente): desfaz o que
+          // este anexo gravou e segue. O lote inteiro nao pode ser perdido por
+          // causa de um arquivo.
+          $this->desfazerAnexoMigradoV4100($objPenAnexoDocumentoRN, $objPenAnexoDocumentoDTO, $numIdAnexoOriginal);
+          $this->registrarAnexoIgnoradoV4100($numIdAnexoOriginal, $strCaminhoNomeArquivo, $e->getMessage());
+          $numIgnorados++;
+      }
     }
 
-      return array('banco' => $numTempoBanco, 'arquivos' => $numTempoArquivos);
+      return array('banco' => $numTempoBanco, 'arquivos' => $numTempoArquivos, 'ignorados' => $numIgnorados);
   }
 
+
+  /**
+   * Diz por que o arquivo de origem nao serve para migrar, ou null se serve.
+   *
+   * So checagens baratas: existencia, leitura e tamanho. O MD5 fica por conta do
+   * consolidarAnexoFilesystemModuloPen, que ja o calcula sobre a copia.
+   *
+   * @param  string $strCaminho  caminho do arquivo no repositorio do SEI
+   * @param  int    $numTamanho  tamanho registrado em `anexo`
+   * @return string|null
+   */
+  private function motivoArquivoInvalidoV4100($strCaminho, $numTamanho)
+    {
+    if (!file_exists($strCaminho)) {
+        return 'arquivo nao encontrado';
+    }
+
+    if (!is_readable($strCaminho)) {
+        return 'sem permissao de leitura';
+    }
+
+      $numTamanhoDisco = filesize($strCaminho);
+    if ((int) $numTamanho > 0 && $numTamanhoDisco !== (int) $numTamanho) {
+        return sprintf('tamanho divergente (banco=%d, disco=%d)', $numTamanho, $numTamanhoDisco);
+    }
+
+      return null;
+  }
+
+  /**
+   * Desfaz o que a migracao de um anexo gravou, quando ela falha no meio.
+   *
+   * Devolve o vinculo ao id antigo e remove a linha criada em
+   * md_pen_anexo_documento, deixando o anexo exatamente como estava.
+   */
+  private function desfazerAnexoMigradoV4100($objPenAnexoDocumentoRN, $objPenAnexoDocumentoDTO, $numIdAnexoOriginal)
+    {
+      $numIdAnexoNovo = $objPenAnexoDocumentoDTO->getNumIdAnexo();
+    if (empty($numIdAnexoNovo) || $numIdAnexoNovo == $numIdAnexoOriginal) {
+        return;
+    }
+
+    try {
+        $this->atualizarVinculoComponenteDigital($numIdAnexoNovo, $numIdAnexoOriginal);
+
+        // excluir recebe o DTO, nao um array: o excluirConectado deste modulo
+        // declara o parametro tipado. Vem antes da remocao do arquivo porque e
+        // o essencial.
+        $objDTO = new PenAnexoDocumentoDTO();
+        $objDTO->setNumIdAnexo($numIdAnexoNovo);
+        $objPenAnexoDocumentoRN->excluir($objDTO);
+
+        // A copia pode ter sido gravada antes da falha. O consolidar ja a remove
+        // quando o MD5 diverge; nos demais casos ela ficaria orfa no repositorio.
+        $strCopia = $objPenAnexoDocumentoRN->obterLocalizacaoAnexoModuloPen($objPenAnexoDocumentoDTO);
+        if (file_exists($strCopia)) {
+            @unlink($strCopia);
+        }
+    } catch (Exception $e) {
+        $this->logar(sprintf(
+            'MIGRACAO_ANEXOS_V4100 AVISO nao foi possivel desfazer o anexo %s: %s',
+            $numIdAnexoNovo, $this->descreverExcecaoV4100($e)
+        ));
+    }
+  }
+
+  /**
+   * Junta a mensagem de cada excecao da cadeia. O INFRA embrulha a causa em
+   * mensagens genericas ("Erro processando operacao excluir"), e so a ultima da
+   * cadeia diz o que realmente aconteceu.
+   */
+  private function descreverExcecaoV4100($objExcecao)
+    {
+      $arrMensagens = array();
+    while ($objExcecao !== null && count($arrMensagens) < 5) {
+        $arrMensagens[] = $objExcecao->getMessage();
+        $objExcecao = $objExcecao->getPrevious();
+    }
+
+      return implode(' | causada por: ', $arrMensagens);
+  }
+
+  /**
+   * Registra no log o anexo que a migracao deixou para tras, com o motivo.
+   */
+  private function registrarAnexoIgnoradoV4100($numIdAnexo, $strCaminho, $strMotivo)
+    {
+      $this->arrAnexosIgnoradosV4100[] = $numIdAnexo;
+      $strLinha = sprintf(
+          'MIGRACAO_ANEXOS_V4100 IGNORADO id_anexo=%s caminho=%s motivo=%s',
+          $numIdAnexo, $strCaminho, str_replace(array("\r", "\n"), ' ', $strMotivo)
+      );
+      $this->logar($strLinha);
+      $this->gravarLinhaIgnoradosV4100($strLinha);
+  }
+
+  /**
+   * Grava a linha no arquivo de ignorados, que e a unica copia duravel desta
+   * lista: o log da migracao so vai para a saida padrao. O arquivo nasce no
+   * primeiro anexo ignorado -- migracao sem problema nao deixa arquivo vazio.
+   *
+   * Nunca interrompe a migracao: se nao der para gravar, avisa e segue. O INFRA
+   * converte warning em excecao, entao o fopen precisa de try/catch alem do @.
+   */
+  private function gravarLinhaIgnoradosV4100($strLinha)
+    {
+      if ($this->resArquivoIgnoradosV4100 === false) {
+          return;
+      }
+
+      if ($this->resArquivoIgnoradosV4100 === null) {
+          $this->strArquivoIgnoradosV4100 = sys_get_temp_dir()
+              . '/migracao-anexos-ignorados-' . date('Ymd-His') . '-' . getmypid() . '.log';
+          try {
+              $this->resArquivoIgnoradosV4100 = @fopen($this->strArquivoIgnoradosV4100, 'w');
+          } catch (Throwable $e) {
+              $this->resArquivoIgnoradosV4100 = false;
+          }
+
+          if ($this->resArquivoIgnoradosV4100 === false) {
+              $this->logar(sprintf(
+                  'MIGRACAO_ANEXOS_V4100 AVISO nao foi possivel gravar %s -- a lista fica so nesta saida.',
+                  $this->strArquivoIgnoradosV4100
+              ));
+              return;
+          }
+
+          // O arquivo lista caminhos do repositorio de arquivos do orgao.
+          @chmod($this->strArquivoIgnoradosV4100, 0600);
+          $this->logar(sprintf(
+              'MIGRACAO_ANEXOS_V4100 Anexos ignorados sendo registrados em %s',
+              $this->strArquivoIgnoradosV4100
+          ));
+      }
+
+      @fwrite($this->resArquivoIgnoradosV4100, $strLinha . PHP_EOL);
+  }
 
   /**
    * Reaponta os componentes digitais para o novo id do anexo migrado.
@@ -3037,9 +3247,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   /**
    * Lista um lote de anexos de documentos internos pertencentes ao modulo.
    *
-   * O filtro por md_pen_componente_digital evita migrar anexos de outros
-   * modulos. IN + UNION no lugar de OR entre EXISTS: 0,6 s por lote contra
-   * 13 s, medido no Oracle.
+   * Entram apenas os anexos de processos com ao menos um tramite concluido
+   * (situacao 6, recibo de conclusao em md_pen_recibo_tramite), em qualquer
+   * numero de registro do processo. Os demais permanecem em `anexo`.
    *
    * @param  int $numLimite        quantidade maxima de linhas do lote
    * @param  int $numUltimoIdAnexo ancora: retorna apenas ids maiores que este
@@ -3056,9 +3266,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                 WHERE p.sta_protocolo = 'G'
                   AND a.id_anexo > " . (int) $numUltimoIdAnexo . "
                   AND a.id_anexo IN (
-                        SELECT id_anexo FROM md_pen_componente_digital WHERE id_anexo IS NOT NULL
-                        UNION
-                        SELECT id_anexo_imutavel FROM md_pen_componente_digital WHERE id_anexo_imutavel IS NOT NULL)
+                        SELECT cd.id_anexo FROM md_pen_componente_digital cd
+                         WHERE cd.id_anexo IS NOT NULL
+                           AND EXISTS (SELECT 1 FROM md_pen_processo_eletronico pe
+                                       WHERE pe.id_procedimento = cd.id_procedimento
+                                         AND EXISTS (SELECT 1 FROM md_pen_recibo_tramite rt
+                                                      WHERE rt.numero_registro = pe.numero_registro))
+                      UNION
+                        SELECT cd.id_anexo_imutavel FROM md_pen_componente_digital cd
+                         WHERE cd.id_anexo_imutavel IS NOT NULL
+                           AND EXISTS (SELECT 1 FROM md_pen_processo_eletronico pe
+                                       WHERE pe.id_procedimento = cd.id_procedimento
+                                         AND EXISTS (SELECT 1 FROM md_pen_recibo_tramite rt
+                                                      WHERE rt.numero_registro = pe.numero_registro)))
                 ORDER BY a.id_anexo
                 ";
 
