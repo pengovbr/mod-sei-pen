@@ -2715,12 +2715,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           false
       );
 
-      // A FK precisa virar ON DELETE SET NULL ANTES do laco: enquanto ela for
-      // restritiva, excluir a linha de `anexo` falha se algum componente digital
-      // ainda a referenciar por id_anexo, e o anexo acaba ignorado.
       //----------------------------------------------------------------------
-      // Correcao da FK md_pen_componente_digital -> anexo para ON DELETE SET NULL.
-      // Sem isso, o expurgo definitivo de um anexo pela limpeza da lixeira falha.
+      // FK md_pen_componente_digital -> anexo com ON DELETE SET NULL.
+      //
+      // Sem ela, o expurgo definitivo de um anexo pela limpeza da lixeira falha.
+      // Precisa vir ANTES do laco: enquanto a FK for restritiva, excluir a linha
+      // de `anexo` falha se algum componente digital ainda a referenciar por
+      // id_anexo, e o anexo acaba ignorado.
       //----------------------------------------------------------------------
       $objMetaBanco->excluirChaveEstrangeira('md_pen_componente_digital', 'fk_md_pen_comp_dig_anexo');
       $objMetaBanco->criarChaveEstrangeiraComExclusao(
@@ -2731,7 +2732,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         ['id_anexo'],
         'SET NULL'
       );
-
 
       // Migracao dos anexos de documentos internos, em lotes. O laco fica fora
       // de um metodo Controlado: dentro dele tudo rodaria numa transacao so.
@@ -2926,7 +2926,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           // este anexo gravou e segue. O lote inteiro nao pode ser perdido por
           // causa de um arquivo.
           $this->desfazerAnexoMigradoV4100($objPenAnexoDocumentoRN, $objPenAnexoDocumentoDTO, $numIdAnexoOriginal);
-          $this->registrarAnexoIgnoradoV4100($numIdAnexoOriginal, $strCaminhoNomeArquivo, $e->getMessage());
+          $this->registrarAnexoIgnoradoV4100(
+              $numIdAnexoOriginal,
+              $strCaminhoNomeArquivo,
+              $this->descreverExcecaoV4100($e)
+          );
           $numIgnorados++;
       }
     }
