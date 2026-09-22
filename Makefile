@@ -281,7 +281,7 @@ test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
 
 	@printf "\n   ✅ Permissões de pastas para testes ajustadas com sucesso.\n\n"
 
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --debug /tests/tests/$(addsuffix .php,$(teste))
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste))
 
 # Testes funcionais exercitando o caminho ASSINCRONO (Gearman).
 # O alvo test-functional roda tudo pelo processamento sincrono, entao o caminho

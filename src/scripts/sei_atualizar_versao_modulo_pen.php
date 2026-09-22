@@ -2829,7 +2829,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
    * tempo total. PEN_MIGRACAO_ANEXOS_LOTE ajusta o valor -- reduza se a base
    * esbarrar em limite de transacao.
    */
-
   const TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100 = 5000;
 
   /** Ids dos anexos que a migracao ignorou por problema no arquivo. */
@@ -3154,25 +3153,36 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         return;
     }
 
-      // O antigo nao pode sair primeiro: no MySQL a FK depende dele (ERROR 1553).
-      // Cria-se o unico com nome temporario, o antigo sai, depois vem o rename.
       $objInfraBanco = $objMetaBanco->getObjInfraIBanco();
 
-    if ($this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, null) !== $strIndiceTemporario) {
+      // As restricoes sao opostas: o MySQL nao deixa o indice antigo sair antes,
+      // porque a FK depende dele (ERROR 1553); o Oracle proibe dois indices
+      // sobre a mesma coluna (ORA-01408) e exige o contrario. Dai os dois
+      // caminhos. PostgreSQL e SQL Server aceitam ambos e vao pelo mais curto.
+    if ($objInfraBanco instanceof InfraMySql) {
+        if ($this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, null) !== $strIndiceTemporario) {
+            $objInfraBanco->executarSql(
+                'create unique index ' . $strIndiceTemporario
+                . ' on ' . $strTabela . ' (' . implode(',', $arrColunas) . ')'
+            );
+        }
+
+        // O antigo pode ja ter sumido: o InnoDB descarta o indice da FK quando
+        // vira redundante. Excluir nesse estado abortaria a atualizacao.
+        $arrIndicesAtuais = $objMetaBanco->obterIndices(null, $strTabela);
+
+        if (isset($arrIndicesAtuais[$strTabela][$strIndiceNaoUnico])) {
+            $objMetaBanco->excluirIndice($strTabela, $strIndiceNaoUnico);
+        }
+
+        $objMetaBanco->renomearIndice($strTabela, $strIndiceTemporario, $strIndice, $arrColunas);
+    } else {
+        $objMetaBanco->excluirIndice($strTabela, $strIndiceNaoUnico);
+
         $objInfraBanco->executarSql(
-            'create unique index ' . $strIndiceTemporario . ' on ' . $strTabela . ' (' . implode(',', $arrColunas) . ')'
+            'create unique index ' . $strIndice . ' on ' . $strTabela . ' (' . implode(',', $arrColunas) . ')'
         );
     }
-
-      // O antigo pode ja ter sumido: o InnoDB descarta o indice da FK quando
-      // vira redundante. Excluir nesse estado abortaria a atualizacao.
-      $arrIndicesAtuais = $objMetaBanco->obterIndices(null, $strTabela);
-
-    if (isset($arrIndicesAtuais[$strTabela][$strIndiceNaoUnico])) {
-        $objMetaBanco->excluirIndice($strTabela, $strIndiceNaoUnico);
-    }
-
-      $objMetaBanco->renomearIndice($strTabela, $strIndiceTemporario, $strIndice, $arrColunas);
 
       $this->logar(sprintf(
           'MAPEAMENTO_ENVIO_V4100 indice %s recriado como UNICO (o anterior, %s, nao era unico)',
