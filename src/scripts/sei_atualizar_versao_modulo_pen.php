@@ -2818,12 +2818,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
 
-  /**
+   /**
    * Tamanho padrao do lote de migracao de anexos, cada um em transacao propria.
-   * PEN_MIGRACAO_ANEXOS_LOTE reduz o lote se a base esbarrar em limite de
-   * transacao. O tamanho do lote praticamente nao altera o desempenho.
+   * O custo por lote e quase todo fixo, entao lotes maiores reduzem bastante o
+   * tempo total. PEN_MIGRACAO_ANEXOS_LOTE ajusta o valor -- reduza se a base
+   * esbarrar em limite de transacao.
    */
-  const TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100 = 500;
+
+  const TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100 = 5000;
 
   /** Ids dos anexos que a migracao ignorou por problema no arquivo. */
   private $arrAnexosIgnoradosV4100 = array();
