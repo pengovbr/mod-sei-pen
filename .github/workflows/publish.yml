@@ -34,5 +34,5 @@ jobs:
           draft: false
           prerelease: true
           files: |
-            dist/mod-sei-tramitagovbr-${{ github.ref_name }}.zip
+            dist/*.zip
             compatibilidade.json

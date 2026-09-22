@@ -4,6 +4,21 @@ Este documento descreve as principais mudanças aplicadas nesta versão do módu
 
 As melhorias entregues em cada uma das versões são cumulativas, ou seja, contêm todas as implementações realizadas em versões anteriores.
 
+## Correção pós-publicação (pacote 4.1.0-fix)
+
+> [!IMPORTANT]
+> No **Oracle**, a atualização podia abortar com `ORA-01408: such column list already indexed`
+> ao criar o índice único de `id_serie` em `md_pen_rel_doc_map_enviado`, antes de qualquer
+> migração de anexo. O pacote **4.1.0-fix** corrige isso.
+>
+> * **Se a sua atualização falhou com esse erro:** nenhum anexo foi migrado e a base não ficou
+>   em estado misto. Basta atualizar com este pacote e executar o script novamente.
+> * **Se a sua atualização concluiu com sucesso:** nenhuma ação é necessária.
+>
+> O número da versão do módulo permanece **4.1.0** — a correção não altera o esquema do banco
+> nem o comportamento da migração de anexos. Para confirmar qual pacote está instalado, veja
+> se este bloco existe no `NOTAS_VERSAO.md` da instalação.
+
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
   * SEI 5.0.0, 5.0.1, 5.0.2, 5.0.3, 5.0.4 e 5.1.0
