@@ -27,7 +27,7 @@
  * despercebidos aqui e só aparecem na lista de ignorados da migração.
  *
  * Variáveis de ambiente opcionais:
- *   PEN_VERIFICA_LOTE=500     linhas por lote
+ *   PEN_VERIFICA_LOTE=5000     linhas por lote
  *   PEN_VERIFICA_HASH=1       confere também o MD5 do conteúdo (lê cada arquivo;
  *                             lento em base grande -- sem isto, confere apenas
  *                             existência, leitura e tamanho)
@@ -61,7 +61,7 @@ ini_set('max_execution_time', '0');
 
 class VerificadorAnexosMigracaoV4100
 {
-    const TAMANHO_LOTE_PADRAO = 500;
+    const TAMANHO_LOTE_PADRAO = 5000;
 
     private $numLote;
     private $bolConferirHash;
