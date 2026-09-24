@@ -4,6 +4,21 @@ Este documento descreve as principais mudanças aplicadas nesta versão do módu
 
 As melhorias entregues em cada uma das versões são cumulativas, ou seja, contêm todas as implementações realizadas em versões anteriores.
 
+## Correção pós-publicação (pacote 4.1.0-fix)
+
+> [!IMPORTANT]
+> No **Oracle**, a atualização podia abortar com `ORA-01408: such column list already indexed`
+> ao criar o índice único de `id_serie` em `md_pen_rel_doc_map_enviado`, antes de qualquer
+> migração de anexo. O pacote **4.1.0-fix** corrige isso.
+>
+> * **Se a sua atualização falhou com esse erro:** nenhum anexo foi migrado e a base não ficou
+>   em estado misto. Basta atualizar com este pacote e executar o script novamente.
+> * **Se a sua atualização concluiu com sucesso:** nenhuma ação é necessária.
+>
+> O número da versão do módulo permanece **4.1.0** — a correção não altera o esquema do banco
+> nem o comportamento da migração de anexos. Para confirmar qual pacote está instalado, veja
+> se este bloco existe no `NOTAS_VERSAO.md` da instalação.
+
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
   * SEI 5.0.0, 5.0.1, 5.0.2, 5.0.3, 5.0.4 e 5.1.0
@@ -15,14 +30,16 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 ## Atenção: esta versão executa migração de dados
 
-O script de atualização desta versão move os anexos de documentos internos da tabela `anexo` do SEI para a tabela `md_pen_anexo_documento` do módulo, com árvore de arquivos própria em `RepositorioArquivos/mod-pen/AAAA/MM/DD/`. A migração é processada em lotes, é retomável e registra o progresso em log.
+O script de atualização desta versão cria três índices de apoio (dois em `md_pen_componente_digital` e um em `md_pen_processo_eletronico`) e move os anexos de documentos internos de processos com ao menos um trâmite concluído (situação 6) da tabela `anexo` do SEI para a tabela `md_pen_anexo_documento` do módulo, com árvore de arquivos própria em `RepositorioArquivos/mod-pen/AAAA/MM/DD/`. A migração é processada em lotes, é retomável e registra o progresso em log.
 
 Antes de atualizar:
 
 * **Faça backup do banco de dados e do repositório de arquivos.** A migração remove a linha original da tabela `anexo` após gravar o novo arquivo;
 * **Execute a atualização com o sistema fora do ar.** O tempo é proporcional ao volume de anexos do órgão;
-* **Reserve janela compatível com o volume da base.** Em ambiente de teste, a migração processou cerca de 2 a 3 milissegundos por anexo;
+* **Reserve janela compatível com o volume da base.** Em ambiente de teste, com 2 milhões de anexos, a migração processou de 2,9 a 7,0 milissegundos por anexo, conforme o banco. **O custo por anexo cresce com o tamanho da base** no Oracle e no PostgreSQL: dobrar o volume aproximadamente dobra o tempo de cada lote. Meça no volume real antes de definir a janela;
 * **Em instalações com Gearman**, pare os workers antes de atualizar e só religue depois que todos os nós de aplicação estiverem na nova versão. Consulte o **UPGRADE.md** para o procedimento detalhado;
+* **Execute a verificação prévia dos anexos antes da migração.** O script `verifica_anexos_migracao_modulo_pen.php`, em `sei/scripts/mod-pen/`, lista os anexos cujos arquivos estão ausentes, ilegíveis ou corrompidos. Esses anexos são ignorados pela migração — permanecem em `anexo`, e a migração grava a lista deles em arquivo, com id e motivo —, mas convém conhecê-los antes da janela. É somente leitura e pode rodar com o sistema no ar. Consulte o **UPGRADE.md**;
+* **Ao final, confira se algum anexo foi ignorado.** A migração não interrompe por causa de arquivo ausente, ilegível ou corrompido: ela ignora o anexo, que permanece em `anexo`, e segue. A última linha da saída informa quantos foram e o caminho do arquivo com a lista (`<tmp>/migracao-anexos-ignorados-AAAAMMDD-HHMMSS-<pid>.log`), com id, caminho e motivo de cada um. Guarde esse arquivo antes de liberar o servidor: esses anexos precisam de tratamento;
 * **Mantenha o agendador de tarefas do SEI parado durante toda a janela**, e desabilite o agendamento `AgendamentoRN::removerAquivosNaoUtilizados` antes de atualizar. Rotinas de limpeza de arquivos — tanto do SEI quanto do próprio módulo — atuam sobre os mesmos anexos que a migração está movendo. Mantê-las paradas durante o procedimento evita interferência. Reative o agendador após a conclusão da migração;
 
 ### Lista de melhorias e correções de problemas

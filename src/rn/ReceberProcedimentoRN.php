@@ -1337,7 +1337,16 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO = new ProtocoloDTO();
       $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
       $objProtocoloDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100), 'ISO-8859-1', 'UTF-8'));
-      $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO([]);
+
+      // Assuntos seguem a mesma regra dos interessados abaixo. A lista enviada ao
+      // nucleo e (assuntos de OUTRAS unidades, preservados) + (sugeridos do tipo de
+      // processo, acrescentados por atribuirTipoProcedimento).
+      //
+      // Comecar de uma lista vazia removia implicitamente os assuntos incluidos pela
+      // unidade que trabalha o processo - a sessao aqui esta na unidade receptora -
+      // e ProtocoloRN abortava o recebimento inteiro com
+      // "O assunto ... nao pode ser excluido porque foi adicionado por outra unidade".
+      $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO($this->listarAssuntosDeOutrasUnidades($parNumIdProcedimento));
 
       // Sincronizacao de interessados (#1225), coerente com a regra do nucleo.
       //
@@ -1368,6 +1377,14 @@ class ReceberProcedimentoRN extends InfraRN
           $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO'),
           mb_convert_encoding($parObjProtocolo->processoDeNegocio, 'ISO-8859-1', 'UTF-8')
       );
+
+      $arrObjAssuntoDTO = [];
+    foreach ($objProtocoloDTO->getArrObjRelProtocoloAssuntoDTO() as $objRelProtocoloAssuntoDTO) {
+      if (!isset($arrObjAssuntoDTO[$objRelProtocoloAssuntoDTO->getNumIdAssunto()])) {
+        $arrObjAssuntoDTO[$objRelProtocoloAssuntoDTO->getNumIdAssunto()] = $objRelProtocoloAssuntoDTO;
+      }
+    }
+      $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array_values($arrObjAssuntoDTO));
 
       $strNomeTipoPrioridade = $this->obterValorPropriedadeAdicional($parObjMetadadosProcedimento->propriedadesAdicionais ?? [], 'PEN_NOME_PRIORIDADE_PROCESSO');
     if ($strNomeTipoPrioridade !== null) {
@@ -1471,6 +1488,39 @@ class ReceberProcedimentoRN extends InfraRN
       return null;
   }
 
+
+  /**
+   * Assuntos do processo incluidos por unidade diferente da unidade atual da sessao.
+   * Sao os que ProtocoloRN nao permite remover; ver sincronizarMetadadosProcedimento().
+   */
+  protected function listarAssuntosDeOutrasUnidades($numIdProtocolo)
+    {
+      $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+
+      $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
+      $objRelProtocoloAssuntoDTO->retNumIdAssunto();
+      $objRelProtocoloAssuntoDTO->retNumIdUnidade();
+      $objRelProtocoloAssuntoDTO->retNumSequencia();
+      $objRelProtocoloAssuntoDTO->setDblIdProtocolo($numIdProtocolo);
+      $objRelProtocoloAssuntoDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
+
+      $objRelProtocoloAssuntoRN = new RelProtocoloAssuntoRN();
+      $arrObjRelProtocoloAssuntoDTO = $objRelProtocoloAssuntoRN->listarRN0188($objRelProtocoloAssuntoDTO);
+
+      $arrPreservados = array();
+
+    foreach ($arrObjRelProtocoloAssuntoDTO as $objDTO) {
+      if ($objDTO->getNumIdUnidade() != $numIdUnidadeAtual) {
+          // Mesmo formato dos sugeridos em atribuirTipoProcedimento(): so assunto e sequencia.
+          $objPreservadoDTO = new RelProtocoloAssuntoDTO();
+          $objPreservadoDTO->setNumIdAssunto($objDTO->getNumIdAssunto());
+          $objPreservadoDTO->setNumSequencia($objDTO->getNumSequencia());
+          $arrPreservados[] = $objPreservadoDTO;
+      }
+    }
+
+      return $arrPreservados;
+  }
 
     /**
      * Lista os participantes do protocolo que pertencem a unidades diferentes da
