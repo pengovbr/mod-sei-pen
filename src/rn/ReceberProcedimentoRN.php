@@ -288,7 +288,7 @@ class ReceberProcedimentoRN extends InfraRN
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
-      $arrComponentesDigitaisPresentes = array_diff_key($arrHashComponentesProtocolo, $arrHashPendentesRecebimento);
+      $arrComponentesDigitaisPresentes = array_diff($arrHashComponentesProtocolo, $arrHashPendentesRecebimento);
       $numQtdComponentesPresentes = count($arrComponentesDigitaisPresentes);
     if ($numQtdComponentesPresentes > 0) {
       $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
@@ -366,9 +366,35 @@ class ReceberProcedimentoRN extends InfraRN
       $objComponenteDigitalDTO->setStrHashConteudo($parStrHashComponenteDigital);
       $objComponenteDigitalDTO->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE);
       $objComponenteDigitalDTO->setStrStaEstadoProtocolo(ProtocoloRN::$TE_DOCUMENTO_CANCELADO, InfraDTO::$OPER_DIFERENTE);
+      $objComponenteDigitalDTO->retDblIdDocumento();
 
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-      return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
+      $arrComponentes = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+      $objAnexoRN = new AnexoRN();
+      $arrDocumentosVerificados = [];
+
+    foreach ($arrComponentes as $objComponente) {
+        $dblIdDocumento = $objComponente->getDblIdDocumento();
+      if (isset($arrDocumentosVerificados[$dblIdDocumento])) {
+        continue;
+      }
+        $arrDocumentosVerificados[$dblIdDocumento] = true;
+
+        // O historico do componente pode manter o id de um anexo ja excluido.
+        // Confere a mesma origem usada na clonagem antes de dispensar o download.
+        $objAnexoDTO = new AnexoDTO();
+        $objAnexoDTO->setDblIdProtocolo($dblIdDocumento);
+        $objAnexoDTO->retNumIdAnexo();
+        $objAnexoDTO->retDthInclusao();
+      foreach ($objAnexoRN->listarRN0218($objAnexoDTO) as $objAnexo) {
+          $strLocalizacao = $objAnexoRN->obterLocalizacao($objAnexo);
+        if (is_file($strLocalizacao) && is_readable($strLocalizacao)) {
+          return true;
+        }
+      }
+    }
+
+      return false;
   }
 
 

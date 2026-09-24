@@ -175,7 +175,9 @@ class TramiteSincronizacaoAposCancelamentoDocumentoInversoTest extends FixtureCe
     public function test_devolver_novo_documento_para_origem()
     {
         $arrRemetenteDevolucao = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$documentoIncluidoNoDestino = $this->gerarDadosDocumentoExternoTeste($arrRemetenteDevolucao, 'arquivo_pequeno_B.pdf');
+        // Mesmo conteudo do documento cancelado: exige recuperar o componente
+        // quando o barramento nao o informa como pendente de recebimento.
+        self::$documentoIncluidoNoDestino = $this->gerarDadosDocumentoExternoTeste($arrRemetenteDevolucao, 'arquivo_pequeno_A.pdf');
 
         putenv('DATABASE_HOST=org1-database');
         $objProtocoloDTO = $this->consultarProcessoFixture(
@@ -237,44 +239,6 @@ class TramiteSincronizacaoAposCancelamentoDocumentoInversoTest extends FixtureCe
         );
 
         $this->validarDocumentoCancelado($listaDocumentos[0]);
-    }
-
-    /**
-     * ACH-03 - defeito AINDA ABERTO, documentado aqui para nao se perder.
-     *
-     * Quando o documento novo incluido pelo destino tem o MESMO conteudo (mesmo
-     * hash) do documento que foi cancelado na origem, o recebimento falha:
-     *
-     *   Inconsistencia identificada no recebimento de processo:
-     *   - Componente digital de pelo menos um dos documentos do processo nao pode ser recebido.
-     *
-     * Mecanismo, confirmado por experimento controlado (mesmo teste, trocando
-     * apenas os arquivos):
-     *
-     *   1. o barramento deduplica por hash e nao lista o componente como pendente,
-     *      porque a origem ja o recebeu uma vez;
-     *   2. o modulo tenta entao clonar o arquivo de um documento local que ja
-     *      tenha aquele hash (clonarComponentesJaExistentesNoProcesso);
-     *   3. o unico documento local com aquele hash e o CANCELADO - e o
-     *      cancelamento no SEI remove a linha de `anexo`, entao nao ha arquivo
-     *      para clonar;
-     *   4. o documento novo fica sem anexo, documentosPendenteRegistro() o marca
-     *      como pendente e validarPosCondicoesTramite() derruba a transacao
-     *      inteira.
-     *
-     * Corrigir exige decidir se o modulo deve reobter do barramento um componente
-     * que ele ja recebeu e descartou - o que depende do que a API permite. Nao ha
-     * especificacao para isso, por isso o teste esta marcado como incompleto em
-     * vez de falhar a suite.
-     *
-     * #[Group('multiplos_orgaos')]
-     */
-    public function test_hash_identico_ao_documento_cancelado_ainda_falha()
-    {
-        $this->markTestIncomplete(
-            'ACH-03: defeito aberto. Documento novo com hash identico ao do documento cancelado '
-            . 'na origem nao e recebido - ver docs/correções.md.'
-        );
     }
 
     /**
