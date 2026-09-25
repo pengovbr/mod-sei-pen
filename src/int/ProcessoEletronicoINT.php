@@ -14,6 +14,12 @@ class ProcessoEletronicoINT extends InfraINT
     const TEE_SOLICITACAO_SINCRONIZACAO_CONCLUSAO = 'Solicitação de sincronização enviada com sucesso!';
     const TEE_EXPEDICAO_BLOCO_ETAPA_CONCLUSAO = 'Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'';
 
+    // Impedimento de envio externo apresentado quando a sincronização do trâmite anterior do processo
+    // ainda não foi concluída no Tramita GOV.BR
+    const TEE_EXPEDICAO_TRAMITE_EM_ANDAMENTO = 'Envio de trâmite externo interrompido.'
+        . ' O processo %s já possui uma tramitação/sincronização em andamento.'
+        . ' Por favor, aguardar a conclusão dessa operação antes de realizar uma nova tentativa de envio.';
+
     /**
      * Concate as siglas das hierarquias no nome da unidade
      *
