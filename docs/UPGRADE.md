@@ -18,15 +18,16 @@ Procedimentos para realizar a atualização de uma nova versão do módulo
     **[1.4. Atualização para a 4.1.0 em instalações com Gearman](#)**  
     **[1.5. Verificação prévia dos anexos (4.1.0)](#)**  
     **[1.6. Agendamento de tarefas (4.1.0)](#)**  
-    **[1.7. Atualização da 4.0.x para a 4.1.0 — ordem dos passos](#)**  
+    **[1.7. Atualização da 4.0.x para a 4.1.0 — ordem dos passos](#)**
+    **[1.8. Configuração para salvar LOGS do HTTP no SOLR](#)**  
 
-2. **[Configuração](#configuração)**:  
+3. **[Configuração](#configuração)**:  
 Procedimentos destinados ao Administradores do SEI responsáveis pela configuração do módulo através da funcionalidades de administração do sistema.
 
-3. **[Suporte](#suporte)**:  
+4. **[Suporte](#suporte)**:  
 Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do PEN.
 
-4. **[Problemas Conhecidos](#problemas-conhecidos)**:  
+5. **[Problemas Conhecidos](#problemas-conhecidos)**:  
 Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do PEN.
 
 ---
