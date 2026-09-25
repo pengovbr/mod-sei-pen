@@ -18,7 +18,7 @@ Procedimentos para realizar a atualização de uma nova versão do módulo
     **[1.4. Atualização para a 4.1.0 em instalações com Gearman](#)**  
     **[1.5. Verificação prévia dos anexos (4.1.0)](#)**  
     **[1.6. Agendamento de tarefas (4.1.0)](#)**  
-    **[1.7. Atualização da 4.0.x para a 4.1.0 — ordem dos passos](#)**
+    **[1.7. Atualização da 4.0.x para a 4.1.0 — ordem dos passos](#)**  
     **[1.8. Configuração para salvar LOGS do HTTP no SOLR](#)**  
 
 3. **[Configuração](#configuração)**:  
