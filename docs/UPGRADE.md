@@ -728,6 +728,28 @@ nas seções anteriores; esta é a ordem em que devem ser executados.
 > continua de onde parou. Anexo com arquivo problemático não interrompe o
 > procedimento — é ignorado, e a migração segue.
 
+---
+
+### 1.8. Configuração para salvar LOGS do HTTP no SOLR
+
+Desde a versão 4.1.0 é possível salvar os logs do HTTP para debug e coleta de informações para abertura de chamados.
+
+Para salvar os logs de HTTP é necessário ter o solr configurado no SEI e criar um core específico para o módulo do Tramita.
+
+Para Solr com usuário adequado (geralmente solr):
+
+```
+$ mkdir -p <PASTADECORESDOSOLR>/mod-sei-pen
+$ cp <PASTADESCOMPACTADADOMODULO>/solr <PASTADECORESDOSOLR>/mod-sei-pen/conf
+$ SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=LOGINADMINDOSOLR:SENHAADMINDOSOLR" <CAMINHODO>/bin/solr create -c mod-sei-pen -d <PASTADECORESDOSOLR>/mod-sei-pen/conf
+```
+---
+
+Depois de criado o core deve-se habilitar criando um parâmetro **MOD_SEI_PEN_SALVA_HTTP_LOGS** com valor '1'. Para desabilitar colocar o valor '0'.
+
+> [!IMPORTANT]
+> Não use esse parâmetro com valor '1' por muito tempo em produção pois pode degradar o ambiente. Só use para debug quando necessário.
+
 ## 2. CONFIGURAÇÕES
 
 Esta seção descreve os passos de configuração adicionais presentes na nova versão do módulo de Integração do SEI com o Tramita.GOV.BR. Todos os itens descritos nesta seção são destinados aos administradores do sistema SEI da instituição, responsáveis pela alteração de configurações gerais do sistema através do menu de administração do SEI (**SEI >> Administração >> Processo Eletrônico Nacional**)
