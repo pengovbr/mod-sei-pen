@@ -17,14 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Pull Request branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
             repository: pengovbr/sei
             submodules: recursive
             token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
             path: sei
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
             path: sei/src/sei/web/modulos/mod-sei-pen
       - name: Set up Docker
@@ -67,10 +67,8 @@ jobs:
              cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
-
+             
       - name: Run headless test
-        uses: coactions/setup-xvfb@v1
-        with:
-          working-directory: sei/src/sei/web/modulos/mod-sei-pen
-          run: make test-functional
-          options: "-screen 0 1920x1080x24"
+        run: |
+          cd sei/src/sei/web/modulos/mod-sei-pen
+          xvfb-run -a -s "-screen 0 1920x1080x24" make test-functional
