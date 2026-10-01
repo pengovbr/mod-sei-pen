@@ -309,6 +309,11 @@ Para utilizar os arquivos `.br`, o servidor HTTP deve estar configurado para:
 
 Com essa configuração, os clientes compatíveis receberão automaticamente as versões compactadas dos arquivos **SVG**, **JS** e **CSS**, proporcionando uma entrega de conteúdo mais eficiente.
 
+### 1.13. Backup da pasta do RepositorioArquivos
+
+> [!IMPORTANT] 
+> É necessário adicionar a pasta mod-pen que foi criada desde a versão 4.1.0 para a rotina de backup do órgão. A mesma é uma subpasta da pasta configurada como repositório de > arquivos do SEI. 
+
 ---
 ---
 
