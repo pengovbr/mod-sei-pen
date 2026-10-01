@@ -18,7 +18,7 @@ Procedimentos para realizar a atualização de uma nova versão do módulo
     **[1.4. Atualização para a 4.1.0 em instalações com Gearman](#)**  
     **[1.5. Verificação prévia dos anexos (4.1.0)](#)**  
     **[1.6. Agendamento de tarefas (4.1.0)](#)**  
-    **[1.7. Atualização da 4.0.x para a 4.1.0 — ordem dos passos](#)**
+    **[1.7. Atualização da 4.0.x para a 4.1.0 — ordem dos passos](#)**  
     **[1.8. Configuração para salvar LOGS do HTTP no SOLR](#)**  
 
 
@@ -729,6 +729,11 @@ nas seções anteriores; esta é a ordem em que devem ser executados.
 > A migração é **retomável**: se for interrompida, executar o script novamente
 > continua de onde parou. Anexo com arquivo problemático não interrompe o
 > procedimento — é ignorado, e a migração segue.
+
+#### 1.7.1 Backup da pasta do RepositorioArquivos
+
+> [!IMPORTANT] 
+> É necessário adicionar a pasta mod-pen que foi criada desde a versão 4.1.0 para a rotina de backup do órgão. A mesma é uma subpasta da pasta configurada como repositório de > arquivos do SEI. 
 
 ---
 
