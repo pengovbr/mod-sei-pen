@@ -142,6 +142,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
         $this->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, null, $bolSinProcessamentoEmBloco);
         $this->validarParametrosExpedicao($objInfraException, $objExpedirProcedimentoDTO);
+        $this->validarTramiteEmAndamento($objInfraException, $objProcedimentoDTO);
 
         //Apresentao da mensagens de validao na janela da barra de progresso
       if($objInfraException->contemValidacoes()) {
@@ -347,6 +348,12 @@ class ExpedirProcedimentoRN extends InfraRN
       if($bolSinProcessamentoEmBloco) {
           $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
       } else {
+          // Impedimentos identificados na validação do processo, como o trâmite anterior ainda em
+          // andamento, possuem mensagem própria e não podem ser apresentados como falha de comunicação
+        if($e instanceof InfraException && $e->contemValidacoes()) {
+            throw $e;
+        }
+
           throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
       }
     }
@@ -3087,6 +3094,34 @@ class ExpedirProcedimentoRN extends InfraRN
         . " Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
         $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
       }
+    }
+  }
+
+  /**
+   * Valida se o processo ainda possui trâmite/sincronização em andamento no Tramita GOV.BR
+   *
+   * Enquanto o trâmite anterior não é concluído, o Tramita GOV.BR rejeita o novo envio com mensagens
+   * que não indicam a causa real do impedimento, como a inconsistência de hash de componentes digitais
+   * (erro 0047). A validação antecipa o impedimento, orientando o usuário a aguardar a conclusão da
+   * sincronização antes de realizar uma nova tentativa de envio.
+   *
+   * @param  InfraException $objInfraException Instância da classe de exceção para registro dos erros
+   * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser enviado
+   * @param  string $strAtributoValidacao Índice para o InfraException separar os processos
+   * @return void
+   */
+  public function validarTramiteEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
+    {
+      $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+      $objTramiteEmAndamento = $this->objProcessoEletronicoRN->consultarTramiteEmAndamento($strProtocoloFormatado);
+
+    if(!is_null($objTramiteEmAndamento)) {
+        $strMensagem = sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_TRAMITE_EM_ANDAMENTO, $strProtocoloFormatado);
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+        $objInfraException->adicionarValidacao(
+            $strMensagem,
+            $strAtributoValidacao
+        );
     }
   }
 
