@@ -1324,22 +1324,15 @@ class ReceberProcedimentoRN extends InfraRN
       // "O assunto ... nao pode ser excluido porque foi adicionado por outra unidade".
       $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO($this->listarAssuntosDeOutrasUnidades($parNumIdProcedimento));
 
-      // Sincronizacao de interessados (#1225), coerente com a regra do nucleo.
-      //
-      // ProtocoloRN::alterarRN0202() so recusa a remocao de participante quando
-      // ele pertence a unidade DIFERENTE da unidade atual da sessao. A unidade
-      // atual pode remover os que ela mesma cadastrou.
-      //
-      // Por isso a lista nova e montada como:
-      //     (participantes de OUTRAS unidades, preservados) + (os recebidos)
-      //
-      // A unica remocao possivel passa a ser de participante da unidade atual -
-      // permitida pelo nucleo. A tentativa anterior definia a lista completa a
-      // partir apenas dos recebidos, o que removia implicitamente os das outras
-      // unidades e abortava o recebimento inteiro com
-      // "O interessado ... nao pode ser excluido porque foi adicionado por outra unidade".
-      $objProtocoloDTO->setArrObjParticipanteDTO($this->listarParticipantesDeOutrasUnidades($parNumIdProcedimento));
-      $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessados ?? []);
+      // Preserva interessados de outras unidades e os que receberam acesso externo.
+      // O SEI nao permite excluir nenhum desses participantes durante a sincronizacao.
+      $arrParticipantesPreservados = $this->listarParticipantesDeOutrasUnidades($parNumIdProcedimento);
+      $objInteressadosRecebidosDTO = new ProtocoloDTO();
+      $this->atribuirParticipantes($objInteressadosRecebidosDTO, $parObjProtocolo->interessados ?? []);
+      $objProtocoloDTO->setArrObjParticipanteDTO(self::mesclarInteressadosRecebidos(
+          $arrParticipantesPreservados,
+          $objInteressadosRecebidosDTO->getArrObjParticipanteDTO()
+      ));
 
       $objProcedimentoDTO = new ProcedimentoDTO();
       $objProcedimentoDTO->setDblIdProcedimento($parNumIdProcedimento);
@@ -1499,11 +1492,8 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
     /**
-     * Lista os participantes do protocolo que pertencem a unidades diferentes da
-     * unidade atual da sessao.
-     *
-     * Sao os que o nucleo do SEI proibe remover (ProtocoloRN::alterarRN0202) e
-     * que, portanto, precisam ser preservados na sincronizacao de interessados.
+     * Lista interessados que o SEI impede de excluir: os de outras unidades e
+     * os que receberam acesso externo ativo.
      *
      * @param  int $numIdProtocolo
      * @return ParticipanteDTO[]
@@ -1516,6 +1506,7 @@ class ReceberProcedimentoRN extends InfraRN
       // com contato e nao sao trazidos por retTodos(). Sem eles, prepararParticipantes()
       // falha com "Atributo [NomeContato] nao recebeu valor".
       $objParticipanteDTO = new ParticipanteDTO();
+      $objParticipanteDTO->retNumIdParticipante();
       $objParticipanteDTO->retNumIdUnidade();
       $objParticipanteDTO->retNumIdContato();
       $objParticipanteDTO->retStrNomeContato();
@@ -1529,10 +1520,50 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjParticipanteDTO = $objParticipanteRN->listarRN0189($objParticipanteDTO);
 
       $arrPreservados = array();
+      $objAcessoExternoRN = new AcessoExternoRN();
 
     foreach ($arrObjParticipanteDTO as $objDTO) {
       if ($objDTO->getNumIdUnidade() != $numIdUnidadeAtual) {
           $arrPreservados[] = $objDTO;
+          continue;
+      }
+
+      $objAcessoExternoDTO = new AcessoExternoDTO();
+      $objAcessoExternoDTO->setBolExclusaoLogica(false);
+      $objAcessoExternoDTO->retNumIdAcessoExterno();
+      $objAcessoExternoDTO->setStrStaTipo(AcessoExternoRN::$TA_SISTEMA, InfraDTO::$OPER_DIFERENTE);
+      $objAcessoExternoDTO->setNumIdParticipante($objDTO->getNumIdParticipante());
+      $objAcessoExternoDTO->setNumMaxRegistrosRetorno(1);
+      if ($objAcessoExternoRN->consultar($objAcessoExternoDTO) != null) {
+          $arrPreservados[] = $objDTO;
+      }
+    }
+
+      return $arrPreservados;
+  }
+
+  /**
+   * Mescla os interessados recebidos com os preservados, garantindo que não haja duplicatas.
+   *
+   * @param array $arrPreservados Array de objetos ParticipanteDTO preservados.
+   * @param array $arrRecebidos Array de objetos ParticipanteDTO recebidos.
+   * @return array Array resultante da mesclagem dos interessados.
+   */
+  private static function mesclarInteressadosRecebidos($arrPreservados, $arrRecebidos)
+  {
+      $arrChaves = [];
+      $numSequencia = -1;
+    foreach ($arrPreservados as $objParticipanteDTO) {
+        $arrChaves[$objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato()] = true;
+        $numSequencia = max($numSequencia, (int) $objParticipanteDTO->getNumSequencia());
+    }
+
+    foreach ($arrRecebidos as $objParticipanteDTO) {
+        $strChave = $objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato();
+      if (!isset($arrChaves[$strChave])) {
+          $objParticipanteDTO->setNumSequencia(++$numSequencia);
+          $arrPreservados[] = $objParticipanteDTO;
+          $arrChaves[$strChave] = true;
       }
     }
 

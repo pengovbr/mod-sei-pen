@@ -583,16 +583,16 @@ class PendenciasTramiteRN extends InfraRN
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA,
         );
 
-    if (in_array((int) $numStatus, $arrSituacoesProcessaveis, true)) {
-        $client->addTaskBackground(
+        if (in_array((int) $numStatus, $arrSituacoesProcessaveis, true)) {
+            $client->addTaskBackground(
             'processarPendencia',
             json_encode(array('idt' => $numIDT, 'status' => $numStatus)),
             null,
             $numIDT
-        );
-    } else {
-        $this->gravarLogDebug("Situação do trâmite ($numStatus ) não pode ser tratada.");
-    }
+            );
+        } else {
+            $this->gravarLogDebug("Situação do trâmite ($numStatus ) não pode ser tratada.");
+        }
 
         $client->runTasks();
     }
