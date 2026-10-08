@@ -461,41 +461,41 @@ class ProcessarPendenciasRN extends InfraRN
           "processarPendencia", function ($job): void {
               $arrPendencia = json_decode($job->workload(), true);
 
-              if (!is_array($arrPendencia) || !isset($arrPendencia['idt'], $arrPendencia['status'])) {
-                  $this->gravarLogDebug("Payload de pendencia invalido: " . $job->workload(), 0, true);
-                  return;
-              }
+            if (!is_array($arrPendencia) || !isset($arrPendencia['idt'], $arrPendencia['status'])) {
+                $this->gravarLogDebug("Payload de pendencia invalido: " . $job->workload(), 0, true);
+                return;
+            }
 
               $numIdTramite = $arrPendencia['idt'];
 
-              switch ((int) $arrPendencia['status']) {
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                      $this->receberProcedimento($numIdTramite);
-                      break;
+            switch ((int) $arrPendencia['status']) {
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
+                  $this->receberProcedimento($numIdTramite);
+                  break;
 
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                      $this->receberReciboTramite($numIdTramite);
-                      break;
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+                  $this->receberReciboTramite($numIdTramite);
+                  break;
 
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                      $this->receberTramitesRecusados($numIdTramite);
-                      break;
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+                  $this->receberTramitesRecusados($numIdTramite);
+                  break;
 
-                  // Exclusivo da 4.2.0-beta: pedido de sincronizacao de multiplos
-                  // orgaos. A 4.2.0-beta despachava 'enviarSincronizacaoTramite',
-                  // mas nenhum worker registrava essa funcao - o job ficava na fila
-                  // sem consumidor. Aqui ele passa a ser efetivamente tratado.
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA:
-                      $objSincronizacaoRN = new SincronizacaoExpedirProcedimentoRN();
-                      $objSincronizacaoRN->enviarSincronizacaoTramite($numIdTramite);
-                      break;
+                // Exclusivo da 4.2.0-beta: pedido de sincronizacao de multiplos
+                // orgaos. A 4.2.0-beta despachava 'enviarSincronizacaoTramite',
+                // mas nenhum worker registrava essa funcao - o job ficava na fila
+                // sem consumidor. Aqui ele passa a ser efetivamente tratado.
+              case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA:
+                  $objSincronizacaoRN = new SincronizacaoExpedirProcedimentoRN();
+                  $objSincronizacaoRN->enviarSincronizacaoTramite($numIdTramite);
+                  break;
 
-                  default:
-                      $this->gravarLogDebug("Situacao do tramite ({$arrPendencia['status']}) nao pode ser tratada.", 0, true);
-                      break;
-              }
+              default:
+                  $this->gravarLogDebug("Situacao do tramite ({$arrPendencia['status']}) nao pode ser tratada.", 0, true);
+                  break;
+            }
           }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 

@@ -290,7 +290,7 @@ class PENAgendamentoRN extends InfraRN
     * @throws InfraException
     *
     */
-   public function removerArquivosExcluidosModSeiPen(){
+  public function removerArquivosExcluidosModSeiPen(){
     try{
 
       LimiteSEI::getInstance()->configurarNivel3();
@@ -308,7 +308,7 @@ class PENAgendamentoRN extends InfraRN
 
       $objAnexoRN = new PenAnexoDocumentoRN();
 
-      $diretorioAno = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/');
+      $diretorioAno = dir(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'). '/mod-pen/' .'/');
       $arrAno = array();
       while($ano = $diretorioAno -> read()){
         if (is_numeric($ano)){
@@ -326,7 +326,7 @@ class PENAgendamentoRN extends InfraRN
         foreach($arrAno as $ano){
 
           $arrMes = array();
-          $diretorioMes = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano);
+          $diretorioMes = dir(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'). '/mod-pen/' .'/'.$ano);
           while($mes = $diretorioMes -> read()){
             if (is_numeric($mes)){
               $arrMes[] = $mes;
@@ -339,7 +339,7 @@ class PENAgendamentoRN extends InfraRN
 
             foreach($arrMes as $mes){
               $arrDia = array();
-              $diretorioDia = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes);
+              $diretorioDia = dir(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes);
               while($dia = $diretorioDia -> read()){
                 if (is_numeric($dia)){
                   $arrDia[] = $dia;
@@ -359,7 +359,7 @@ class PENAgendamentoRN extends InfraRN
                     InfraDTO::$OPER_LOGICO_AND);
                 $objAnexoDTO->setOrdNumIdAnexo(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-                $arrIdAnexosMes = InfraArray::indexarArrInfraDTO($objAnexoRN->listar($objAnexoDTO),'IdAnexo');
+                $arrIdAnexosMes = InfraArray::indexarArrInfraDTO($objAnexoRN->listar($objAnexoDTO), 'IdAnexo');
 
                 foreach($arrDia as $dia){
 
@@ -367,13 +367,13 @@ class PENAgendamentoRN extends InfraRN
                     break 3;
                   }
 
-                  $diretorioArquivos = opendir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes.'/'.$dia);
+                  $diretorioArquivos = opendir(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes.'/'.$dia);
 
                   if ($diretorioArquivos){
 
                     while (($arquivo = readdir($diretorioArquivos)) !== false) {
                       if (is_numeric($arquivo) && !isset($arrIdAnexosMes[$arquivo])){
-                        $strCaminhoArquivo = ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes.'/'.$dia.'/'.$arquivo;
+                        $strCaminhoArquivo = ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes.'/'.$dia.'/'.$arquivo;
                         $numBytesArquivo = filesize($strCaminhoArquivo);
                         unlink($strCaminhoArquivo);
                         InfraDebug::getInstance()->gravar($strCaminhoArquivo.' ('.InfraUtil::formatarTamanhoBytes($numBytesArquivo).')');
@@ -398,7 +398,7 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->gravar('TEMPO TOTAL DE EXECUCAO: '.$numSeg.' s');
       InfraDebug::getInstance()->gravar('FIM');
 
-      LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug(),InfraLog::$INFORMACAO);
+      LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug(), InfraLog::$INFORMACAO);
 
 
     }catch(Throwable $e){
@@ -406,7 +406,7 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->setBolDebugInfra(false);
       InfraDebug::getInstance()->setBolEcho(false);
 
-      throw new InfraException('Erro removendo arquivos mod-sei-pen excluídos.',$e);
+      throw new InfraException('Erro removendo arquivos mod-sei-pen excluídos.', $e);
     }
   }
 
@@ -414,7 +414,7 @@ class PENAgendamentoRN extends InfraRN
    * Rotina para remoção física dos arquivos do módulo PEN que estão marcados como isolados ou desativados e que foram incluídos há mais de 24 horas, 
    * garantindo a limpeza de arquivos que não estão mais vinculados a nenhum anexo ativo ou que foram marcados para exclusão lógica
    */
-    public function removerArquivosNaoUtilizadosModSeiPen(){
+  public function removerArquivosNaoUtilizadosModSeiPen(){
     try{
 
       LimiteSEI::getInstance()->configurarNivel3();
@@ -448,9 +448,9 @@ class PENAgendamentoRN extends InfraRN
                                        null,
                                        'cDesativado');
 
-      $objAnexoDTO->agruparCriterios(array('cIsolado','cDesativado'),InfraDTO::$OPER_LOGICO_OR);
+      $objAnexoDTO->agruparCriterios(array('cIsolado','cDesativado'), InfraDTO::$OPER_LOGICO_OR);
 
-      $objAnexoDTO->setDthInclusao(InfraData::calcularData(1, InfraData::$UNIDADE_DIAS, InfraData::$SENTIDO_ATRAS, InfraData::getStrDataHoraAtual()),InfraDTO::$OPER_MENOR_IGUAL);
+      $objAnexoDTO->setDthInclusao(InfraData::calcularData(1, InfraData::$UNIDADE_DIAS, InfraData::$SENTIDO_ATRAS, InfraData::getStrDataHoraAtual()), InfraDTO::$OPER_MENOR_IGUAL);
 
       $arrObjAnexoDTO = $objAnexoRN->listar($objAnexoDTO);
 
@@ -497,14 +497,14 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->gravar('TEMPO TOTAL DE EXECUCAO: '.$numSeg.' s');
       InfraDebug::getInstance()->gravar('FIM');
       
-      LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug(),InfraLog::$INFORMACAO);
+      LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug(), InfraLog::$INFORMACAO);
 
     }catch(Throwable $e){
       InfraDebug::getInstance()->setBolLigado(false);
       InfraDebug::getInstance()->setBolDebugInfra(false);
       InfraDebug::getInstance()->setBolEcho(false);
       
-      throw new InfraException('Erro removendo arquivos não utilizados.',$e);
+      throw new InfraException('Erro removendo arquivos não utilizados.', $e);
     }
   }
 }

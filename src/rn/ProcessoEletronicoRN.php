@@ -3575,7 +3575,7 @@ class ProcessoEletronicoRN extends InfraRN
       return $this->getArrPenWsRest('DELETE', $endpoint, ['query' => $params]);
   }
 
-  private function getStackParaLog() : HandlerStack {
+  private function getStackParaLog(): HandlerStack {
       // Monolog
       $logger = new Logger('mod_sei_pen_logger');
       $logger->pushHandler(new StreamHandler('php://stdout'));

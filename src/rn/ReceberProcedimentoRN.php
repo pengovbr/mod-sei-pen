@@ -1553,19 +1553,19 @@ class ReceberProcedimentoRN extends InfraRN
   {
       $arrChaves = [];
       $numSequencia = -1;
-      foreach ($arrPreservados as $objParticipanteDTO) {
-          $arrChaves[$objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato()] = true;
-          $numSequencia = max($numSequencia, (int) $objParticipanteDTO->getNumSequencia());
-      }
+    foreach ($arrPreservados as $objParticipanteDTO) {
+        $arrChaves[$objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato()] = true;
+        $numSequencia = max($numSequencia, (int) $objParticipanteDTO->getNumSequencia());
+    }
 
-      foreach ($arrRecebidos as $objParticipanteDTO) {
-          $strChave = $objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato();
-          if (!isset($arrChaves[$strChave])) {
-              $objParticipanteDTO->setNumSequencia(++$numSequencia);
-              $arrPreservados[] = $objParticipanteDTO;
-              $arrChaves[$strChave] = true;
-          }
+    foreach ($arrRecebidos as $objParticipanteDTO) {
+        $strChave = $objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato();
+      if (!isset($arrChaves[$strChave])) {
+          $objParticipanteDTO->setNumSequencia(++$numSequencia);
+          $arrPreservados[] = $objParticipanteDTO;
+          $arrChaves[$strChave] = true;
       }
+    }
 
       return $arrPreservados;
   }

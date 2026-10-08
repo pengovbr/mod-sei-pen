@@ -2638,69 +2638,69 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       
       $objMetaBanco = $this->inicializarObjMetaBanco();
 
-      if (!$objMetaBanco->isTabelaExiste('md_pen_anexo_documento')) {
-        $objMetaBanco->criarTabela([
-          'tabela' => 'md_pen_anexo_documento',
-          'cols' => [
-            'id_anexo' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-            'nome' => [$objMetaBanco->tipoTextoVariavel(255), PenMetaBD::NNULLO],
-            'id_protocolo' => [$objMetaBanco->tipoNumeroGrande(), PenMetaBD::SNULLO],
-            'sin_ativo' => [$objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO],
-            'id_unidade' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-            'id_usuario' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-            'tamanho' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
-            'dth_inclusao' => [$objMetaBanco->tipoDataHora(), PenMetaBD::NNULLO],
-            'id_base_conhecimento' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
-            'id_projeto' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
-            'hash' => [$objMetaBanco->tipoTextoFixo(32), PenMetaBD::NNULLO]
-          ],
-          'pk' => ['cols' => ['id_anexo']]
-        ]);
+    if (!$objMetaBanco->isTabelaExiste('md_pen_anexo_documento')) {
+      $objMetaBanco->criarTabela([
+        'tabela' => 'md_pen_anexo_documento',
+        'cols' => [
+          'id_anexo' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+          'nome' => [$objMetaBanco->tipoTextoVariavel(255), PenMetaBD::NNULLO],
+          'id_protocolo' => [$objMetaBanco->tipoNumeroGrande(), PenMetaBD::SNULLO],
+          'sin_ativo' => [$objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO],
+          'id_unidade' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+          'id_usuario' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+          'tamanho' => [$objMetaBanco->tipoNumero(), PenMetaBD::NNULLO],
+          'dth_inclusao' => [$objMetaBanco->tipoDataHora(), PenMetaBD::NNULLO],
+          'id_base_conhecimento' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
+          'id_projeto' => [$objMetaBanco->tipoNumero(), PenMetaBD::SNULLO],
+          'hash' => [$objMetaBanco->tipoTextoFixo(32), PenMetaBD::NNULLO]
+        ],
+        'pk' => ['cols' => ['id_anexo']]
+      ]);
 
-        $objInfraBanco = BancoSEI::getInstance();
+      $objInfraBanco = BancoSEI::getInstance();
       
-        // A sequencia parte do maior id de `anexo`, nao da tabela nova (vazia
-        // neste ponto). Comecando baixo, um id novo colidiria com o id antigo de
-        // uma linha ainda nao migrada, apontando o vinculo para o anexo errado.
-        $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from anexo');
-        $numMaxId = $rs[0]['total'] ?? 0;
-        $objInfraBanco->criarSequencialNativa('md_pen_seq_anexo_documento', $numMaxId + 1);
+      // A sequencia parte do maior id de `anexo`, nao da tabela nova (vazia
+      // neste ponto). Comecando baixo, um id novo colidiria com o id antigo de
+      // uma linha ainda nao migrada, apontando o vinculo para o anexo errado.
+      $rs = $objInfraBanco->consultarSql('select max(id_anexo) as total from anexo');
+      $numMaxId = $rs[0]['total'] ?? 0;
+      $objInfraBanco->criarSequencialNativa('md_pen_seq_anexo_documento', $numMaxId + 1);
   
-        $objInfraSequenciaRN = new InfraSequenciaRN();
-        $objInfraSequenciaDTO = new InfraSequenciaDTO();
-        $objInfraSequenciaDTO->setStrNome('md_pen_anexo_documento');
-        $objInfraSequenciaDTO->retStrNome();
-        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-        if (!empty($arrObjInfraSequenciaDTO)) {
-          $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-        }
+      $objInfraSequenciaRN = new InfraSequenciaRN();
+      $objInfraSequenciaDTO = new InfraSequenciaDTO();
+      $objInfraSequenciaDTO->setStrNome('md_pen_anexo_documento');
+      $objInfraSequenciaDTO->retStrNome();
+      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+      if (!empty($arrObjInfraSequenciaDTO)) {
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+      }
           
 
-        // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
-        $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
-        $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos mod-sei-pen excluídos.');
-        $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosExcluidosModSeiPen');
-        $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
-        $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('4');
-        $objInfraAgendamentoDTO->setStrSinAtivo('S');
-        $objInfraAgendamentoDTO->setStrSinSucesso('S');
+      // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
+      $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
+      $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos mod-sei-pen excluídos.');
+      $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosExcluidosModSeiPen');
+      $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
+      $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('4');
+      $objInfraAgendamentoDTO->setStrSinAtivo('S');
+      $objInfraAgendamentoDTO->setStrSinSucesso('S');
 
-        $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
-        $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
+      $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
+      $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
 
-        // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
-        $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
-        $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos com mais de 24 horas criados pelo e que ainda não foram utilizados.');
-        $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosNaoUtilizadosModSeiPen');
-        $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
-        $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('5');
-        $objInfraAgendamentoDTO->setStrSinAtivo('S');
-        $objInfraAgendamentoDTO->setStrSinSucesso('S');
+      // Adiciona o agendamento para atualizar os arquivamentos quando houver alteração nos assuntos
+      $objInfraAgendamentoDTO = new InfraAgendamentoTarefaDTO();
+      $objInfraAgendamentoDTO->setStrDescricao('Remove arquivos com mais de 24 horas criados pelo e que ainda não foram utilizados.');
+      $objInfraAgendamentoDTO->setStrComando('PENAgendamentoRN::removerArquivosNaoUtilizadosModSeiPen');
+      $objInfraAgendamentoDTO->setStrStaPeriodicidadeExecucao('D');
+      $objInfraAgendamentoDTO->setStrPeriodicidadeComplemento('5');
+      $objInfraAgendamentoDTO->setStrSinAtivo('S');
+      $objInfraAgendamentoDTO->setStrSinSucesso('S');
 
-        $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
-        $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
+      $objAgendamentoBD = new  AgendamentoBD(BancoSEI::getInstance());
+      $objAgendamentoBD->cadastrar($objInfraAgendamentoDTO);
   
-      }
+    }
 
       // Indice unico de id_serie (#1207). Vem antes da migracao: falha em
       // segundos, nao depois de horas. As duplicatas saem primeiro, senao a
@@ -2741,9 +2741,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       // Migracao dos anexos de documentos internos, em lotes. O laco fica fora
       // de um metodo Controlado: dentro dele tudo rodaria numa transacao so.
       $numTamanhoLote = (int) getenv('PEN_MIGRACAO_ANEXOS_LOTE');
-      if ($numTamanhoLote < 1) {
-          $numTamanhoLote = self::TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100;
-      }
+    if ($numTamanhoLote < 1) {
+        $numTamanhoLote = self::TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100;
+    }
 
       $numLote = 0;
       $numTotal = 0;
@@ -2756,65 +2756,65 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $bolDebugInfraAnterior = InfraDebug::getInstance()->isBolDebugInfra();
       InfraDebug::getInstance()->setBolDebugInfra(false);
 
-      do {
-          $numInicioLote = microtime(true);
-          $arrAnexosLote = $this->listarAnexoDocumentosInternos($numTamanhoLote, $numUltimoIdAnexo);
-          $numTempoConsulta = microtime(true) - $numInicioLote;
+    do {
+        $numInicioLote = microtime(true);
+        $arrAnexosLote = $this->listarAnexoDocumentosInternos($numTamanhoLote, $numUltimoIdAnexo);
+        $numTempoConsulta = microtime(true) - $numInicioLote;
 
-          if (!empty($arrAnexosLote)) {
-              $arrUltimo = end($arrAnexosLote);
-              $numUltimoIdAnexo = $arrUltimo['id_anexo'];
+      if (!empty($arrAnexosLote)) {
+          $arrUltimo = end($arrAnexosLote);
+          $numUltimoIdAnexo = $arrUltimo['id_anexo'];
 
-              $numLote++;
-              $arrTempos = $this->migrarLoteAnexosDocumentosInternosV4100($arrAnexosLote);
-              $numTotal += count($arrAnexosLote);
+          $numLote++;
+          $arrTempos = $this->migrarLoteAnexosDocumentosInternosV4100($arrAnexosLote);
+          $numTotal += count($arrAnexosLote);
 
-              $this->logar(sprintf(
-                  'MIGRACAO_ANEXOS_V4100 lote=%d linhas=%d consulta=%.4f banco=%.4f arquivos=%.4f lote_total=%.4f acumulado=%d decorrido=%.2f',
-                  $numLote,
-                  count($arrAnexosLote),
-                  $numTempoConsulta,
-                  $arrTempos['banco'],
-                  $arrTempos['arquivos'],
-                  microtime(true) - $numInicioLote,
-                  $numTotal,
-                  microtime(true) - $numInicioGeral
-              ));
-          }
-      } while (!empty($arrAnexosLote));
+          $this->logar(sprintf(
+              'MIGRACAO_ANEXOS_V4100 lote=%d linhas=%d consulta=%.4f banco=%.4f arquivos=%.4f lote_total=%.4f acumulado=%d decorrido=%.2f',
+              $numLote,
+              count($arrAnexosLote),
+              $numTempoConsulta,
+              $arrTempos['banco'],
+              $arrTempos['arquivos'],
+              microtime(true) - $numInicioLote,
+              $numTotal,
+              microtime(true) - $numInicioGeral
+          ));
+      }
+    } while (!empty($arrAnexosLote));
 
       InfraDebug::getInstance()->setBolDebugInfra($bolDebugInfraAnterior);
 
-      if ($numTotal > 0) {
-          $numDecorrido = microtime(true) - $numInicioGeral;
-          $this->logar(sprintf(
-              'MIGRACAO_ANEXOS_V4100 FIM total=%d ignorados=%d lotes=%d tamanho_lote=%d'
-              . ' tempo=%.2fs media=%.4fms_por_anexo',
-              $numTotal, count($this->arrAnexosIgnoradosV4100), $numLote, $numTamanhoLote,
-              $numDecorrido, ($numDecorrido * 1000) / $numTotal
-          ));
-      }
+    if ($numTotal > 0) {
+        $numDecorrido = microtime(true) - $numInicioGeral;
+        $this->logar(sprintf(
+            'MIGRACAO_ANEXOS_V4100 FIM total=%d ignorados=%d lotes=%d tamanho_lote=%d'
+            . ' tempo=%.2fs media=%.4fms_por_anexo',
+            $numTotal, count($this->arrAnexosIgnoradosV4100), $numLote, $numTamanhoLote,
+            $numDecorrido, ($numDecorrido * 1000) / $numTotal
+        ));
+    }
 
       // O resumo repete a lista para quem le so o fim do log: sao os anexos que
       // continuam em `anexo` e precisam de tratamento depois da atualizacao.
-      if (!empty($this->arrAnexosIgnoradosV4100)) {
-          $strResumo = sprintf(
-              'MIGRACAO_ANEXOS_V4100 ATENCAO %d anexo(s) ignorado(s) por problema no arquivo: %s',
-              count($this->arrAnexosIgnoradosV4100),
-              implode(', ', $this->arrAnexosIgnoradosV4100)
-          );
-          $this->logar($strResumo);
-          $this->gravarLinhaIgnoradosV4100($strResumo);
+    if (!empty($this->arrAnexosIgnoradosV4100)) {
+        $strResumo = sprintf(
+            'MIGRACAO_ANEXOS_V4100 ATENCAO %d anexo(s) ignorado(s) por problema no arquivo: %s',
+            count($this->arrAnexosIgnoradosV4100),
+            implode(', ', $this->arrAnexosIgnoradosV4100)
+        );
+        $this->logar($strResumo);
+        $this->gravarLinhaIgnoradosV4100($strResumo);
 
-          if (!empty($this->resArquivoIgnoradosV4100)) {
-              @fclose($this->resArquivoIgnoradosV4100);
-              $this->resArquivoIgnoradosV4100 = false;
-              $this->logar(sprintf(
-                  'MIGRACAO_ANEXOS_V4100 ATENCAO a lista dos ignorados esta em %s',
-                  $this->strArquivoIgnoradosV4100
-              ));
-          }
-      }        
+      if (!empty($this->resArquivoIgnoradosV4100)) {
+        @fclose($this->resArquivoIgnoradosV4100);
+        $this->resArquivoIgnoradosV4100 = false;
+        $this->logar(sprintf(
+            'MIGRACAO_ANEXOS_V4100 ATENCAO a lista dos ignorados esta em %s',
+            $this->strArquivoIgnoradosV4100
+        ));
+      }
+    }        
   
 
       
@@ -2999,9 +2999,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         // A copia pode ter sido gravada antes da falha. O consolidar ja a remove
         // quando o MD5 diverge; nos demais casos ela ficaria orfa no repositorio.
         $strCopia = $objPenAnexoDocumentoRN->obterLocalizacaoAnexoModuloPen($objPenAnexoDocumentoDTO);
-        if (file_exists($strCopia)) {
-            @unlink($strCopia);
-        }
+      if (file_exists($strCopia)) {
+          @unlink($strCopia);
+      }
     } catch (Exception $e) {
         $this->logar(sprintf(
             'MIGRACAO_ANEXOS_V4100 AVISO nao foi possivel desfazer o anexo %s: %s',
@@ -3050,34 +3050,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
    */
   private function gravarLinhaIgnoradosV4100($strLinha)
     {
+    if ($this->resArquivoIgnoradosV4100 === false) {
+        return;
+    }
+
+    if ($this->resArquivoIgnoradosV4100 === null) {
+        $this->strArquivoIgnoradosV4100 = sys_get_temp_dir()
+            . '/migracao-anexos-ignorados-' . date('Ymd-His') . '-' . getmypid() . '.log';
+      try {
+          $this->resArquivoIgnoradosV4100 = @fopen($this->strArquivoIgnoradosV4100, 'w');
+      } catch (Throwable $e) {
+          $this->resArquivoIgnoradosV4100 = false;
+      }
+
       if ($this->resArquivoIgnoradosV4100 === false) {
+          $this->logar(sprintf(
+              'MIGRACAO_ANEXOS_V4100 AVISO nao foi possivel gravar %s -- a lista fica so nesta saida.',
+              $this->strArquivoIgnoradosV4100
+          ));
           return;
       }
 
-      if ($this->resArquivoIgnoradosV4100 === null) {
-          $this->strArquivoIgnoradosV4100 = sys_get_temp_dir()
-              . '/migracao-anexos-ignorados-' . date('Ymd-His') . '-' . getmypid() . '.log';
-          try {
-              $this->resArquivoIgnoradosV4100 = @fopen($this->strArquivoIgnoradosV4100, 'w');
-          } catch (Throwable $e) {
-              $this->resArquivoIgnoradosV4100 = false;
-          }
-
-          if ($this->resArquivoIgnoradosV4100 === false) {
-              $this->logar(sprintf(
-                  'MIGRACAO_ANEXOS_V4100 AVISO nao foi possivel gravar %s -- a lista fica so nesta saida.',
-                  $this->strArquivoIgnoradosV4100
-              ));
-              return;
-          }
-
-          // O arquivo lista caminhos do repositorio de arquivos do orgao.
-          @chmod($this->strArquivoIgnoradosV4100, 0600);
-          $this->logar(sprintf(
-              'MIGRACAO_ANEXOS_V4100 Anexos ignorados sendo registrados em %s',
-              $this->strArquivoIgnoradosV4100
-          ));
-      }
+        // O arquivo lista caminhos do repositorio de arquivos do orgao.
+        @chmod($this->strArquivoIgnoradosV4100, 0600);
+        $this->logar(sprintf(
+            'MIGRACAO_ANEXOS_V4100 Anexos ignorados sendo registrados em %s',
+            $this->strArquivoIgnoradosV4100
+        ));
+    }
 
       @fwrite($this->resArquivoIgnoradosV4100, $strLinha . PHP_EOL);
   }
@@ -3160,20 +3160,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       // sobre a mesma coluna (ORA-01408) e exige o contrario. Dai os dois
       // caminhos. PostgreSQL e SQL Server aceitam ambos e vao pelo mais curto.
     if ($objInfraBanco instanceof InfraMySql) {
-        if ($this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, null) !== $strIndiceTemporario) {
-            $objInfraBanco->executarSql(
-                'create unique index ' . $strIndiceTemporario
-                . ' on ' . $strTabela . ' (' . implode(',', $arrColunas) . ')'
-            );
-        }
+      if ($this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, null) !== $strIndiceTemporario) {
+          $objInfraBanco->executarSql(
+              'create unique index ' . $strIndiceTemporario
+              . ' on ' . $strTabela . ' (' . implode(',', $arrColunas) . ')'
+          );
+      }
 
         // O antigo pode ja ter sumido: o InnoDB descarta o indice da FK quando
         // vira redundante. Excluir nesse estado abortaria a atualizacao.
         $arrIndicesAtuais = $objMetaBanco->obterIndices(null, $strTabela);
 
-        if (isset($arrIndicesAtuais[$strTabela][$strIndiceNaoUnico])) {
-            $objMetaBanco->excluirIndice($strTabela, $strIndiceNaoUnico);
-        }
+      if (isset($arrIndicesAtuais[$strTabela][$strIndiceNaoUnico])) {
+          $objMetaBanco->excluirIndice($strTabela, $strIndiceNaoUnico);
+      }
 
         $objMetaBanco->renomearIndice($strTabela, $strIndiceTemporario, $strIndice, $arrColunas);
     } else {
@@ -3220,7 +3220,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     // Adicionar coluna para controle de múltiplos órgãos
     if (!$objMetaBanco->isColunaExiste('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos')) {
-        $objMetaBanco->adicionarColuna('md_pen_envio_comp_digitais','sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::SNULLO);
+        $objMetaBanco->adicionarColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::SNULLO);
         BancoSEI::getInstance()->executarSql('update md_pen_envio_comp_digitais set sin_multiplos_orgaos=\'N\'');
         $objMetaBanco->alterarColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', $objMetaBanco->tipoTextoFixo(1), PenMetaBD::NNULLO);
         $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_envio_comp_digitais', 'sin_multiplos_orgaos', 'N');

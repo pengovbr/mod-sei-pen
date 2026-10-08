@@ -195,9 +195,9 @@ class ExpedirProcedimentoRN extends InfraRN
       // A release/4.1.0 nao possui este metodo, por isso nao sofre do problema.
       // Confirmado por teste: com o reuso irrestrito, CancelamentoTramiteIndividualTest
       // e TramiteRecebimentoDocumentoAvulsoTest falham; restringindo, passam.
-    if (is_null($strNumeroRegistro) && $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
+      if (is_null($strNumeroRegistro) && $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
         $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $objExpedirProcedimentoDTO);
-    }
+      }
 
         $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 
