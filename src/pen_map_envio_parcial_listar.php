@@ -120,6 +120,7 @@ try {
       $strResultado .= '<th class="infraTh" width="18%">Nome do Repositório</th>' . "\n";
       $strResultado .= '<th class="infraTh" width="18%">ID da Unidade</th>' . "\n";
       $strResultado .= '<th class="infraTh" width="18%">Nome da Unidade</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="18%">Aberto e Sincronizado</th>' . "\n";
       $strResultado .= '<th class="infraTh" width="14%">Ações</th>' . "\n";
       $strResultado .= '</tr>' . "\n";
       $strCssTr = '';
@@ -150,6 +151,10 @@ try {
       
         $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
+        . '</td>';
+
+        $strResultado .= '<td style="text-align: center;">'
+        . ($objPenRestricaoEnvioComponentesDigitaisDTO->getStrSinMultiplosOrgaos() == 'S' ? 'SIM' : 'NÃO')
         . '</td>';
 
         $strResultado .= '<td align="center">';
