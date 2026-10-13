@@ -2399,6 +2399,55 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
 
+    /**
+     * Lista os anexos de um documento ja recebido que podem ser reaproveitados por outro documento com o mesmo
+     * componente digital, descartando os que nao possuem arquivo fisico disponivel.
+     *
+     * A partir do SEI 5.1, o cancelamento de um documento externo envia o seu anexo para a lixeira, desvinculando-o
+     * do protocolo (AnexoRN::removerDocumento). Nesse caso o anexo e localizado pelo registro do componente digital.
+     *
+     * @param  float $parDblIdDocumento
+     * @return AnexoDTO[]
+     */
+  private function listarAnexosReutilizaveisDocumento($parDblIdDocumento)
+    {
+      $objAnexoRN = new AnexoRN();
+
+      $objAnexoDTO = new AnexoDTO();
+      $objAnexoDTO->retNumIdAnexo();
+      $objAnexoDTO->retStrNome();
+      $objAnexoDTO->retNumTamanho();
+      $objAnexoDTO->retDthInclusao();
+      $objAnexoDTO->setDblIdProtocolo($parDblIdDocumento);
+      $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+
+    if (empty($arrObjAnexoDTO)) {
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->retNumIdAnexo();
+        $objComponenteDigitalDTO->setDblIdDocumento($parDblIdDocumento);
+        $objComponenteDigitalDTO->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE);
+
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        $arrNumIdAnexo = array_values(array_unique(InfraArray::converterArrInfraDTO($objComponenteDigitalBD->listar($objComponenteDigitalDTO), 'IdAnexo')));
+
+      if (!empty($arrNumIdAnexo)) {
+          $objAnexoDTO = new AnexoDTO();
+          $objAnexoDTO->retNumIdAnexo();
+          $objAnexoDTO->retStrNome();
+          $objAnexoDTO->retNumTamanho();
+          $objAnexoDTO->retDthInclusao();
+          $objAnexoDTO->setNumIdAnexo($arrNumIdAnexo, InfraDTO::$OPER_IN);
+          $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+      }
+    }
+
+      return array_values(array_filter($arrObjAnexoDTO, function ($objAnexoDTO) use ($objAnexoRN) {
+          $strLocalizacao = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+          return is_file($strLocalizacao) && is_readable($strLocalizacao);
+      }));
+  }
+
+
   private function atribuirComponentesJaExistentesNoProcesso($objComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados)
     {
       $arrObjAnexosDTO = [];
@@ -2426,15 +2475,8 @@ class ReceberProcedimentoRN extends InfraRN
   private function clonarComponentesJaExistentesNoProcesso($dblIdDocumentoReferencia, $objComponenteDigitalDTO, $bolMultiplosComponentes)
     {
 
-      $objAnexoDTO = new AnexoDTO();
-      $objAnexoDTO->retNumIdAnexo();
-      $objAnexoDTO->retStrNome();
-      $objAnexoDTO->retNumTamanho();
-      $objAnexoDTO->retDthInclusao();
-      $objAnexoDTO->setDblIdProtocolo($dblIdDocumentoReferencia);
-
       $objAnexoRN = new AnexoRN();
-      $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+      $arrObjAnexoDTO = $this->listarAnexosReutilizaveisDocumento($dblIdDocumentoReferencia);
     if(!empty($arrObjAnexoDTO)) {
       foreach($arrObjAnexoDTO as $objAnexoDTO){
         $strSinDuplicado = 'S';
