@@ -2474,31 +2474,101 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function clonarComponentesJaExistentesNoProcesso($dblIdDocumentoReferencia, $objComponenteDigitalDTO, $bolMultiplosComponentes)
     {
+      $strHashComponente = $objComponenteDigitalDTO->getStrHashConteudo();
 
       $objAnexoRN = new AnexoRN();
       $arrObjAnexoDTO = $this->listarAnexosReutilizaveisDocumento($dblIdDocumentoReferencia);
-    if(!empty($arrObjAnexoDTO)) {
-      foreach($arrObjAnexoDTO as $objAnexoDTO){
+    foreach($arrObjAnexoDTO as $objAnexoDTO){
         $strSinDuplicado = 'S';
         $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
-        if($bolMultiplosComponentes) {
-            $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
-            [$strCaminhoAnexoTemporario, ] = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
-            $strCaminhoAnexo = $strCaminhoAnexoTemporario;
-            $strSinDuplicado = 'N';
-        }
+      if($bolMultiplosComponentes && $this->isArquivoCompactado($strCaminhoAnexo)) {
+          $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
+          [$strCaminhoAnexoTemporario, ] = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
+          $strCaminhoAnexo = $strCaminhoAnexoTemporario;
+          $strSinDuplicado = 'N';
+      }
+
+        // Somente o arquivo correspondente ao componente digital pode ser reaproveitado. Um documento gerado no
+        // próprio órgão, como o e-mail, possui anexos que não correspondem ao seu componente digital
+      if(!is_readable($strCaminhoAnexo) || base64_encode(hash_file('sha256', $strCaminhoAnexo, true)) != $strHashComponente) {
+          continue;
+      }
 
         $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
-        $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
-        copy($strCaminhoAnexo, $strNomeUploadCompleto);
+        copy($strCaminhoAnexo, DIR_SEI_TEMP.'/'.$strNomeUpload);
         $objAnexoDTO->setNumIdAnexo($strNomeUpload);
         $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
         $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
         $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
-      }
+        return [$objAnexoDTO];
     }
 
-      return $arrObjAnexoDTO;
+      $objAnexoDTO = $this->gerarAnexoDocumentoFormulario($dblIdDocumentoReferencia, $objComponenteDigitalDTO);
+      return isset($objAnexoDTO) ? [$objAnexoDTO] : [];
+  }
+
+
+    /**
+     * Gera novamente o conteúdo de um documento de formulário produzido no próprio órgão (ex.: e-mail), cujo componente
+     * digital não fica armazenado como anexo do documento, retornando-o como anexo caso corresponda ao componente digital
+     *
+     * @param  float                $parDblIdDocumento
+     * @param  ComponenteDigitalDTO $parObjComponenteDigitalDTO
+     * @return AnexoDTO|null
+     */
+  private function gerarAnexoDocumentoFormulario($parDblIdDocumento, $parObjComponenteDigitalDTO)
+    {
+      $objDocumentoDTO = new DocumentoDTO();
+      $objDocumentoDTO->retStrStaDocumento();
+      $objDocumentoDTO->setDblIdDocumento($parDblIdDocumento);
+      $objDocumentoRN = new DocumentoRN();
+      $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+
+    if(is_null($objDocumentoDTO) || !in_array($objDocumentoDTO->getStrStaDocumento(), [DocumentoRN::$TD_FORMULARIO_GERADO, DocumentoRN::$TD_FORMULARIO_AUTOMATICO])) {
+        return null;
+    }
+
+      $objDocumentoDTO->setDblIdDocumento($parDblIdDocumento);
+      $objDocumentoDTO->setObjInfraSessao(SessaoSEI::getInstance());
+      $strConteudo = $objDocumentoRN->consultarHtmlFormulario($objDocumentoDTO);
+
+      // Variação no fechamento da tag meta tratada também no envio do documento (ExpedirProcedimentoRN::obterDadosArquivo)
+      $arrStrConteudo = [$strConteudo, str_replace(
+          '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />',
+          '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">',
+          $strConteudo
+      )];
+
+      $strHashComponente = $parObjComponenteDigitalDTO->getStrHashConteudo();
+      foreach($arrStrConteudo as $strConteudoFormulario) {
+        if(base64_encode(hash('sha256', $strConteudoFormulario, true)) == $strHashComponente) {
+          $objAnexoRN = new AnexoRN();
+          $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
+          file_put_contents(DIR_SEI_TEMP.'/'.$strNomeUpload, $strConteudoFormulario);
+
+          $objAnexoDTO = new AnexoDTO();
+          $objAnexoDTO->setNumIdAnexo($strNomeUpload);
+          $objAnexoDTO->setStrNome($parObjComponenteDigitalDTO->getStrNome());
+          $objAnexoDTO->setNumTamanho(strlen($strConteudoFormulario));
+          $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+          $objAnexoDTO->setStrSinDuplicando('S');
+          return $objAnexoDTO;
+        }
+      }
+
+      return null;
+  }
+
+
+  private function isArquivoCompactado($strCaminhoArquivo)
+    {
+      $objZipArchive = new ZipArchive();
+    if($objZipArchive->open($strCaminhoArquivo) === true) {
+        $objZipArchive->close();
+        return true;
+    }
+
+      return false;
   }
 
 

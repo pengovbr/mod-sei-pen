@@ -1251,7 +1251,7 @@ class ExpedirProcedimentoRN extends InfraRN
           $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
        
         if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
-            $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+            $arrobjComponenteDigitalDTO = $this->listarComponentesDigitaisDocumentoRetirado($objComponenteDigitalBD, $objComponenteDigitalDTO);
           foreach ($arrobjComponenteDigitalDTO as $key => $componenteDigital) {
             $objComponenteDigital = array();
             $objComponenteDigital['ordem'] = $key + 1;
@@ -1293,6 +1293,35 @@ class ExpedirProcedimentoRN extends InfraRN
       return $objProcesso;
   }
 
+
+    /**
+     * Lista os componentes digitais de um documento retirado, considerando apenas o seu trâmite mais recente.
+     *
+     * Os componentes digitais são registrados novamente a cada trâmite do documento. Considerar todos os registros
+     * faria com que um mesmo componente fosse enviado repetidas vezes, uma para cada trâmite anterior, e o destinatário
+     * passaria a tratar o documento como se possuísse múltiplos componentes digitais.
+     *
+     * @param  ComponenteDigitalBD  $objComponenteDigitalBD
+     * @param  ComponenteDigitalDTO $objComponenteDigitalDTO Filtro com o documento retirado
+     * @return ComponenteDigitalDTO[]
+     */
+  private function listarComponentesDigitaisDocumentoRetirado(ComponenteDigitalBD $objComponenteDigitalBD, ComponenteDigitalDTO $objComponenteDigitalDTO)
+    {
+      $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
+      $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
+      $numIdTramiteMaisRecente = $arrObjComponenteDigitalDTO[0]->getNumIdTramite();
+      $arrObjComponenteDigitalDTOPorOrdem = [];
+    foreach ($arrObjComponenteDigitalDTO as $objComponenteDigitalTramiteDTO) {
+        $numOrdem = $objComponenteDigitalTramiteDTO->getNumOrdem();
+      if ($objComponenteDigitalTramiteDTO->getNumIdTramite() == $numIdTramiteMaisRecente && !array_key_exists($numOrdem, $arrObjComponenteDigitalDTOPorOrdem)) {
+          $arrObjComponenteDigitalDTOPorOrdem[$numOrdem] = $objComponenteDigitalTramiteDTO;
+      }
+    }
+
+      return array_values($arrObjComponenteDigitalDTOPorOrdem);
+  }
 
   public function atribuirComponentesDigitaisRetirados($documentoDTO)
     {
