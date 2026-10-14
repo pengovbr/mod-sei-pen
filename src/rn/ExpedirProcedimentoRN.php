@@ -2896,6 +2896,14 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
+    /**
+     * Verifica se origem e destino são tramitados pelo mesmo SPE (mesmo certificado digital).
+     *
+     * A API do Tramita não informa o SPE de uma estrutura, então considera-se do mesmo SPE
+     * a própria estrutura de origem e qualquer estrutura mapeada para unidade deste SEI, pois
+     * todas as unidades mapeadas localmente são tramitadas com o certificado do remetente.
+     * Estruturas da mesma hierarquia com SPE (certificado) distinto podem tramitar entre si.
+     */
   public function estruturasPertencemAoMesmoOrgao(
       $numIdRepositorioOrigem,
       $numIdEstruturaOrigem,
@@ -2911,48 +2919,20 @@ class ExpedirProcedimentoRN extends InfraRN
         return true;
     }
 
-      $arrHierarquiaOrigem = $this->obterIdentificadoresHierarquiaEstrutura(
-          $numIdRepositorioOrigem,
-          $numIdEstruturaOrigem
-      );
-      $arrHierarquiaDestino = $this->obterIdentificadoresHierarquiaEstrutura(
-          $numIdRepositorioDestino,
-          $numIdEstruturaDestino
-      );
-
-      return count(array_intersect($arrHierarquiaOrigem, $arrHierarquiaDestino)) > 0;
+      return $this->estruturaMapeadaParaUnidadeLocal($numIdEstruturaDestino);
   }
 
-  private function obterIdentificadoresHierarquiaEstrutura($numIdRepositorio, $numIdEstrutura)
+  protected function estruturaMapeadaParaUnidadeLocal($numIdEstrutura)
     {
-      $strChaveCache = (string) $numIdRepositorio.':'.(string) $numIdEstrutura;
-    if (isset($this->arrCacheHierarquiaEstruturas[$strChaveCache])) {
-        return $this->arrCacheHierarquiaEstruturas[$strChaveCache];
+      $strChaveCache = (string) $numIdEstrutura;
+    if (!isset($this->arrCacheHierarquiaEstruturas[$strChaveCache])) {
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidadeRH($numIdEstrutura);
+
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $this->arrCacheHierarquiaEstruturas[$strChaveCache] = $objPenUnidadeRN->contar($objPenUnidadeDTO) > 0;
     }
 
-      $objEstrutura = $this->objProcessoEletronicoRN->consultarEstrutura(
-          $numIdRepositorio,
-          $numIdEstrutura,
-          true
-      );
-
-      $arrIdentificadores = [(string) $numIdEstrutura];
-    if (isset($objEstrutura->numeroDeIdentificacaoDaEstrutura)) {
-        $arrIdentificadores[] = (string) $objEstrutura->numeroDeIdentificacaoDaEstrutura;
-    }
-
-    if (isset($objEstrutura->hierarquia) && is_array($objEstrutura->hierarquia)) {
-      foreach ($objEstrutura->hierarquia as $objNivel) {
-          $numIdNivel = is_array($objNivel)
-              ? ($objNivel['numeroDeIdentificacaoDaEstrutura'] ?? null)
-              : ($objNivel->numeroDeIdentificacaoDaEstrutura ?? null);
-        if (!InfraString::isBolVazia($numIdNivel)) {
-            $arrIdentificadores[] = (string) $numIdNivel;
-        }
-      }
-    }
-
-      $this->arrCacheHierarquiaEstruturas[$strChaveCache] = array_values(array_unique($arrIdentificadores));
       return $this->arrCacheHierarquiaEstruturas[$strChaveCache];
   }
 
