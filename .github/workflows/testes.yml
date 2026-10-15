@@ -44,6 +44,7 @@ jobs:
         run: | 
              cd sei/src/sei/web/modulos/mod-sei-pen
              make config
+             make .modulo.env
              sed -i 's/INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/155275/' tests_sei5/funcional/phpunit.xml
              sed -i 's/INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GITACTIONORG1/' tests_sei5/funcional/phpunit.xml
              sed -i 's/INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1/GITACTIONORG1/' tests_sei5/funcional/phpunit.xml
