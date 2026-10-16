@@ -68,12 +68,19 @@ jobs:
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org2.pem
              make up
+      
+      - name: Diagnosticar containers Docker
+        run: |
+          docker ps -a
+          docker compose ls
 
       - name: Executa update, install
         run: |
              sudo echo "127.0.0.1 org1-http" | sudo tee -a /etc/hosts
              sudo echo "127.0.0.1 org2-http" | sudo tee -a /etc/hosts
              cd sei/src/sei/web/modulos/mod-sei-pen
+             docker ps -a
+             docker compose ls
              make update
              make install
 
