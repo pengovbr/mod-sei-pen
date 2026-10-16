@@ -36,6 +36,7 @@ jobs:
         with:
             path: sei/src/sei/web/modulos/mod-sei-pen
       - name: Set up Docker
+        id: docker
         uses: docker/setup-docker-action@v5
       - name: Cache tmp files
         uses: actions/cache@v5
@@ -49,6 +50,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Configura e sobe o ambiente
+        env:
+          DOCKER_HOST: ${{ steps.docker.outputs.sock }}
         run: | 
              cd sei/src/sei/web/modulos/mod-sei-pen
              make config
@@ -67,6 +70,8 @@ jobs:
              echo "ORG2_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG2" >> tests_sei5/funcional/.env
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_sei5/funcional/assets/config/certificado_org2.pem
+             SOCK_PATH="${DOCKER_HOST#unix://}"
+             sed -i "s|/var/run/docker.sock|${SOCK_PATH}|g" tests_sei5/funcional/docker-compose.yml
              make up
       
       - name: Diagnosticar containers Docker
