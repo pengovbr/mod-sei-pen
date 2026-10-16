@@ -399,35 +399,10 @@ class PENIntegracao extends SeiIntegracao
     $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
     if ($bolFlagAberto && $bolProcessoEstadoNormal && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
-      $objPenUnidadeDTO->retNumIdUnidadeRH();
-      $objPenUnidadeRN = new PenUnidadeRN();
-      $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
-      $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
-      
-      $bolUnidadeAtualEhDestinoRecebimento = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
-      $bolTramiteRecebimento = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
-      if ($bolTramiteRecebimento && $bolUnidadeAtualEhDestinoRecebimento) {
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
-          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
-          if (!empty($arrObjTramites)) {
-            $objMetadados = $arrObjTramites[0];
-            $numIdRepositorioOrigem = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas ?? null;
-            $numIdUnidadeOrigem = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura ?? null;
-            $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
-
-            // Critério deliberadamente menos restritivo (sem o terceiro argumento):
-            // sincronizar so exige mapeamento; devolver exige 'S'. Exigir 'S' aqui
-            // tiraria do destino o direito legitimo de pedir sincronizacao.
-            if ($objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($numIdRepositorioOrigem, $numIdUnidadeOrigem)) {
-              $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-              $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
-              $strAcoesProcedimento .= '</a>';
-            }
-          }
-        }
+      if ($this->getIconeSincronizacao($dblIdProcedimento, $numIdUnidadeAtual, $objTramiteDTO)) {
+        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
+        $strAcoesProcedimento .= '</a>';
       }
     }
 
@@ -681,9 +656,75 @@ class PENIntegracao extends SeiIntegracao
           $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
         }
       }
+
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+      $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+
+      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+      $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
+      $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), [ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO]);
+
+      $objSessaoSEI = SessaoSEI::getInstance();
+      $numIdUnidadeAtual = $objSessaoSEI->getNumIdUnidadeAtual(); 
+
+      $objAtividadeRN = new AtividadeRN();
+      $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
+      $objPesquisaPendenciaDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objPesquisaPendenciaDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
+      $objPesquisaPendenciaDTO->setNumIdUnidade($numIdUnidadeAtual);
+      $objPesquisaPendenciaDTO->setStrSinMontandoArvore('N');
+      $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+      $bolFlagAberto = count($arrObjProcedimentoDTO) == 1;
+
+      if ($bolFlagAberto && $bolProcessoEstadoNormal && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+        if ($this->getIconeSincronizacao($dblIdProcedimento, $numIdUnidadeAtual, $objTramiteDTO)) {
+          $title = "Processo sincronizável";
+          $iconeProcessoSincronizavel = '<img src="' . $this->getDiretorioImagens() . '/processo_sincronizavel.png" title="'.$title.'" />';
+          $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], [$iconeProcessoSincronizavel]);
+        }
+      }
     }
 
     return $arrStrIcone;
+  }
+
+  private function getIconeSincronizacao($dblIdProcedimento, $numIdUnidadeAtual, $objTramiteDTO)
+  {
+    $objPenUnidadeDTO = new PenUnidadeDTO();
+    $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+    $objPenUnidadeDTO->retNumIdUnidadeRH();
+    $objPenUnidadeRN = new PenUnidadeRN();
+    $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
+    $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
+    
+    $bolUnidadeAtualEhDestinoRecebimento = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
+    $bolTramiteRecebimento = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
+
+    $returnIcone = false;
+    if ($bolTramiteRecebimento && $bolUnidadeAtualEhDestinoRecebimento) {
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+        if (!empty($arrObjTramites)) {
+          $objMetadados = $arrObjTramites[0];
+          $numIdRepositorioOrigem = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas ?? null;
+          $numIdUnidadeOrigem = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura ?? null;
+          $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+
+          // Critério deliberadamente menos restritivo (sem o terceiro argumento):
+          // sincronizar so exige mapeamento; devolver exige 'S'. Exigir 'S' aqui
+          // tiraria do destino o direito legitimo de pedir sincronizacao.
+          if ($objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($numIdRepositorioOrigem, $numIdUnidadeOrigem)) {
+            $returnIcone = true;
+          }
+        }
+      }
+    }
+
+    return $returnIcone;
   }
   
   private function consultarProcessoRecebido($dblIdProtocolo)
