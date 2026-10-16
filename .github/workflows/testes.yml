@@ -21,6 +21,7 @@ jobs:
         with:
             repository: pengovbr/sei
             submodules: recursive
+            ref: release/5.1.0
             token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
             path: sei
       - name: Fetch Pull mod-sei-assinatura-eletronica
