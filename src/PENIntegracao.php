@@ -399,35 +399,10 @@ class PENIntegracao extends SeiIntegracao
     $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
     if ($bolFlagAberto && $bolProcessoEstadoNormal && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
-      $objPenUnidadeDTO->retNumIdUnidadeRH();
-      $objPenUnidadeRN = new PenUnidadeRN();
-      $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
-      $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
-      
-      $bolUnidadeAtualEhDestinoRecebimento = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
-      $bolTramiteRecebimento = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
-      if ($bolTramiteRecebimento && $bolUnidadeAtualEhDestinoRecebimento) {
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
-          $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
-          if (!empty($arrObjTramites)) {
-            $objMetadados = $arrObjTramites[0];
-            $numIdRepositorioOrigem = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas ?? null;
-            $numIdUnidadeOrigem = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura ?? null;
-            $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
-
-            // Critério deliberadamente menos restritivo (sem o terceiro argumento):
-            // sincronizar so exige mapeamento; devolver exige 'S'. Exigir 'S' aqui
-            // tiraria do destino o direito legitimo de pedir sincronizacao.
-            if ($objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($numIdRepositorioOrigem, $numIdUnidadeOrigem)) {
-              $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-              $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
-              $strAcoesProcedimento .= '</a>';
-            }
-          }
-        }
+      if (in_array($dblIdProcedimento, $this->listarProcessosSincronizaveis([$dblIdProcedimento]))) {
+        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
+        $strAcoesProcedimento .= '</a>';
       }
     }
 
@@ -563,6 +538,11 @@ class PENIntegracao extends SeiIntegracao
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO), 
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), 
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO)];
+
+      // Processos que utilizaram envio para múltiplos órgãos têm o ícone de enviado/recebido substituído pelo de tramitação cíclica (#1247)
+      $arrMultiplosOrgaos = array_flip($this->listarProcessosMultiplosOrgaos($arrDblIdProcedimento));
+      $strIconeEnviado = '<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trâmite para esse processo foi enviado" />';
+      $strIconeRecebido = '<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />';
     
       foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
         $objAtividadeDTO = new AtividadeDTO();
@@ -576,48 +556,112 @@ class PENIntegracao extends SeiIntegracao
       
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-        if (!empty($objAtividadeDTO)) {
-          switch ($objAtividadeDTO->getNumIdTarefa()) {
-            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
-              $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trâmite para esse processo foi enviado" />'];
-              if (!isset($arrStrIcone[$dblIdProcedimento])) {
-                $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
-              } else {
-                $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
-              }
-                break;
-            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
-            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
-              $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />'];
-              if (!isset($arrStrIcone[$dblIdProcedimento])) {
-                $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
-              } else {
-                $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
-              }
-                break;
-            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
-            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
-              if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
-                $arrayIcone = ['<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />'];
-                if (!isset($arrStrIcone[$dblIdProcedimento])) {
-                  $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
-                } else {
-                  $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
-                }
-              }
-                break;
-            default:
-                break;
-          }
+        if (empty($objAtividadeDTO)) {
+          continue;
         }
+
+        $strIcone = null;
+        switch ($objAtividadeDTO->getNumIdTarefa()) {
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
+            $strIcone = $strIconeEnviado;
+              break;
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
+            $strIcone = $strIconeRecebido;
+              break;
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
+            if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
+              $strIcone = $strIconeRecebido;
+            }
+              break;
+          default:
+              break;
+        }
+
+        if (is_null($strIcone)) {
+          continue;
+        }
+
+        if (isset($arrMultiplosOrgaos[$dblIdProcedimento])) {
+          $strIcone = $this->getIconeTramiteMultiplosOrgaos();
+        }
+
+        $arrStrIcone[$dblIdProcedimento][] = $strIcone;
       }
 
       return $arrStrIcone;
   }
 
+  private function getIconeTramiteMultiplosOrgaos()
+  {
+    return '<img src="' . $this->getDiretorioImagens() . '/icone-MULTIPLOS-ORGAOS-tramita.png" title="Processo tramitado utilizando a funcionalidade de envio para múltiplos órgãos." />';
+  }
+
+  /**
+   * Retorna, dentre os processos informados, os que já foram tramitados (enviados ou recebidos)
+   * utilizando a funcionalidade de envio para múltiplos órgãos.
+   * Usa as atividades de múltiplos órgãos registradas localmente, sem consultar o barramento.
+   *
+   * @param array $arrDblIdProcedimento
+   * @return array
+   */
+  private function listarProcessosMultiplosOrgaos(array $arrDblIdProcedimento)
+  {
+    $arrDblIdProcedimento = array_values(array_unique(array_filter($arrDblIdProcedimento)));
+    if (empty($arrDblIdProcedimento)) {
+      return [];
+    }
+
+    $arrStrIdTarefaModulo = [
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_AUTO_ENVIO_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_SUCESSO,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_ORIGEM,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO,
+      ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA,
+    ];
+
+    $objAtividadeBD = new AtividadeBD(BancoSEI::getInstance());
+    $arrResultado = [];
+    foreach (array_chunk($arrDblIdProcedimento, 500) as $arrDblIdProcedimentoLote) {
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDistinct(true);
+      $objAtividadeDTO->setDblIdProtocolo($arrDblIdProcedimentoLote, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setStrIdTarefaModuloTarefa($arrStrIdTarefaModulo, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->retDblIdProtocolo();
+      $arrResultado = array_merge($arrResultado, InfraArray::converterArrInfraDTO($objAtividadeBD->listar($objAtividadeDTO), 'IdProtocolo'));
+    }
+
+    return $arrResultado;
+  }
+
   private function montarIconeSincronizacao($arrDblIdProcedimento = [], $arrStrIcone = [])
   {
+    // Consulta em lote, só no banco local: não depende do barramento e não cresce com o tamanho da lista
+    $arrSincronizaveis = [];
+    foreach (array_chunk($arrDblIdProcedimento, 500) as $arrDblIdProcedimentoLote) {
+      $arrSincronizaveis = array_merge($arrSincronizaveis, $this->listarProcessosSincronizaveis($arrDblIdProcedimentoLote));
+    }
+    $arrSincronizaveis = array_flip($arrSincronizaveis);
+    $strIconeSincronizavel = '<img src="' . $this->getDiretorioImagens() . '/processo_sincronizavel.png" title="Processo sincronizável" />';
+
     foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
+      if (isset($arrSincronizaveis[$dblIdProcedimento])) {
+        $arrStrIcone[$dblIdProcedimento][] = $strIconeSincronizavel;
+      }
+
       $arrTiProcessoEletronico = [
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR),
@@ -675,6 +719,11 @@ class PENIntegracao extends SeiIntegracao
           continue;
         }
 
+        // Regras da #1018 mantidas (#1247): o ícone de situação da sincronização substitui o de tramitação cíclica
+        if (isset($arrStrIcone[$dblIdProcedimento])) {
+          $arrStrIcone[$dblIdProcedimento] = array_values(array_diff($arrStrIcone[$dblIdProcedimento], [$this->getIconeTramiteMultiplosOrgaos()]));
+        }
+
         if (!isset($arrStrIcone[$dblIdProcedimento])) {
           $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
         } else {
@@ -684,6 +733,146 @@ class PENIntegracao extends SeiIntegracao
     }
 
     return $arrStrIcone;
+  }
+
+  /**
+   * Retorna, dentre os processos informados, os que a unidade atual pode pedir
+   * sincronização de múltiplos órgãos (mesmo critério do botão "Sincronizar").
+   *
+   * Usa apenas dados gravados localmente no recebimento, sem consultar o barramento:
+   * - multiplicidade de órgãos: atividade PEN_RECEBIMENTO_MULTIPLOS_ORGAOS
+   *   (mesma regra do pen_procedimento_expedir.php);
+   * - remetente: md_pen_tramite.id_repositorio_origem / id_estrutura_origem do primeiro trâmite.
+   *
+   * Executa um número fixo de consultas, independente da quantidade de processos.
+   * Usa as classes BD diretamente para não validar/auditar permissão a cada carga da tela.
+   *
+   * @param array $arrDblIdProcedimento
+   * @return array ids dos processos sincronizáveis
+   */
+  private function listarProcessosSincronizaveis(array $arrDblIdProcedimento)
+  {
+    $arrDblIdProcedimento = array_values(array_unique(array_filter($arrDblIdProcedimento)));
+    if (empty($arrDblIdProcedimento)) {
+      return [];
+    }
+
+    $objInfraIBanco = BancoSEI::getInstance();
+    $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+
+    // 1) Estrutura (RH) da unidade atual
+    $objPenUnidadeDTO = new PenUnidadeDTO();
+    $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+    $objPenUnidadeDTO->retNumIdUnidadeRH();
+    $objPenUnidadeDTO = (new PenUnidadeRN())->consultar($objPenUnidadeDTO);
+    if (empty($objPenUnidadeDTO) || is_null($objPenUnidadeDTO->getNumIdUnidadeRH())) {
+      return [];
+    }
+    $numIdUnidadeRHAtual = $objPenUnidadeDTO->getNumIdUnidadeRH();
+
+    // 2) Mapeamentos de envio parcial. Critério deliberadamente menos restritivo (sem sin_multiplos_orgaos):
+    // sincronizar só exige mapeamento; devolver exige 'S'.
+    $objRestricaoDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+    $objRestricaoDTO->retNumIdEstrutura();
+    $objRestricaoDTO->retNumIdUnidadePen();
+    $arrObjRestricaoDTO = (new PenRestricaoEnvioComponentesDigitaisBD($objInfraIBanco))->listar($objRestricaoDTO);
+
+    $arrMapeamento = [];
+    foreach ($arrObjRestricaoDTO as $objRestricaoDTO) {
+      $arrMapeamento[$objRestricaoDTO->getNumIdEstrutura() . '|' . $objRestricaoDTO->getNumIdUnidadePen()] = true;
+    }
+    if (empty($arrMapeamento)) {
+      return [];
+    }
+
+    // 3) Primeiro trâmite de cada processo (equivalente a TramiteBD::consultarPrimeiroTramite, em lote)
+    $objTramiteDTO = new TramiteDTO();
+    $objTramiteDTO->setNumIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
+    $objTramiteDTO->setStrStaTipoProtocolo(
+        [ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO, ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO],
+        InfraDTO::$OPER_IN
+    );
+    $objTramiteDTO->retNumIdProcedimento();
+    $objTramiteDTO->retNumIdTramite();
+    $objTramiteDTO->retStrStaTipoTramite();
+    $objTramiteDTO->retNumIdEstruturaDestino();
+    $objTramiteDTO->retNumIdRepositorioOrigem();
+    $objTramiteDTO->retNumIdEstruturaOrigem();
+    $objTramiteDTO->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $arrObjTramiteDTO = (new TramiteBD($objInfraIBanco))->listar($objTramiteDTO);
+
+    $arrObjPrimeiroTramiteDTO = [];
+    foreach ($arrObjTramiteDTO as $objTramiteDTO) {
+      if (!isset($arrObjPrimeiroTramiteDTO[$objTramiteDTO->getNumIdProcedimento()])) {
+        $arrObjPrimeiroTramiteDTO[$objTramiteDTO->getNumIdProcedimento()] = $objTramiteDTO;
+      }
+    }
+
+    // Recebido na unidade atual, de remetente com mapeamento de envio parcial
+    $arrDblIdCandidatos = [];
+    foreach ($arrObjPrimeiroTramiteDTO as $dblIdProcedimento => $objTramiteDTO) {
+      if ($objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO
+          && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual
+          && isset($arrMapeamento[$objTramiteDTO->getNumIdRepositorioOrigem() . '|' . $objTramiteDTO->getNumIdEstruturaOrigem()])) {
+        $arrDblIdCandidatos[] = $dblIdProcedimento;
+      }
+    }
+    if (empty($arrDblIdCandidatos)) {
+      return [];
+    }
+
+    // 4) Processo de múltiplos órgãos: a primeira atividade entre envio/recebimento de múltiplos órgãos deve ser a de recebimento
+    $numIdTarefaRecebimentoMultiplosOrgaos = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS);
+    $objAtividadeBD = new AtividadeBD($objInfraIBanco);
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($arrDblIdCandidatos, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setNumIdTarefa([
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS),
+      $numIdTarefaRecebimentoMultiplosOrgaos,
+    ], InfraDTO::$OPER_IN);
+    $objAtividadeDTO->retDblIdProtocolo();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_ASC);
+
+    $arrNumIdPrimeiraTarefa = [];
+    foreach ($objAtividadeBD->listar($objAtividadeDTO) as $objAtividadeDTO) {
+      if (!isset($arrNumIdPrimeiraTarefa[$objAtividadeDTO->getDblIdProtocolo()])) {
+        $arrNumIdPrimeiraTarefa[$objAtividadeDTO->getDblIdProtocolo()] = $objAtividadeDTO->getNumIdTarefa();
+      }
+    }
+
+    $arrDblIdCandidatos = [];
+    foreach ($arrNumIdPrimeiraTarefa as $dblIdProcedimento => $numIdTarefa) {
+      if ($numIdTarefa == $numIdTarefaRecebimentoMultiplosOrgaos) {
+        $arrDblIdCandidatos[] = $dblIdProcedimento;
+      }
+    }
+    if (empty($arrDblIdCandidatos)) {
+      return [];
+    }
+
+    // 5) Aberto na unidade atual (mesmo filtro base do AtividadeRN::listarPendenciasRN0754)
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDistinct(true);
+    $objAtividadeDTO->setDblIdProtocolo($arrDblIdCandidatos, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeDTO->retDblIdProtocolo();
+    $arrDblIdCandidatos = InfraArray::converterArrInfraDTO($objAtividadeBD->listar($objAtividadeDTO), 'IdProtocolo');
+    if (empty($arrDblIdCandidatos)) {
+      return [];
+    }
+
+    // 6) Estado normal (não sobrestado/bloqueado) e não sigiloso
+    $objProcedimentoDTO = new ProcedimentoDTO();
+    $objProcedimentoDTO->setDblIdProcedimento($arrDblIdCandidatos, InfraDTO::$OPER_IN);
+    $objProcedimentoDTO->setStrStaEstadoProtocolo([ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO], InfraDTO::$OPER_NOT_IN);
+    $objProcedimentoDTO->setStrStaNivelAcessoGlobalProtocolo(ProtocoloRN::$NA_SIGILOSO, InfraDTO::$OPER_DIFERENTE);
+    $objProcedimentoDTO->retDblIdProcedimento();
+
+    return InfraArray::converterArrInfraDTO((new ProcedimentoBD($objInfraIBanco))->listar($objProcedimentoDTO), 'IdProcedimento');
   }
   
   private function consultarProcessoRecebido($dblIdProtocolo)
