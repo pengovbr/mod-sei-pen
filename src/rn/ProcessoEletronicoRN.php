@@ -1969,6 +1969,75 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  /**
+   * Situações do Tramita GOV.BR que indicam trâmite de processo ainda em andamento, ou seja,
+   * cuja sincronização entre remetente e destinatário ainda não foi concluída
+   *
+   * A situação 1 (Iniciado) não é considerada em andamento pois representa um envio interrompido antes
+   * da transferência dos componentes digitais, o qual é cancelado automaticamente pelo próprio módulo
+   * antes da realização de um novo envio.
+   *
+   * @return array Códigos de situação de trâmite ainda não concluído
+   */
+  public static function listarSituacoesTramiteEmAndamento()
+    {
+      return [
+        self::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+        self::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+        self::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+        self::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+      ];
+  }
+
+  /**
+   * Recupera o último trâmite do processo cuja sincronização ainda não foi concluída no Tramita GOV.BR
+   *
+   * Um novo envio realizado antes da conclusão do trâmite anterior é rejeitado pelo Tramita GOV.BR com
+   * mensagens que não representam a causa real do impedimento, como a inconsistência de hash de
+   * componentes digitais (erro 0047), levando o usuário a interpretar o comportamento como um erro
+   * nos documentos do processo.
+   *
+   * @param  string $parStrProtocoloFormatado Número do processo a ser consultado
+   * @return object|null Dados do trâmite em andamento ou null caso a sincronização anterior esteja concluída
+   */
+  public function consultarTramiteEmAndamento($parStrProtocoloFormatado)
+    {
+    if(InfraString::isBolVazia($parStrProtocoloFormatado)) {
+      return null;
+    }
+
+    try {
+        $arrObjTramite = $this->consultarTramitesTodos(null, null, null, null, $parStrProtocoloFormatado);
+    } catch (\Exception $e) {
+        //A indisponibilidade da consulta não pode impedir o envio, que possui seu próprio tratamento de falhas
+        $strMensagem = sprintf(
+            'Falha na consulta de trâmites em andamento do processo %s. Detalhes: %s',
+            $parStrProtocoloFormatado,
+            $e->getMessage()
+        );
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+        return null;
+    }
+
+      $objUltimoTramite = null;
+      $arrSituacoesEmAndamento = self::listarSituacoesTramiteEmAndamento();
+    foreach ($arrObjTramite as $objTramite) {
+      if(!isset($objTramite->IDT) || !isset($objTramite->situacaoAtual)) {
+        continue;
+      }
+
+      if(!in_array(intval($objTramite->situacaoAtual), $arrSituacoesEmAndamento, true)) {
+        continue;
+      }
+
+      if(is_null($objUltimoTramite) || intval($objTramite->IDT) > intval($objUltimoTramite->IDT)) {
+          $objUltimoTramite = $objTramite;
+      }
+    }
+
+      return $objUltimoTramite;
+  }
+
   public function consultarTramitesProtocolo($parProtocoloFormatado)
     {
       $arrObjTramite = [];
