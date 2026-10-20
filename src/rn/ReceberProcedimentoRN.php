@@ -525,7 +525,11 @@ class ReceberProcedimentoRN extends InfraRN
             $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
             $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
             $objProcedimentoRN = new ProcedimentoRN();
-            //$objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+            try {
+              $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+            } catch (Exception $e) {
+              $this->gravarLogDebug("Falha ao reabrir automaticamente o processo " . $objReceberTramiteRecusadoDTO->getNumIdProtocolo() . ": " . InfraException::inspecionar($e), 2);
+            }
           }
 
           //Realiza o desbloqueio do processo
