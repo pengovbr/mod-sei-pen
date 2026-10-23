@@ -49,6 +49,24 @@ class PenMapUnidadesFixture extends \FixtureBase
       return $objPenUnidadeBD->consultar($objPenUnidadeDTO);
   }
   
+  /**
+   * Consulta o mapeamento pela estrutura (Id) ou pela unidade (IdUnidade) abrindo
+   * conexao com o banco apontado no momento por DATABASE_HOST
+   */
+  protected function consultarMapeamentoConectado($dados = [])
+    {
+      $objPenUnidadeDTO = new \PenUnidadeDTO();
+    if (isset($dados['Id'])) {
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
+    } else {
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade']);
+    }
+      $objPenUnidadeDTO->retTodos();
+
+      $objPenUnidadeBD = new \PenUnidadeBD($this->inicializarObjInfraIBanco());
+      return $objPenUnidadeBD->consultar($objPenUnidadeDTO);
+  }
+
   protected function listar($dados = [])
   { 
     $this->objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade']);
