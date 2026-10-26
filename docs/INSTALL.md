@@ -312,7 +312,7 @@ Com essa configuração, os clientes compatíveis receberão automaticamente as 
 ### 1.13. Backup da pasta do RepositorioArquivos
 
 > [!IMPORTANT] 
-> É necessário adicionar a pasta mod-pen que foi criada desde a versão 4.1.0 para a rotina de backup do órgão. A mesma é uma subpasta da pasta configurada como repositório de > arquivos do SEI. 
+> É necessário adicionar a pasta mod-pen que foi criada desde a versão 4.1.0 para a rotina de backup do órgão. A mesma é uma subpasta da pasta configurada como repositório de arquivos do SEI. 
 
 ---
 ---

@@ -293,7 +293,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         case '4.0.2':
           $this->instalarV4030();
         case '4.0.3':
-          $this->instalarV4100();    
+          $this->instalarV4100();
+        case '4.1.0':
+          $this->instalarV4110();
           
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2815,6 +2817,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       
 
       $this->atualizarNumeroVersao("4.1.0");
+  }
+
+  protected function instalarV4110()
+  {
+    $this->atualizarNumeroVersao("4.1.1");
   }
 
 
