@@ -42,6 +42,11 @@ class PaginaMoverDocumento extends PaginaTeste
       $this->waitUntil(function() use ($valor) {
           return stripos($this->elById('txtProcedimentoDestino')->getAttribute('value'), $valor) !== false;
       }, PEN_WAIT_TIMEOUT);
+
+      // Aguarda o AJAX preencher o id do processo destino (campo oculto exigido pelo SEI)
+      $this->waitUntil(function() {
+          return trim($this->elById('hdnIdProcedimentoDestino')->getAttribute('value')) !== '';
+      }, PEN_WAIT_TIMEOUT);
   }
 
     /**
