@@ -35,6 +35,21 @@ Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módul
 
 ## 1. ATUALIZAÇÃO
 
+### Atualização para 4.1.2: remoção de tabela legada
+
+A atualização remove `md_pen_rel_tipo_doc_map_rec` somente quando ela está
+vazia. Se a tabela já estiver ausente, a atualização continua normalmente.
+O mapeamento vigente em `md_pen_rel_doc_map_recebido` e o parâmetro
+`PEN_TIPO_DOCUMENTO_PADRAO_RECEBIMENTO` são preservados.
+
+Se houver registros na tabela legada, o script informa a quantidade no log,
+interrompe a atualização e não avança a versão para 4.1.2. Os dados são
+preservados para análise pela equipe responsável. Analise sua origem e
+providencie a destinação adequada antes de esvaziar ou remover a tabela;
+não descarte os registros apenas para liberar a atualização. Após resolver
+a pendência, execute novamente o mesmo script de atualização.
+
+
 > ## ⚠️ Atualizando para a 4.1.0: backup do banco **e** do repositório de arquivos
 >
 > Esta versão **executa migração de dados**. Ela move as cópias imutáveis dos
