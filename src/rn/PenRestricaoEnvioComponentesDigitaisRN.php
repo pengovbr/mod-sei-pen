@@ -16,9 +16,9 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
       $objDTO->setNumIdEstrutura($numIdEstrutura);
       $objDTO->setNumIdUnidadePen($numIdUnidadePen);
-      if (!InfraString::isBolVazia($strSinMultiplosOrgaos)) {
-          $objDTO->setStrSinMultiplosOrgaos($strSinMultiplosOrgaos);
-      }
+    if (!InfraString::isBolVazia($strSinMultiplosOrgaos)) {
+        $objDTO->setStrSinMultiplosOrgaos($strSinMultiplosOrgaos);
+    }
 
       return $this->contar($objDTO) > 0;
   }

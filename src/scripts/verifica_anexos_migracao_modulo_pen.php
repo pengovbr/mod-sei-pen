@@ -88,9 +88,9 @@ class VerificadorAnexosMigracaoV4100
     public function __construct()
     {
         $this->numLote = (int) getenv('PEN_VERIFICA_LOTE');
-        if ($this->numLote < 1) {
-            $this->numLote = self::TAMANHO_LOTE_PADRAO;
-        }
+      if ($this->numLote < 1) {
+          $this->numLote = self::TAMANHO_LOTE_PADRAO;
+      }
         $this->bolConferirHash = (getenv('PEN_VERIFICA_HASH') === '1');
         // O PID entra no nome porque o carimbo tem resolucao de 1 segundo:
         // duas execucoes no mesmo segundo colidiriam, e se a primeira for de
@@ -104,9 +104,9 @@ class VerificadorAnexosMigracaoV4100
         $this->numMaxProblemas = ($strMax === false || $strMax === '')
             ? self::MAX_PROBLEMAS_PADRAO
             : (int) $strMax;
-        if ($this->numMaxProblemas < 0) {
-            $this->numMaxProblemas = 0;
-        }
+      if ($this->numMaxProblemas < 0) {
+          $this->numMaxProblemas = 0;
+      }
     }
 
     public function executar()
@@ -123,9 +123,9 @@ class VerificadorAnexosMigracaoV4100
         ));
         $this->imprimir('');
 
-        if (!$this->verificarIndices()) {
-            return 2;
-        }
+      if (!$this->verificarIndices()) {
+          return 2;
+      }
 
         $this->imprimir(sprintf('lista de problemas em %s', $this->strArquivoSaida));
         $this->imprimir('');
@@ -141,64 +141,64 @@ class VerificadorAnexosMigracaoV4100
         $numUltimoIdAnexo = 0;
         $numLotesLidos = 0;
 
-        try {
-            do {
-                $arrAnexos = $this->listarLote($numUltimoIdAnexo);
+      try {
+        do {
+            $arrAnexos = $this->listarLote($numUltimoIdAnexo);
 
-                if (!empty($arrAnexos)) {
-                    $numLotesLidos++;
-                    $arrUltimo = end($arrAnexos);
-                    $numUltimoIdAnexo = $arrUltimo['id_anexo'];
+          if (!empty($arrAnexos)) {
+            $numLotesLidos++;
+            $arrUltimo = end($arrAnexos);
+            $numUltimoIdAnexo = $arrUltimo['id_anexo'];
 
-                    foreach ($arrAnexos as $arrAnexo) {
-                        $this->verificarAnexo($arrAnexo);
+            foreach ($arrAnexos as $arrAnexo) {
+                $this->verificarAnexo($arrAnexo);
 
-                        if ($this->numMaxProblemas > 0 && $this->numProblemas >= $this->numMaxProblemas) {
-                            $this->bolInterrompido = true;
-                            break 2;
-                        }
-                    }
+              if ($this->numMaxProblemas > 0 && $this->numProblemas >= $this->numMaxProblemas) {
+                $this->bolInterrompido = true;
+                break 2;
+              }
+            }
 
-                    if ($numLotesLidos % 20 === 0) {
-                        $this->imprimir(sprintf(
-                            '  ... %d anexos verificados, %d problemas, %.1fs',
-                            $this->numTotal,
-                            $this->numProblemas,
-                            microtime(true) - $numInicio
-                        ));
-                    }
-                }
-            } while (!empty($arrAnexos));
-        } catch (Exception $e) {
-            InfraDebug::getInstance()->setBolDebugInfra($bolDebugAnterior);
-            throw $e;
-        }
+            if ($numLotesLidos % 20 === 0) {
+                $this->imprimir(sprintf(
+                    '  ... %d anexos verificados, %d problemas, %.1fs',
+                    $this->numTotal,
+                    $this->numProblemas,
+                    microtime(true) - $numInicio
+                ));
+            }
+          }
+        } while (!empty($arrAnexos));
+      } catch (Exception $e) {
+          InfraDebug::getInstance()->setBolDebugInfra($bolDebugAnterior);
+          throw $e;
+      }
 
         InfraDebug::getInstance()->setBolDebugInfra($bolDebugAnterior);
 
         $this->relatar(microtime(true) - $numInicio);
 
-        if ($this->resCsv !== null) {
-            // Sem problemas o CSV so teria o cabecalho, e um arquivo vazio nao
-            // distingue "base integra" de "script nao rodou". Registra o veredito.
-            if ($this->numProblemas === 0) {
-                fputcsv($this->resCsv, array(
-                    '',
-                    '',
-                    '',
-                    '',
-                    'ok',
-                    '',
-                    sprintf('nenhum problema: %d anexos verificados', $this->numTotal),
-                ));
-            }
-            fclose($this->resCsv);
-            $this->resCsv = null;
-        }
-
+      if ($this->resCsv !== null) {
+          // Sem problemas o CSV so teria o cabecalho, e um arquivo vazio nao
+          // distingue "base integra" de "script nao rodou". Registra o veredito.
         if ($this->numProblemas === 0) {
-            return 0;
+            fputcsv($this->resCsv, array(
+                '',
+                '',
+                '',
+                '',
+                'ok',
+                '',
+                sprintf('nenhum problema: %d anexos verificados', $this->numTotal),
+            ));
         }
+          fclose($this->resCsv);
+          $this->resCsv = null;
+      }
+
+      if ($this->numProblemas === 0) {
+          return 0;
+      }
 
         return $this->bolInterrompido ? 3 : 1;
     }
@@ -292,10 +292,10 @@ class VerificadorAnexosMigracaoV4100
 
         if ($this->bolConferirHash) {
             $strHashBanco = $arrAnexo['hash'];
-            if (!empty($strHashBanco) && $strHashBanco !== hash_file('md5', $strCaminho)) {
-                $this->registrar($numIdAnexo, $arrProtocolo, 'hash', $strCaminho, 'MD5 do arquivo difere do gravado em anexo.hash');
-                return;
-            }
+          if (!empty($strHashBanco) && $strHashBanco !== hash_file('md5', $strCaminho)) {
+              $this->registrar($numIdAnexo, $arrProtocolo, 'hash', $strCaminho, 'MD5 do arquivo difere do gravado em anexo.hash');
+              return;
+          }
         }
 
         $this->numOk++;
@@ -307,25 +307,25 @@ class VerificadorAnexosMigracaoV4100
      */
     private function normalizarDataHora($mixDataHora)
     {
-        if ($mixDataHora instanceof DateTimeInterface) {
-            return $mixDataHora->format('d/m/Y H:i:s');
-        }
+      if ($mixDataHora instanceof DateTimeInterface) {
+          return $mixDataHora->format('d/m/Y H:i:s');
+      }
 
-        if (is_resource($mixDataHora)) {
-            $mixDataHora = stream_get_contents($mixDataHora);
-        }
+      if (is_resource($mixDataHora)) {
+          $mixDataHora = stream_get_contents($mixDataHora);
+      }
 
-        if ($mixDataHora === null || $mixDataHora === '') {
-            throw new InfraException('dth_inclusao vazia');
-        }
+      if ($mixDataHora === null || $mixDataHora === '') {
+          throw new InfraException('dth_inclusao vazia');
+      }
 
         $arrFormatos = array('Y-m-d H:i:s', 'Y-m-d H:i:s.u', 'd/m/Y H:i:s', 'd/m/Y H:i:s.u');
-        foreach ($arrFormatos as $strFormato) {
-            $objData = DateTime::createFromFormat($strFormato, $mixDataHora);
-            if ($objData !== false) {
-                return $objData->format('d/m/Y H:i:s');
-            }
+      foreach ($arrFormatos as $strFormato) {
+          $objData = DateTime::createFromFormat($strFormato, $mixDataHora);
+        if ($objData !== false) {
+            return $objData->format('d/m/Y H:i:s');
         }
+      }
 
         throw new InfraException('dth_inclusao em formato nao reconhecido: ' . $mixDataHora);
     }
@@ -342,15 +342,15 @@ class VerificadorAnexosMigracaoV4100
 
         list($strProcesso, $strDocumento, $numIdProtocolo) = $arrProtocolo;
 
-        if (count($this->arrAmostra) < self::QTD_AMOSTRA) {
-            $this->arrAmostra[] = array($numIdAnexo, $strProcesso, $strTipo, $strCaminho, $strDetalhe, $strDocumento);
-        }
+      if (count($this->arrAmostra) < self::QTD_AMOSTRA) {
+          $this->arrAmostra[] = array($numIdAnexo, $strProcesso, $strTipo, $strCaminho, $strDetalhe, $strDocumento);
+      }
 
-        if ($this->resCsv !== null) {
-            fputcsv($this->resCsv, array(
-                $numIdAnexo, $strProcesso, $strDocumento, $numIdProtocolo, $strTipo, $strCaminho, $strDetalhe,
-            ));
-        }
+      if ($this->resCsv !== null) {
+          fputcsv($this->resCsv, array(
+              $numIdAnexo, $strProcesso, $strDocumento, $numIdProtocolo, $strTipo, $strCaminho, $strDetalhe,
+          ));
+      }
     }
 
     /**
@@ -360,17 +360,17 @@ class VerificadorAnexosMigracaoV4100
      */
     private function abrirCsv()
     {
-        try {
-            $this->resCsv = @fopen($this->strArquivoSaida, 'w');
-        } catch (Throwable $e) {
-            $this->resCsv = false;
-        }
+      try {
+          $this->resCsv = @fopen($this->strArquivoSaida, 'w');
+      } catch (Throwable $e) {
+          $this->resCsv = false;
+      }
 
-        if ($this->resCsv === false) {
-            $this->resCsv = null;
-            $this->imprimir(sprintf('AVISO: nao foi possivel gravar %s -- seguindo sem CSV.', $this->strArquivoSaida));
-            return;
-        }
+      if ($this->resCsv === false) {
+          $this->resCsv = null;
+          $this->imprimir(sprintf('AVISO: nao foi possivel gravar %s -- seguindo sem CSV.', $this->strArquivoSaida));
+          return;
+      }
 
         // O CSV lista caminhos do repositorio de arquivos do orgao. Em /tmp ele
         // nasceria 644, legivel por qualquer usuario local do servidor.
@@ -395,61 +395,61 @@ class VerificadorAnexosMigracaoV4100
         $this->imprimir(sprintf('tempo              : %.1fs', $numSegundos));
         $this->imprimir(sprintf('memoria de pico    : %.1f MB', memory_get_peak_usage(true) / 1048576));
 
-        if ($numProblemas > 0) {
-            $this->imprimir('');
-            $this->imprimir('por tipo:');
-            foreach ($this->arrContagem as $strTipo => $numQtd) {
-                if ($numQtd > 0) {
-                    $this->imprimir(sprintf('  %-9s %d', $strTipo, $numQtd));
-                }
-            }
-
-            $numMostrar = count($this->arrAmostra);
-            $this->imprimir('');
-            $this->imprimir(sprintf('primeiros %d:', $numMostrar));
-            foreach ($this->arrAmostra as $arr) {
-                $this->imprimir(sprintf(
-                    '  id_anexo=%-8s processo=%-22s documento=%-10s %-8s %s  (%s)',
-                    $arr[0],
-                    $arr[1] !== null && $arr[1] !== '' ? $arr[1] : '-',
-                    $arr[5] !== null && $arr[5] !== '' ? $arr[5] : '-',
-                    $arr[2],
-                    $arr[3],
-                    $arr[4]
-                ));
-            }
-
-            if ($numProblemas > $numMostrar) {
-                $this->imprimir(sprintf('  ... e mais %d -- a lista completa esta no CSV.', $numProblemas - $numMostrar));
-            }
-
-            if ($this->resCsv !== null) {
-                $this->imprimir('');
-                $this->imprimir(sprintf('lista completa gravada em %s', $this->strArquivoSaida));
-            }
-
-
-            $this->imprimir('');
-            if ($this->bolInterrompido) {
-                $this->imprimir(sprintf(
-                    'VARREDURA INTERROMPIDA ao atingir %d problemas -- a base NAO foi',
-                    $this->numMaxProblemas
-                ));
-                $this->imprimir('percorrida por inteiro e pode haver mais. Trate os problemas e');
-                $this->imprimir('reexecute, ou use PEN_VERIFICA_MAX_PROBLEMAS=0 para varrer tudo.');
-                $this->imprimir('');
-            }
-            $this->imprimir('A MIGRACAO VAI IGNORAR estes anexos: eles permanecem em `anexo`');
-            $this->imprimir('e nao vao para a tabela do modulo. Trate-os antes, se possivel.');
-        } else {
-            $this->imprimir('');
-            $this->imprimir('NENHUM PROBLEMA ENCONTRADO.');
-            $this->imprimir(sprintf('veredito registrado em %s', $this->strArquivoSaida));
-            if (!$this->bolConferirHash) {
-                $this->imprimir('Observacao: o conteudo nao foi conferido. Para validar o MD5 de');
-                $this->imprimir('cada arquivo, reexecute com PEN_VERIFICA_HASH=1.');
-            }
+      if ($numProblemas > 0) {
+          $this->imprimir('');
+          $this->imprimir('por tipo:');
+        foreach ($this->arrContagem as $strTipo => $numQtd) {
+          if ($numQtd > 0) {
+            $this->imprimir(sprintf('  %-9s %d', $strTipo, $numQtd));
+          }
         }
+
+          $numMostrar = count($this->arrAmostra);
+          $this->imprimir('');
+          $this->imprimir(sprintf('primeiros %d:', $numMostrar));
+        foreach ($this->arrAmostra as $arr) {
+            $this->imprimir(sprintf(
+                '  id_anexo=%-8s processo=%-22s documento=%-10s %-8s %s  (%s)',
+                $arr[0],
+                $arr[1] !== null && $arr[1] !== '' ? $arr[1] : '-',
+                $arr[5] !== null && $arr[5] !== '' ? $arr[5] : '-',
+                $arr[2],
+                $arr[3],
+                $arr[4]
+            ));
+        }
+
+        if ($numProblemas > $numMostrar) {
+            $this->imprimir(sprintf('  ... e mais %d -- a lista completa esta no CSV.', $numProblemas - $numMostrar));
+        }
+
+        if ($this->resCsv !== null) {
+            $this->imprimir('');
+            $this->imprimir(sprintf('lista completa gravada em %s', $this->strArquivoSaida));
+        }
+
+
+          $this->imprimir('');
+        if ($this->bolInterrompido) {
+            $this->imprimir(sprintf(
+                'VARREDURA INTERROMPIDA ao atingir %d problemas -- a base NAO foi',
+                $this->numMaxProblemas
+            ));
+            $this->imprimir('percorrida por inteiro e pode haver mais. Trate os problemas e');
+            $this->imprimir('reexecute, ou use PEN_VERIFICA_MAX_PROBLEMAS=0 para varrer tudo.');
+            $this->imprimir('');
+        }
+          $this->imprimir('A MIGRACAO VAI IGNORAR estes anexos: eles permanecem em `anexo`');
+          $this->imprimir('e nao vao para a tabela do modulo. Trate-os antes, se possivel.');
+      } else {
+          $this->imprimir('');
+          $this->imprimir('NENHUM PROBLEMA ENCONTRADO.');
+          $this->imprimir(sprintf('veredito registrado em %s', $this->strArquivoSaida));
+        if (!$this->bolConferirHash) {
+            $this->imprimir('Observacao: o conteudo nao foi conferido. Para validar o MD5 de');
+            $this->imprimir('cada arquivo, reexecute com PEN_VERIFICA_HASH=1.');
+        }
+      }
         $this->imprimir('---------------------------------------------------------------');
     }
 
@@ -462,14 +462,14 @@ class VerificadorAnexosMigracaoV4100
     {
         $arrIndices = array();
         $objMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        foreach (array('md_pen_componente_digital', 'md_pen_processo_eletronico') as $strTabela) {
-            $arrIndices[$strTabela] = array();
-            foreach ((array) $objMetaBD->obterIndices(null, $strTabela) as $arrPorTabela) {
-                foreach ((array) $arrPorTabela as $arrColunas) {
-                    $arrIndices[$strTabela][] = array_map('strtolower', (array) $arrColunas);
-                }
-            }
+      foreach (array('md_pen_componente_digital', 'md_pen_processo_eletronico') as $strTabela) {
+          $arrIndices[$strTabela] = array();
+        foreach ((array) $objMetaBD->obterIndices(null, $strTabela) as $arrPorTabela) {
+          foreach ((array) $arrPorTabela as $arrColunas) {
+            $arrIndices[$strTabela][] = array_map('strtolower', (array) $arrColunas);
+          }
         }
+      }
 
         $arrFaltando = array();
         $arrNecessarios = array(
@@ -479,9 +479,9 @@ class VerificadorAnexosMigracaoV4100
         );
         foreach ($arrNecessarios as $strChave => $strIndice) {
             list($strTabela, $strColuna) = explode('|', $strChave);
-            if (!in_array(array($strColuna), $arrIndices[$strTabela], true)) {
-                $arrFaltando[$strChave] = $strIndice;
-            }
+          if (!in_array(array($strColuna), $arrIndices[$strTabela], true)) {
+              $arrFaltando[$strChave] = $strIndice;
+          }
         }
 
         if (empty($arrFaltando)) {
@@ -525,9 +525,9 @@ try {
     $numSaida = $objVerificador->executar();
 } catch (Exception $e) {
     echo "\nERRO NA VERIFICACAO: " . $e->getMessage() . "\n";
-    if ($e instanceof InfraException) {
-        echo $e->getStrDescricao() . "\n";
-    }
+  if ($e instanceof InfraException) {
+      echo $e->getStrDescricao() . "\n";
+  }
     $numSaida = 2;
 } catch (Error $e) {
     echo "\nERRO NA VERIFICACAO: " . $e->getMessage() . "\n";

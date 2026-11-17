@@ -196,9 +196,9 @@ class ExpedirProcedimentoRN extends InfraRN
       // A release/4.1.0 nao possui este metodo, por isso nao sofre do problema.
       // Confirmado por teste: com o reuso irrestrito, CancelamentoTramiteIndividualTest
       // e TramiteRecebimentoDocumentoAvulsoTest falham; restringindo, passam.
-    if (is_null($strNumeroRegistro) && $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
+      if (is_null($strNumeroRegistro) && $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
         $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $objExpedirProcedimentoDTO);
-    }
+      }
 
         $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 
@@ -1258,7 +1258,7 @@ class ExpedirProcedimentoRN extends InfraRN
           $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
        
         if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
-            $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+            $arrobjComponenteDigitalDTO = $this->listarComponentesDigitaisDocumentoRetirado($objComponenteDigitalBD, $objComponenteDigitalDTO);
           foreach ($arrobjComponenteDigitalDTO as $key => $componenteDigital) {
             $objComponenteDigital = array();
             $objComponenteDigital['ordem'] = $key + 1;
@@ -1300,6 +1300,35 @@ class ExpedirProcedimentoRN extends InfraRN
       return $objProcesso;
   }
 
+
+    /**
+     * Lista os componentes digitais de um documento retirado, considerando apenas o seu trâmite mais recente.
+     *
+     * Os componentes digitais são registrados novamente a cada trâmite do documento. Considerar todos os registros
+     * faria com que um mesmo componente fosse enviado repetidas vezes, uma para cada trâmite anterior, e o destinatário
+     * passaria a tratar o documento como se possuísse múltiplos componentes digitais.
+     *
+     * @param  ComponenteDigitalBD  $objComponenteDigitalBD
+     * @param  ComponenteDigitalDTO $objComponenteDigitalDTO Filtro com o documento retirado
+     * @return ComponenteDigitalDTO[]
+     */
+  private function listarComponentesDigitaisDocumentoRetirado(ComponenteDigitalBD $objComponenteDigitalBD, ComponenteDigitalDTO $objComponenteDigitalDTO)
+    {
+      $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
+      $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
+      $numIdTramiteMaisRecente = $arrObjComponenteDigitalDTO[0]->getNumIdTramite();
+      $arrObjComponenteDigitalDTOPorOrdem = [];
+    foreach ($arrObjComponenteDigitalDTO as $objComponenteDigitalTramiteDTO) {
+        $numOrdem = $objComponenteDigitalTramiteDTO->getNumOrdem();
+      if ($objComponenteDigitalTramiteDTO->getNumIdTramite() == $numIdTramiteMaisRecente && !array_key_exists($numOrdem, $arrObjComponenteDigitalDTOPorOrdem)) {
+          $arrObjComponenteDigitalDTOPorOrdem[$numOrdem] = $objComponenteDigitalTramiteDTO;
+      }
+    }
+
+      return array_values($arrObjComponenteDigitalDTOPorOrdem);
+  }
 
   public function atribuirComponentesDigitaisRetirados($documentoDTO)
     {
@@ -2903,6 +2932,14 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
+    /**
+     * Verifica se origem e destino são tramitados pelo mesmo SPE (mesmo certificado digital).
+     *
+     * A API do Tramita não informa o SPE de uma estrutura, então considera-se do mesmo SPE
+     * a própria estrutura de origem e qualquer estrutura mapeada para unidade deste SEI, pois
+     * todas as unidades mapeadas localmente são tramitadas com o certificado do remetente.
+     * Estruturas da mesma hierarquia com SPE (certificado) distinto podem tramitar entre si.
+     */
   public function estruturasPertencemAoMesmoOrgao(
       $numIdRepositorioOrigem,
       $numIdEstruturaOrigem,
@@ -2918,48 +2955,20 @@ class ExpedirProcedimentoRN extends InfraRN
         return true;
     }
 
-      $arrHierarquiaOrigem = $this->obterIdentificadoresHierarquiaEstrutura(
-          $numIdRepositorioOrigem,
-          $numIdEstruturaOrigem
-      );
-      $arrHierarquiaDestino = $this->obterIdentificadoresHierarquiaEstrutura(
-          $numIdRepositorioDestino,
-          $numIdEstruturaDestino
-      );
-
-      return count(array_intersect($arrHierarquiaOrigem, $arrHierarquiaDestino)) > 0;
+      return $this->estruturaMapeadaParaUnidadeLocal($numIdEstruturaDestino);
   }
 
-  private function obterIdentificadoresHierarquiaEstrutura($numIdRepositorio, $numIdEstrutura)
+  protected function estruturaMapeadaParaUnidadeLocal($numIdEstrutura)
     {
-      $strChaveCache = (string) $numIdRepositorio.':'.(string) $numIdEstrutura;
-    if (isset($this->arrCacheHierarquiaEstruturas[$strChaveCache])) {
-        return $this->arrCacheHierarquiaEstruturas[$strChaveCache];
+      $strChaveCache = (string) $numIdEstrutura;
+    if (!isset($this->arrCacheHierarquiaEstruturas[$strChaveCache])) {
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidadeRH($numIdEstrutura);
+
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $this->arrCacheHierarquiaEstruturas[$strChaveCache] = $objPenUnidadeRN->contar($objPenUnidadeDTO) > 0;
     }
 
-      $objEstrutura = $this->objProcessoEletronicoRN->consultarEstrutura(
-          $numIdRepositorio,
-          $numIdEstrutura,
-          true
-      );
-
-      $arrIdentificadores = [(string) $numIdEstrutura];
-    if (isset($objEstrutura->numeroDeIdentificacaoDaEstrutura)) {
-        $arrIdentificadores[] = (string) $objEstrutura->numeroDeIdentificacaoDaEstrutura;
-    }
-
-    if (isset($objEstrutura->hierarquia) && is_array($objEstrutura->hierarquia)) {
-      foreach ($objEstrutura->hierarquia as $objNivel) {
-          $numIdNivel = is_array($objNivel)
-              ? ($objNivel['numeroDeIdentificacaoDaEstrutura'] ?? null)
-              : ($objNivel->numeroDeIdentificacaoDaEstrutura ?? null);
-        if (!InfraString::isBolVazia($numIdNivel)) {
-            $arrIdentificadores[] = (string) $numIdNivel;
-        }
-      }
-    }
-
-      $this->arrCacheHierarquiaEstruturas[$strChaveCache] = array_values(array_unique($arrIdentificadores));
       return $this->arrCacheHierarquiaEstruturas[$strChaveCache];
   }
 

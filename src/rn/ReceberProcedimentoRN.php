@@ -1073,12 +1073,32 @@ class ReceberProcedimentoRN extends InfraRN
       // alinha SessaoSEI com a unidade que ProtocoloRN::alterarRN0202 usa para validar
       // remocao de participantes - do que depende listarParticipantesDeOutrasUnidades().
       $numIdUnidadeSessaoAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-      $numIdUnidadeAndamentoAberto = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento());
+      // cancelarDocumentosProcesso() (chamado por atribuirDocumentos) conclui o processo na
+      // unidade geradora de cada documento retirado pelo remetente e pode deixa-lo sem nenhum
+      // andamento aberto. Sem andamento aberto, o nucleo recusa os andamentos que exigem
+      // processo aberto, como a alteracao de tipo de processo (tarefa 126): "Processo ... nao
+      // possui andamento aberto na unidade ...". Nesse caso o processo e reaberto na sua
+      // unidade geradora, em vez da unidade da ultima expedicao.
+    if ($this->possuiAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento())) {
+        $numIdUnidadeAndamentoAberto = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento());
+    } else {
+        $numIdUnidadeAndamentoAberto = $this->obterUnidadeGeradoraProcesso($objProcedimentoDTO->getDblIdProcedimento());
+    }
       SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeAndamentoAberto);
 
     try {
+        $bolReabertoParaSincronizacao = $this->abrirProcessoSeNaoAberto($objProcedimentoDTO->getDblIdProcedimento());
+
         $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
         $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+
+      if ($bolReabertoParaSincronizacao) {
+          // Desfaz a reabertura para nao deixar o processo aberto numa unidade em que ele
+          // nao estava; o envio final a unidade de destino reabre onde for necessario.
+          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+          $objEntradaConcluirProcessoAPI->setIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
+      }
     } finally {
         SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoAtual);
     }
@@ -1324,22 +1344,15 @@ class ReceberProcedimentoRN extends InfraRN
       // "O assunto ... nao pode ser excluido porque foi adicionado por outra unidade".
       $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO($this->listarAssuntosDeOutrasUnidades($parNumIdProcedimento));
 
-      // Sincronizacao de interessados (#1225), coerente com a regra do nucleo.
-      //
-      // ProtocoloRN::alterarRN0202() so recusa a remocao de participante quando
-      // ele pertence a unidade DIFERENTE da unidade atual da sessao. A unidade
-      // atual pode remover os que ela mesma cadastrou.
-      //
-      // Por isso a lista nova e montada como:
-      //     (participantes de OUTRAS unidades, preservados) + (os recebidos)
-      //
-      // A unica remocao possivel passa a ser de participante da unidade atual -
-      // permitida pelo nucleo. A tentativa anterior definia a lista completa a
-      // partir apenas dos recebidos, o que removia implicitamente os das outras
-      // unidades e abortava o recebimento inteiro com
-      // "O interessado ... nao pode ser excluido porque foi adicionado por outra unidade".
-      $objProtocoloDTO->setArrObjParticipanteDTO($this->listarParticipantesDeOutrasUnidades($parNumIdProcedimento));
-      $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessados ?? []);
+      // Preserva interessados de outras unidades e os que receberam acesso externo.
+      // O SEI nao permite excluir nenhum desses participantes durante a sincronizacao.
+      $arrParticipantesPreservados = $this->listarParticipantesDeOutrasUnidades($parNumIdProcedimento);
+      $objInteressadosRecebidosDTO = new ProtocoloDTO();
+      $this->atribuirParticipantes($objInteressadosRecebidosDTO, $parObjProtocolo->interessados ?? []);
+      $objProtocoloDTO->setArrObjParticipanteDTO(self::mesclarInteressadosRecebidos(
+          $arrParticipantesPreservados,
+          $objInteressadosRecebidosDTO->getArrObjParticipanteDTO()
+      ));
 
       $objProcedimentoDTO = new ProcedimentoDTO();
       $objProcedimentoDTO->setDblIdProcedimento($parNumIdProcedimento);
@@ -1353,6 +1366,16 @@ class ReceberProcedimentoRN extends InfraRN
           $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO'),
           mb_convert_encoding($parObjProtocolo->processoDeNegocio, 'ISO-8859-1', 'UTF-8')
       );
+
+      // A alteracao de tipo gera a tarefa 126 na unidade atual da sessao. Somente nesse caso a
+      // unidade precisa estar ativa; se foi excluida (exclusao logica), o recebimento e recusado.
+      $objProcedimentoAtualDTO = new ProcedimentoDTO();
+      $objProcedimentoAtualDTO->setDblIdProcedimento($parNumIdProcedimento);
+      $objProcedimentoAtualDTO->retNumIdTipoProcedimento();
+      $objProcedimentoAtualDTO = $this->objProcedimentoRN->consultarRN0201($objProcedimentoAtualDTO);
+    if ($objProcedimentoAtualDTO != null && $objProcedimentoAtualDTO->getNumIdTipoProcedimento() != $objProcedimentoDTO->getNumIdTipoProcedimento()) {
+        $this->validarUnidadeAtivaParaTramite(SessaoSEI::getInstance()->getNumIdUnidadeAtual(), $parObjProtocolo->protocolo);
+    }
 
       $arrObjAssuntoDTO = [];
     foreach ($objProtocoloDTO->getArrObjRelProtocoloAssuntoDTO() as $objRelProtocoloAssuntoDTO) {
@@ -1499,11 +1522,8 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
     /**
-     * Lista os participantes do protocolo que pertencem a unidades diferentes da
-     * unidade atual da sessao.
-     *
-     * Sao os que o nucleo do SEI proibe remover (ProtocoloRN::alterarRN0202) e
-     * que, portanto, precisam ser preservados na sincronizacao de interessados.
+     * Lista interessados que o SEI impede de excluir: os de outras unidades e
+     * os que receberam acesso externo ativo.
      *
      * @param  int $numIdProtocolo
      * @return ParticipanteDTO[]
@@ -1516,6 +1536,7 @@ class ReceberProcedimentoRN extends InfraRN
       // com contato e nao sao trazidos por retTodos(). Sem eles, prepararParticipantes()
       // falha com "Atributo [NomeContato] nao recebeu valor".
       $objParticipanteDTO = new ParticipanteDTO();
+      $objParticipanteDTO->retNumIdParticipante();
       $objParticipanteDTO->retNumIdUnidade();
       $objParticipanteDTO->retNumIdContato();
       $objParticipanteDTO->retStrNomeContato();
@@ -1529,10 +1550,50 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjParticipanteDTO = $objParticipanteRN->listarRN0189($objParticipanteDTO);
 
       $arrPreservados = array();
+      $objAcessoExternoRN = new AcessoExternoRN();
 
     foreach ($arrObjParticipanteDTO as $objDTO) {
       if ($objDTO->getNumIdUnidade() != $numIdUnidadeAtual) {
           $arrPreservados[] = $objDTO;
+          continue;
+      }
+
+      $objAcessoExternoDTO = new AcessoExternoDTO();
+      $objAcessoExternoDTO->setBolExclusaoLogica(false);
+      $objAcessoExternoDTO->retNumIdAcessoExterno();
+      $objAcessoExternoDTO->setStrStaTipo(AcessoExternoRN::$TA_SISTEMA, InfraDTO::$OPER_DIFERENTE);
+      $objAcessoExternoDTO->setNumIdParticipante($objDTO->getNumIdParticipante());
+      $objAcessoExternoDTO->setNumMaxRegistrosRetorno(1);
+      if ($objAcessoExternoRN->consultar($objAcessoExternoDTO) != null) {
+          $arrPreservados[] = $objDTO;
+      }
+    }
+
+      return $arrPreservados;
+  }
+
+  /**
+   * Mescla os interessados recebidos com os preservados, garantindo que não haja duplicatas.
+   *
+   * @param array $arrPreservados Array de objetos ParticipanteDTO preservados.
+   * @param array $arrRecebidos Array de objetos ParticipanteDTO recebidos.
+   * @return array Array resultante da mesclagem dos interessados.
+   */
+  private static function mesclarInteressadosRecebidos($arrPreservados, $arrRecebidos)
+  {
+      $arrChaves = [];
+      $numSequencia = -1;
+    foreach ($arrPreservados as $objParticipanteDTO) {
+        $arrChaves[$objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato()] = true;
+        $numSequencia = max($numSequencia, (int) $objParticipanteDTO->getNumSequencia());
+    }
+
+    foreach ($arrRecebidos as $objParticipanteDTO) {
+        $strChave = $objParticipanteDTO->getStrStaParticipacao() . ':' . $objParticipanteDTO->getNumIdContato();
+      if (!isset($arrChaves[$strChave])) {
+          $objParticipanteDTO->setNumSequencia(++$numSequencia);
+          $arrPreservados[] = $objParticipanteDTO;
+          $arrChaves[$strChave] = true;
       }
     }
 
@@ -2368,6 +2429,55 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
 
+    /**
+     * Lista os anexos de um documento ja recebido que podem ser reaproveitados por outro documento com o mesmo
+     * componente digital, descartando os que nao possuem arquivo fisico disponivel.
+     *
+     * A partir do SEI 5.1, o cancelamento de um documento externo envia o seu anexo para a lixeira, desvinculando-o
+     * do protocolo (AnexoRN::removerDocumento). Nesse caso o anexo e localizado pelo registro do componente digital.
+     *
+     * @param  float $parDblIdDocumento
+     * @return AnexoDTO[]
+     */
+  private function listarAnexosReutilizaveisDocumento($parDblIdDocumento)
+    {
+      $objAnexoRN = new AnexoRN();
+
+      $objAnexoDTO = new AnexoDTO();
+      $objAnexoDTO->retNumIdAnexo();
+      $objAnexoDTO->retStrNome();
+      $objAnexoDTO->retNumTamanho();
+      $objAnexoDTO->retDthInclusao();
+      $objAnexoDTO->setDblIdProtocolo($parDblIdDocumento);
+      $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+
+    if (empty($arrObjAnexoDTO)) {
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->retNumIdAnexo();
+        $objComponenteDigitalDTO->setDblIdDocumento($parDblIdDocumento);
+        $objComponenteDigitalDTO->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE);
+
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        $arrNumIdAnexo = array_values(array_unique(InfraArray::converterArrInfraDTO($objComponenteDigitalBD->listar($objComponenteDigitalDTO), 'IdAnexo')));
+
+      if (!empty($arrNumIdAnexo)) {
+          $objAnexoDTO = new AnexoDTO();
+          $objAnexoDTO->retNumIdAnexo();
+          $objAnexoDTO->retStrNome();
+          $objAnexoDTO->retNumTamanho();
+          $objAnexoDTO->retDthInclusao();
+          $objAnexoDTO->setNumIdAnexo($arrNumIdAnexo, InfraDTO::$OPER_IN);
+          $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+      }
+    }
+
+      return array_values(array_filter($arrObjAnexoDTO, function ($objAnexoDTO) use ($objAnexoRN) {
+          $strLocalizacao = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+          return is_file($strLocalizacao) && is_readable($strLocalizacao);
+      }));
+  }
+
+
   private function atribuirComponentesJaExistentesNoProcesso($objComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados)
     {
       $arrObjAnexosDTO = [];
@@ -2394,38 +2504,101 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function clonarComponentesJaExistentesNoProcesso($dblIdDocumentoReferencia, $objComponenteDigitalDTO, $bolMultiplosComponentes)
     {
-
-      $objAnexoDTO = new AnexoDTO();
-      $objAnexoDTO->retNumIdAnexo();
-      $objAnexoDTO->retStrNome();
-      $objAnexoDTO->retNumTamanho();
-      $objAnexoDTO->retDthInclusao();
-      $objAnexoDTO->setDblIdProtocolo($dblIdDocumentoReferencia);
+      $strHashComponente = $objComponenteDigitalDTO->getStrHashConteudo();
 
       $objAnexoRN = new AnexoRN();
-      $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
-    if(!empty($arrObjAnexoDTO)) {
-      foreach($arrObjAnexoDTO as $objAnexoDTO){
+      $arrObjAnexoDTO = $this->listarAnexosReutilizaveisDocumento($dblIdDocumentoReferencia);
+    foreach($arrObjAnexoDTO as $objAnexoDTO){
         $strSinDuplicado = 'S';
         $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
-        if($bolMultiplosComponentes) {
-            $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
-            [$strCaminhoAnexoTemporario, ] = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
-            $strCaminhoAnexo = $strCaminhoAnexoTemporario;
-            $strSinDuplicado = 'N';
-        }
+      if($bolMultiplosComponentes && $this->isArquivoCompactado($strCaminhoAnexo)) {
+          $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
+          [$strCaminhoAnexoTemporario, ] = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
+          $strCaminhoAnexo = $strCaminhoAnexoTemporario;
+          $strSinDuplicado = 'N';
+      }
+
+        // Somente o arquivo correspondente ao componente digital pode ser reaproveitado. Um documento gerado no
+        // próprio órgão, como o e-mail, possui anexos que não correspondem ao seu componente digital
+      if(!is_readable($strCaminhoAnexo) || base64_encode(hash_file('sha256', $strCaminhoAnexo, true)) != $strHashComponente) {
+          continue;
+      }
 
         $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
-        $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
-        copy($strCaminhoAnexo, $strNomeUploadCompleto);
+        copy($strCaminhoAnexo, DIR_SEI_TEMP.'/'.$strNomeUpload);
         $objAnexoDTO->setNumIdAnexo($strNomeUpload);
         $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
         $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
         $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
-      }
+        return [$objAnexoDTO];
     }
 
-      return $arrObjAnexoDTO;
+      $objAnexoDTO = $this->gerarAnexoDocumentoFormulario($dblIdDocumentoReferencia, $objComponenteDigitalDTO);
+      return isset($objAnexoDTO) ? [$objAnexoDTO] : [];
+  }
+
+
+    /**
+     * Gera novamente o conteúdo de um documento de formulário produzido no próprio órgão (ex.: e-mail), cujo componente
+     * digital não fica armazenado como anexo do documento, retornando-o como anexo caso corresponda ao componente digital
+     *
+     * @param  float                $parDblIdDocumento
+     * @param  ComponenteDigitalDTO $parObjComponenteDigitalDTO
+     * @return AnexoDTO|null
+     */
+  private function gerarAnexoDocumentoFormulario($parDblIdDocumento, $parObjComponenteDigitalDTO)
+    {
+      $objDocumentoDTO = new DocumentoDTO();
+      $objDocumentoDTO->retStrStaDocumento();
+      $objDocumentoDTO->setDblIdDocumento($parDblIdDocumento);
+      $objDocumentoRN = new DocumentoRN();
+      $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+
+    if(is_null($objDocumentoDTO) || !in_array($objDocumentoDTO->getStrStaDocumento(), [DocumentoRN::$TD_FORMULARIO_GERADO, DocumentoRN::$TD_FORMULARIO_AUTOMATICO])) {
+        return null;
+    }
+
+      $objDocumentoDTO->setDblIdDocumento($parDblIdDocumento);
+      $objDocumentoDTO->setObjInfraSessao(SessaoSEI::getInstance());
+      $strConteudo = $objDocumentoRN->consultarHtmlFormulario($objDocumentoDTO);
+
+      // Variação no fechamento da tag meta tratada também no envio do documento (ExpedirProcedimentoRN::obterDadosArquivo)
+      $arrStrConteudo = [$strConteudo, str_replace(
+          '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />',
+          '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">',
+          $strConteudo
+      )];
+
+      $strHashComponente = $parObjComponenteDigitalDTO->getStrHashConteudo();
+      foreach($arrStrConteudo as $strConteudoFormulario) {
+        if(base64_encode(hash('sha256', $strConteudoFormulario, true)) == $strHashComponente) {
+          $objAnexoRN = new AnexoRN();
+          $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
+          file_put_contents(DIR_SEI_TEMP.'/'.$strNomeUpload, $strConteudoFormulario);
+
+          $objAnexoDTO = new AnexoDTO();
+          $objAnexoDTO->setNumIdAnexo($strNomeUpload);
+          $objAnexoDTO->setStrNome($parObjComponenteDigitalDTO->getStrNome());
+          $objAnexoDTO->setNumTamanho(strlen($strConteudoFormulario));
+          $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+          $objAnexoDTO->setStrSinDuplicando('S');
+          return $objAnexoDTO;
+        }
+      }
+
+      return null;
+  }
+
+
+  private function isArquivoCompactado($strCaminhoArquivo)
+    {
+      $objZipArchive = new ZipArchive();
+    if($objZipArchive->open($strCaminhoArquivo) === true) {
+        $objZipArchive->close();
+        return true;
+    }
+
+      return false;
   }
 
 
@@ -2486,7 +2659,45 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
-    //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
+    /**
+     * Indica se o processo possui andamento aberto em alguma unidade.
+     *
+     * @param  float $parDblIdProcedimento
+     * @return bool
+     */
+  private function possuiAndamentoAberto($parDblIdProcedimento)
+    {
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+      $objAtividadeDTO->setDthConclusao(null);
+
+      $objAtividadeRN = new AtividadeRN();
+      return $objAtividadeRN->contarRN0035($objAtividadeDTO) > 0;
+  }
+
+    /**
+     * Retorna a unidade geradora do processo.
+     *
+     * @param  float $parDblIdProcedimento
+     * @return int
+     */
+  private function obterUnidadeGeradoraProcesso($parDblIdProcedimento)
+    {
+      $objProtocoloDTO = new ProtocoloDTO();
+      $objProtocoloDTO->setDblIdProtocolo($parDblIdProcedimento);
+      $objProtocoloDTO->retNumIdUnidadeGeradora();
+      $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+      return $objProtocoloDTO->getNumIdUnidadeGeradora();
+  }
+
+    /**
+     * Reabre o processo na unidade atual da sessão caso ele não possua andamento aberto nela.
+     * Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
+     *
+     * @param  float $parDblIdProcedimento
+     * @return bool true quando o processo precisou ser reaberto
+     */
   private function abrirProcessoSeNaoAberto($parDblIdProcedimento)
     {
       $objAtividadeDTO = new AtividadeDTO();
@@ -2504,7 +2715,10 @@ class ReceberProcedimentoRN extends InfraRN
         $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+        return true;
     }
+
+      return false;
   }
 
   private function atribuirComponentesDigitais(DocumentoDTO $objDocumentoDTO, $parArrObjComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados)
@@ -2728,6 +2942,39 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       $objInfraException->lancarValidacoes();
+  }
+
+    /**
+     * Recusa o recebimento quando a unidade que registrara a alteracao de tipo de processo
+     * (tarefa 126) nao existe mais ou foi desativada (exclusao logica), gravando o motivo no log.
+     *
+     * @param  int    $parNumIdUnidade
+     * @param  string $parStrProtocoloFormatado
+     * @return void
+     * @throws InfraException
+     */
+  private function validarUnidadeAtivaParaTramite($parNumIdUnidade, $parStrProtocoloFormatado)
+    {
+      $objUnidadeDTO = new UnidadeDTO();
+      $objUnidadeDTO->setNumIdUnidade($parNumIdUnidade);
+      $objUnidadeDTO->retNumIdUnidade();
+      $objUnidadeDTO->retStrSigla();
+      $objUnidadeDTO->retStrDescricao();
+      $objUnidadeDTO->retStrSinAtivo();
+
+      $objUnidadeRN = new UnidadeRN();
+      $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+    if ($objUnidadeDTO == null || $objUnidadeDTO->getStrSinAtivo() == 'N') {
+        $strMsg = ($objUnidadeDTO == null)
+          ? sprintf('Processo %s não pode ser tramitado: a unidade de ID %s não existe mais ou foi desativada no SEI.', $parStrProtocoloFormatado, $parNumIdUnidade)
+          : sprintf('Processo %s não pode ser tramitado: a unidade %s - %s foi desativada ou excluída do SEI.', $parStrProtocoloFormatado, $objUnidadeDTO->getStrSigla(), $objUnidadeDTO->getStrDescricao());
+
+        $this->gravarLogDebug($strMsg, 2);
+        $objInfraException = new InfraException();
+        $objInfraException->adicionarValidacao($strMsg);
+        $objInfraException->lancarValidacoes();
+    }
   }
 
   private function obterNivelSigiloSEI($strNivelSigiloPEN)

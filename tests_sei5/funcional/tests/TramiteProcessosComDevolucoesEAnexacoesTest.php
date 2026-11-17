@@ -143,17 +143,22 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
       self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
       self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-      // Definição de dados de teste do processo principal
-      self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
+      // O processo simples já tramitado passa a ser o processo principal e um novo processo é anexado a ele,
+      // pois o módulo recusa a anexação de processo já tramitado com sucesso para outro órgão
+      self::$processoTestePrincipal = self::$processoTesteAnexado;
+      self::$protocoloTestePrincipal = self::$protocoloTesteAnexado;
+
+      // Definição de dados de teste do novo processo, que será anexado ao processo principal
+      self::$processoTesteAnexado = $this->gerarDadosProcessoTeste(self::$remetente);
       self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
       self::$documentoTeste6 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-      $objProtocoloTesteAnexadoDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
+      $objProtocoloTesteAnexadoDTO = $this->cadastrarProcessoFixture(self::$processoTesteAnexado);
+      self::$protocoloTesteAnexado = $objProtocoloTesteAnexadoDTO->getStrProtocoloFormatado();
 
       $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloTesteAnexadoDTO->getDblIdProtocolo());
 
-      $objProtocoloTestePrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
-      self::$protocoloTestePrincipal = $objProtocoloTestePrincipalDTO->getStrProtocoloFormatado();
+      $objProtocoloTestePrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, \ProtocoloRN::$TP_PROCEDIMENTO);
 
       // Realizar a anexação de processos
       $this->anexarProcessoFixture($objProtocoloTestePrincipalDTO->getDblIdProtocolo(), $objProtocoloTesteAnexadoDTO->getDblIdProtocolo());
@@ -248,9 +253,12 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
 
       // Validação dos dados do processo principal
       $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
-      $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste5, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste6, self::$destinatario);
+      $this->assertEquals(6, count($listaDocumentosProcessoPrincipal));
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste1, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste2, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste3, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[3], self::$documentoTeste4, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[5], self::$documentoTeste6, self::$destinatario);
 
       $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
       $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
@@ -258,11 +266,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
       // Validação dos dados do processo anexado
       $this->paginaProcesso->pesquisar(self::$protocoloTesteAnexado);
       $listaDocumentosProcessoAnexado = $this->paginaProcesso->listarDocumentos();
-      $this->assertEquals(4, count($listaDocumentosProcessoAnexado));
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste1, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste2, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[2], self::$documentoTeste3, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[3], self::$documentoTeste4, self::$destinatario);
+      $this->assertEquals(1, count($listaDocumentosProcessoAnexado));
+      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste5, self::$destinatario);
   }
 
     /**
@@ -376,11 +381,14 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
 
       // Validação dos dados do processo principal
       $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
-      $this->assertEquals(5, count($listaDocumentosProcessoPrincipal));
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste5, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste6, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[3], self::$documentoTeste7, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[4], self::$documentoTeste8, self::$destinatario);
+      $this->assertEquals(8, count($listaDocumentosProcessoPrincipal));
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste1, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste2, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste3, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[3], self::$documentoTeste4, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[5], self::$documentoTeste6, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[6], self::$documentoTeste7, self::$destinatario);
+      $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[7], self::$documentoTeste8, self::$destinatario);
 
       $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
       $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
@@ -388,11 +396,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
       // Validação dos dados do processo anexado
       $this->paginaProcesso->pesquisar(self::$protocoloTesteAnexado);
       $listaDocumentosProcessoAnexado = $this->paginaProcesso->listarDocumentos();
-      $this->assertEquals(4, count($listaDocumentosProcessoAnexado));
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste1, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste2, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[2], self::$documentoTeste3, self::$destinatario);
-      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[3], self::$documentoTeste4, self::$destinatario);
+      $this->assertEquals(1, count($listaDocumentosProcessoAnexado));
+      $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste5, self::$destinatario);
   }
 
   /**

@@ -37,10 +37,11 @@ class PaginaEnviarEmail extends PaginaTeste
      * 8. Valida a mensagem de sucesso no alert
      * 9. Retorna para a janela principal
      * 
+     * @param string|null $strCaminhoArquivoAnexo Caminho (acessível pelo navegador) de arquivo a ser anexado ao e-mail
      * @throws \Exception Se o texto do alert não confirmar o envio do e-mail
      * @return void
      */
-    public function enviar(): void
+    public function enviar(?string $strCaminhoArquivoAnexo = null): void
     {
         // Aguardar a nova janela abrir
         sleep(3);
@@ -92,7 +93,11 @@ class PaginaEnviarEmail extends PaginaTeste
         $campoSelect2->sendKeys(WebDriverKeys::ENTER);
         
         sleep(1);
-        
+
+        if (!is_null($strCaminhoArquivoAnexo)) {
+            $this->anexarArquivo($strCaminhoArquivoAnexo);
+        }
+
         // Clicar no botão Enviar
         $this->elByName('btnEnviar')->click();
         
@@ -109,5 +114,24 @@ class PaginaEnviarEmail extends PaginaTeste
         
         // Fechar a janela e voltar para a janela original
         $this->switchToFirstWindow();
+    }
+
+    /**
+     * Anexa um arquivo ao e-mail, aguardando a conclusão do upload e sua inclusão na tabela de anexos
+     *
+     * @param string $strCaminhoArquivo Caminho do arquivo acessível pelo navegador
+     * @return void
+     */
+    private function anexarArquivo(string $strCaminhoArquivo): void
+    {
+        $this->elById('filArquivo')->sendKeys($strCaminhoArquivo);
+
+        $strNomeArquivo = basename($strCaminhoArquivo);
+        $this->waitUntil(function () use ($strNomeArquivo) {
+            $this->elByXPath("//table[@id='tblAnexos']//td[contains(.,'{$strNomeArquivo}')]");
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        sleep(1);
     }
 }
