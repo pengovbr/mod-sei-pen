@@ -47,7 +47,7 @@ Para iniciar os procedimentos de configuração, será necessário registrar no 
  - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Tramita.GOV.BR - Cadastro de Comitê")
  - **Produção:** [https://gestaopen.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Tramita.GOV.BR - Cadastro de Comitê")
 
-Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.gestao.gov.br
+Para maiores informações, entre em contato na Central de Serviços do PEN, endereço https://portaldeservicos.gestao.gov.br
 
 ### Procedimentos:
 
@@ -835,6 +835,5 @@ Exemplo:
 Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
 Para mais informações, contate a equipe responsável por meio dos seguintes canais:
-- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.gestao.gov.br) - Módulo do Barramento
-- Telefone: 0800 978 9005
+- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.gestao.gov.br) - Módulo do Tramita
 
