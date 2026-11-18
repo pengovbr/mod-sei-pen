@@ -3122,7 +3122,8 @@ class ExpedirProcedimentoRN extends InfraRN
   public function validarTramiteEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
     {
       $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-      $objTramiteEmAndamento = $this->objProcessoEletronicoRN->consultarTramiteEmAndamento($strProtocoloFormatado);
+      $arrNumeroRegistro = $this->objProcessoEletronicoRN->listarNumerosRegistroProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+      $objTramiteEmAndamento = $this->objProcessoEletronicoRN->consultarTramiteEmAndamento($strProtocoloFormatado, $arrNumeroRegistro);
 
     if(!is_null($objTramiteEmAndamento)) {
         $strMensagem = sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_TRAMITE_EM_ANDAMENTO, $strProtocoloFormatado);
