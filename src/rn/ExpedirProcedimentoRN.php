@@ -142,6 +142,14 @@ class ExpedirProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
         $this->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, null, $bolSinProcessamentoEmBloco);
         $this->validarParametrosExpedicao($objInfraException, $objExpedirProcedimentoDTO);
+        $this->validarTramiteEmAndamento(
+            $objInfraException,
+            $objProcedimentoDTO,
+            null,
+            $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+            $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
+            $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()
+        );
 
         //Apresentao da mensagens de validao na janela da barra de progresso
       if($objInfraException->contemValidacoes()) {
@@ -173,31 +181,12 @@ class ExpedirProcedimentoRN extends InfraRN
         
         
         //Construção do cabeçalho para envio do processo
-        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
-        $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
-
-      if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
-          $strNumeroRegistro = null;
-      }else{
-          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
-      }
-
-      // O reaproveitamento do NRE de um tramite ja CONCLUIDO so vale no modo
-      // "processo aberto e sincronizado" (multiplos orgaos), onde preservar a
-      // continuidade da conversa com o barramento e justamente o objetivo.
-      //
-      // Em envio externo comum ele quebra o reenvio: o barramento compara os
-      // hashes declarados agora com os que gravou naquele NRE e, como os
-      // documentos mudaram, recusa com
-      // "0047 - hash de ao menos um componente digital nao confere".
-      //
-      // A release/4.1.0 nao possui este metodo, por isso nao sofre do problema.
-      // Confirmado por teste: com o reuso irrestrito, CancelamentoTramiteIndividualTest
-      // e TramiteRecebimentoDocumentoAvulsoTest falham; restringindo, passam.
-      if (is_null($strNumeroRegistro) && $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
-        $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $objExpedirProcedimentoDTO);
-      }
+        //O mesmo NRE e usado em validarTramiteEmAndamento() para identificar o tramite cancelado automaticamente abaixo
+        $strNumeroRegistro = $this->obterNumeroRegistroEnvio(
+            $objProcedimentoDTO,
+            $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+            $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()
+        );
 
         $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 
@@ -218,11 +207,8 @@ class ExpedirProcedimentoRN extends InfraRN
           $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
       }
 
-        //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
-        $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
-      if($objTramiteInconsistente = $this->necessitaCancelamentoTramiteAnterior($objTramitesAnteriores)) {
-          $this->objProcessoEletronicoRN->cancelarTramite($objTramiteInconsistente->IDT);
-      }
+        //Cancela envios interrompidos (situacao 1) deste processo para a mesma unidade de destino, de qualquer NRE
+        $this->cancelarTramitesInterrompidos($objProcedimentoDTO, $strNumeroRegistro, $objExpedirProcedimentoDTO);
 
         $param = [
         'novoTramiteDeProcesso' => [
@@ -347,9 +333,85 @@ class ExpedirProcedimentoRN extends InfraRN
       if($bolSinProcessamentoEmBloco) {
           $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
       } else {
+          // Impedimentos identificados na validação do processo, como o trâmite anterior ainda em
+          // andamento, possuem mensagem própria e não podem ser apresentados como falha de comunicação
+        if($e instanceof InfraException && $e->contemValidacoes()) {
+            throw $e;
+        }
+
           throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
       }
     }
+  }
+
+  /**
+   * NREs que podem ser usados no cabecalho do envio externo do processo
+   *
+   * E o NRE do ultimo tramite recebido (ou dos metadados do tramite anterior). Sem ele, no envio de processo
+   * aberto/sincronizado (multiplos orgaos), e o NRE do tramite ja concluido para a unidade de destino. Envio
+   * sem NRE (processo nunca recebido) gera um NRE novo no Tramita GOV.BR.
+   *
+   * O tramite na situacao 1 (Iniciado) so e cancelado automaticamente antes do envio quando e o ultimo do NRE
+   * usado no envio (ver necessitaCancelamentoTramiteAnterior), por isso a validacao de tramite em andamento usa
+   * esta mesma regra.
+   *
+   * @param  ProcedimentoDTO $objProcedimentoDTO Processo a ser enviado
+   * @param  int|null $numIdUnidadeDestino Unidade de destino do envio
+   * @param  bool|null $bolSinMultiplosOrgaos Envio de processo aberto/sincronizado. Null quando ainda nao se sabe
+   *                                         (tela de validacao): considera tambem o NRE do tramite concluido
+   * @return array NREs possiveis do envio (vazio quando o envio gera um NRE novo)
+   */
+  protected function listarNumerosRegistroEnvio(ProcedimentoDTO $objProcedimentoDTO, $numIdUnidadeDestino = null, $bolSinMultiplosOrgaos = null)
+  {
+      $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+      $strNumeroRegistro = null;
+
+      $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
+    if(!isset($objMetadadosProcessoTramiteAnterior->documento)) {
+        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+        $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
+    }
+
+    if(!InfraString::isBolVazia($strNumeroRegistro)) {
+        return [(string) $strNumeroRegistro];
+    }
+
+      // O reaproveitamento do NRE de um tramite ja CONCLUIDO so vale no modo
+      // "processo aberto e sincronizado" (multiplos orgaos), onde preservar a
+      // continuidade da conversa com o barramento e justamente o objetivo.
+      //
+      // Em envio externo comum ele quebra o reenvio: o barramento compara os
+      // hashes declarados agora com os que gravou naquele NRE e, como os
+      // documentos mudaram, recusa com
+      // "0047 - hash de ao menos um componente digital nao confere".
+      //
+      // A release/4.1.0 nao possui este metodo, por isso nao sofre do problema.
+      // Confirmado por teste: com o reuso irrestrito, CancelamentoTramiteIndividualTest
+      // e TramiteRecebimentoDocumentoAvulsoTest falham; restringindo, passam.
+    if($bolSinMultiplosOrgaos !== false && !InfraString::isBolVazia($numIdUnidadeDestino)) {
+        $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $numIdUnidadeDestino);
+      if(!InfraString::isBolVazia($strNumeroRegistro)) {
+        return [(string) $strNumeroRegistro];
+      }
+    }
+
+      return [];
+  }
+
+  /**
+   * NRE usado no cabecalho do envio externo do processo (null gera um NRE novo)
+   *
+   * @param  ProcedimentoDTO $objProcedimentoDTO Processo a ser enviado
+   * @param  int|null $numIdUnidadeDestino Unidade de destino do envio
+   * @param  bool $bolSinMultiplosOrgaos Envio de processo aberto/sincronizado
+   * @return string|null
+   */
+  protected function obterNumeroRegistroEnvio(ProcedimentoDTO $objProcedimentoDTO, $numIdUnidadeDestino, $bolSinMultiplosOrgaos)
+  {
+      $arrNumeroRegistro = $this->listarNumerosRegistroEnvio($objProcedimentoDTO, $numIdUnidadeDestino, (bool) $bolSinMultiplosOrgaos);
+      return empty($arrNumeroRegistro) ? null : $arrNumeroRegistro[0];
   }
 
   /**
@@ -359,7 +421,7 @@ class ExpedirProcedimentoRN extends InfraRN
    * @param ExpedirProcedimentoDTO $objExpedirProcedimentoDTO
    * @return string|null
    */
-  protected function buscarNRETramitadoAnteriormenteConcluido(ProcedimentoDTO $objProcedimentoDTO, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO): ?string
+  protected function buscarNRETramitadoAnteriormenteConcluido(ProcedimentoDTO $objProcedimentoDTO, $numIdUnidadeDestino): ?string
   {
       $strNumeroRegistro = null;
 
@@ -376,7 +438,7 @@ class ExpedirProcedimentoRN extends InfraRN
       $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
       $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
     if ($objTramiteDTO) {
-      $arrTramite = $this->objProcessoEletronicoRN->consultarTramites(null, null, null, $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(), $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), null, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE, 1);
+      $arrTramite = $this->objProcessoEletronicoRN->consultarTramites(null, null, null, $numIdUnidadeDestino, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), null, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE, 1);
       if ($arrTramite && count($arrTramite) > 0) {
           $strNumeroRegistro = $arrTramite[0]->NRE;
       }
@@ -3099,6 +3161,52 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
+  /**
+   * Valida se o processo ainda possui trâmite/sincronização em andamento no Tramita GOV.BR
+   *
+   * Enquanto o trâmite anterior não é concluído, o Tramita GOV.BR rejeita o novo envio com mensagens
+   * que não indicam a causa real do impedimento, como a inconsistência de hash de componentes digitais
+   * (erro 0047). A validação antecipa o impedimento, orientando o usuário a aguardar a conclusão da
+   * sincronização antes de realizar uma nova tentativa de envio.
+   *
+   * @param  InfraException $objInfraException Instância da classe de exceção para registro dos erros
+   * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser enviado
+   * @param  string $strAtributoValidacao Índice para o InfraException separar os processos
+   * @param  int|null $numIdUnidadeDestino Unidade de destino do envio: so conta o tramite que envolve essa unidade
+   * @param  int|null $numIdRepositorioDestino Repositorio de estruturas da unidade de destino
+   * @param  bool|null $bolSinMultiplosOrgaos Envio de processo aberto/sincronizado (null quando ainda nao se sabe)
+   * @return void
+   */
+  public function validarTramiteEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null, $numIdUnidadeDestino = null, $numIdRepositorioDestino = null, $bolSinMultiplosOrgaos = null)
+    {
+      $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+      $arrNumeroRegistro = $this->objProcessoEletronicoRN->listarNumerosRegistroProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+
+      //NRE que o envio vai usar, tambem consultado no Tramita GOV.BR
+    try {
+        $arrNumeroRegistroEnvio = $this->listarNumerosRegistroEnvio($objProcedimentoDTO, $numIdUnidadeDestino, $bolSinMultiplosOrgaos);
+    } catch (\Exception $e) {
+        LogSEI::getInstance()->gravar('Falha ao identificar o NRE do envio do processo ' . $strProtocoloFormatado . '. Detalhes: ' . $e->getMessage(), InfraLog::$ERRO);
+        $arrNumeroRegistroEnvio = [];
+    }
+
+      $objTramiteEmAndamento = $this->objProcessoEletronicoRN->consultarTramiteEmAndamento(
+          $strProtocoloFormatado,
+          array_merge($arrNumeroRegistro, $arrNumeroRegistroEnvio),
+          $numIdUnidadeDestino,
+          $numIdRepositorioDestino
+      );
+
+    if(!is_null($objTramiteEmAndamento)) {
+        $strMensagem = sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_TRAMITE_EM_ANDAMENTO, $strProtocoloFormatado);
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+        $objInfraException->adicionarValidacao(
+            $strMensagem,
+            $strAtributoValidacao
+        );
+    }
+  }
+
   private function validarNivelAcessoProcesso(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
     if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
@@ -4008,18 +4116,78 @@ class ExpedirProcedimentoRN extends InfraRN
 
   protected function consultarTramitesAnteriores($parStrNumeroRegistro)
     {
-      return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramites(null, $parStrNumeroRegistro) : null;
+      // consultarTramites() devolve apenas o primeiro (mais antigo) tramite do NRE. Para identificar o ultimo
+      // tramite e preciso consultar todos.
+      return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramitesTodos(null, $parStrNumeroRegistro) : null;
   }
 
   protected function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
     {
     if(!empty($parArrTramitesAnteriores) && is_array($parArrTramitesAnteriores)) {
-        $objUltimoTramite = $parArrTramitesAnteriores[count($parArrTramitesAnteriores) - 1];
-      if($objUltimoTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
+        $objUltimoTramite = ProcessoEletronicoRN::obterTramiteMaisRecente($parArrTramitesAnteriores);
+      if(!is_null($objUltimoTramite) && $objUltimoTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
         return $objUltimoTramite;
       }
     }
       return null;
+  }
+
+  /**
+   * Cancela, antes de um novo envio, os envios interrompidos do processo para a mesma unidade de destino
+   *
+   * Envio interrompido e o tramite na situacao 1 (Iniciado): o Tramita GOV.BR aceitou os metadados, mas os
+   * componentes digitais nao foram enviados (queda do servidor, erro fatal do PHP, falha de comunicacao em que o
+   * proprio cancelamento tambem falhou). Como a transacao local e desfeita, nao ha registro local do tramite e o
+   * "Cancelar tramite" da tela nao o alcanca. O tramite pode estar no NRE do envio (processo recebido) ou em outro
+   * (processo nunca recebido, cujo reenvio gera NRE novo). Sem o cancelamento, o novo envio no mesmo NRE e recusado
+   * (erro 0044) e, em NRE novo, o anterior fica pendurado.
+   *
+   * Somente sao cancelados tramites deste orgao (qualquer unidade mapeada no modulo, no repositorio de estruturas
+   * do orgao) para a unidade de destino do envio: o envio interrompido pode ter partido de outra unidade, antes de o
+   * processo ser tramitado internamente para a unidade que agora o envia.
+   * A falha no cancelamento nao impede o envio, que possui seu proprio tratamento de falhas.
+   *
+   * @param  ProcedimentoDTO $objProcedimentoDTO Processo a ser enviado
+   * @param  string|null $strNumeroRegistro NRE usado no envio
+   * @param  ExpedirProcedimentoDTO $objExpedirProcedimentoDTO Dados do envio (origem e destino)
+   * @return void
+   */
+  protected function cancelarTramitesInterrompidos(ProcedimentoDTO $objProcedimentoDTO, $strNumeroRegistro, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
+    {
+      $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+    try {
+        $arrNumeroRegistro = $this->objProcessoEletronicoRN->listarNumerosRegistroProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+      if(!InfraString::isBolVazia($strNumeroRegistro)) {
+          $arrNumeroRegistro[] = $strNumeroRegistro;
+      }
+
+        //Estruturas de todas as unidades deste orgao mapeadas no modulo
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->retNumIdUnidadeRH();
+        $arrNumIdEstruturaOrigem = InfraArray::converterArrInfraDTO((new GenericoBD($this->getObjInfraIBanco()))->listar($objPenUnidadeDTO), 'IdUnidadeRH');
+        $arrNumIdEstruturaOrigem[] = $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem();
+
+        $arrObjTramite = $this->objProcessoEletronicoRN->listarTramitesInterrompidos(
+            $strProtocoloFormatado,
+            $arrNumeroRegistro,
+            $arrNumIdEstruturaOrigem,
+            $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
+            $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+            $objExpedirProcedimentoDTO->getNumIdRepositorioDestino()
+        );
+    } catch (\Exception $e) {
+        LogSEI::getInstance()->gravar('Falha ao consultar envios interrompidos do processo ' . $strProtocoloFormatado . '. Detalhes: ' . $e->getMessage(), InfraLog::$AVISO);
+        return;
+    }
+
+    foreach ($arrObjTramite as $objTramite) {
+      try {
+          $this->objProcessoEletronicoRN->cancelarTramite($objTramite->IDT);
+          $this->gravarLogDebug(sprintf('Envio interrompido cancelado antes do novo envio do processo %s: IDT %s, NRE %s', $strProtocoloFormatado, $objTramite->IDT, $objTramite->NRE), 2);
+      } catch (\Exception $e) {
+          LogSEI::getInstance()->gravar('Falha ao cancelar o envio interrompido (IDT ' . $objTramite->IDT . ') do processo ' . $strProtocoloFormatado . '. Detalhes: ' . $e->getMessage(), InfraLog::$AVISO);
+      }
+    }
   }
 
 
