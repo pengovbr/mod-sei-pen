@@ -54,7 +54,13 @@ try {
       $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
       $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
       $objExpedirProcedimentosRN->validarProcessoIncluidoBlocoEmAndamento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
-      $objExpedirProcedimentosRN->validarTramiteEmAndamento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
+      $objExpedirProcedimentosRN->validarTramiteEmAndamento(
+          $objInfraException,
+          $objProcedimentoDTO,
+          $strProtocoloFormatado,
+          $_POST['hdnIdUnidade'] ?? null,
+          $_POST['selRepositorioEstruturas'] ?? null
+      );
 
       // Processos apensados
     if(array_key_exists('selProcedimentosApensados', $_POST) && is_array($_POST['selProcedimentosApensados'])) {
