@@ -195,6 +195,49 @@ class PaginaEditarProcesso extends PaginaTeste
       return $select->getFirstSelectedOption()->getText();
   }
 
+  /**
+   * Troca o tipo de processo pela tela "Alterar Processo".
+   *
+   * O SEI submete o formulario ao trocar o tipo (trocarTipoProcedimento()), entao a
+   * espera e pela tela recarregada com o tipo novo selecionado.
+   */
+  public function selecionarTipoProcesso(string $strIdTipoProcedimento): void
+    {
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $select = new WebDriverSelect($this->elById('selTipoProcedimento'));
+      $select->selectByValue($strIdTipoProcedimento);
+      sleep(3);
+
+      $this->waitUntil(function () use ($strIdTipoProcedimento) {
+        try {
+            $this->frame(null);
+            $this->frame('ifrConteudoVisualizacao');
+            $this->frame('ifrVisualizacao');
+            $objSelect = new WebDriverSelect($this->elById('selTipoProcedimento'));
+            return $objSelect->getFirstSelectedOption()->getAttribute('value') == $strIdTipoProcedimento
+              && $this->elById('btnSalvar')->isDisplayed();
+        } catch (\Exception $e) {
+            return null;
+        }
+      });
+  }
+
+  /**
+   * Seleciona a prioridade do processo pela tela "Alterar Processo".
+   */
+  public function selecionarPrioridade(string $strIdTipoPrioridade): void
+    {
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $select = new WebDriverSelect($this->elById('selTipoPrioridade'));
+      $select->selectByValue($strIdTipoPrioridade);
+  }
+
   public function gerarProtocolo(): string
     {
       $seq = str_pad(random_int(1, 999999), 6, '0', STR_PAD_LEFT);

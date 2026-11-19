@@ -1073,32 +1073,12 @@ class ReceberProcedimentoRN extends InfraRN
       // alinha SessaoSEI com a unidade que ProtocoloRN::alterarRN0202 usa para validar
       // remocao de participantes - do que depende listarParticipantesDeOutrasUnidades().
       $numIdUnidadeSessaoAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-      // cancelarDocumentosProcesso() (chamado por atribuirDocumentos) conclui o processo na
-      // unidade geradora de cada documento retirado pelo remetente e pode deixa-lo sem nenhum
-      // andamento aberto. Sem andamento aberto, o nucleo recusa os andamentos que exigem
-      // processo aberto, como a alteracao de tipo de processo (tarefa 126): "Processo ... nao
-      // possui andamento aberto na unidade ...". Nesse caso o processo e reaberto na sua
-      // unidade geradora, em vez da unidade da ultima expedicao.
-    if ($this->possuiAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento())) {
-        $numIdUnidadeAndamentoAberto = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento());
-    } else {
-        $numIdUnidadeAndamentoAberto = $this->obterUnidadeGeradoraProcesso($objProcedimentoDTO->getDblIdProcedimento());
-    }
+      $numIdUnidadeAndamentoAberto = ProcessoEletronicoRN::obterUnidadeComAndamentoAberto($objProcedimentoDTO->getDblIdProcedimento());
       SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeAndamentoAberto);
 
     try {
-        $bolReabertoParaSincronizacao = $this->abrirProcessoSeNaoAberto($objProcedimentoDTO->getDblIdProcedimento());
-
-        $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
+        $this->sincronizarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo);
         $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo, $objMetadadosProcedimento->metadados);
-
-      if ($bolReabertoParaSincronizacao) {
-          // Desfaz a reabertura para nao deixar o processo aberto numa unidade em que ele
-          // nao estava; o envio final a unidade de destino reabre onde for necessario.
-          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
-          $objEntradaConcluirProcessoAPI->setIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
-          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
-      }
     } finally {
         SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoAtual);
     }
@@ -1328,21 +1308,23 @@ class ReceberProcedimentoRN extends InfraRN
       return $strNumeroProcesso;
   }
 
-  private function sincronizarMetadadosProcedimento($parNumIdProcedimento, $parObjProtocolo, $parObjMetadadosProcedimento)
+  /**
+   * Sincroniza no processo existente os metadados recebidos do outro orgao: descricao e interessados.
+   *
+   * Tipo de processo, prioridade e assuntos nao sao sincronizados: cada orgao mantem os seus.
+   * A alteracao de tipo (tarefa 126) e de prioridade (tarefa 137) lanca andamento, que o nucleo
+   * so aceita com o processo aberto na unidade atual. Na sincronizacao o processo pode estar sem
+   * andamento aberto - cancelarDocumentosProcesso() o conclui na unidade receptora quando o
+   * remetente cancela um documento - e o recebimento era recusado com "Processo ... nao possui
+   * andamento aberto na unidade ..." (#1278). Os assuntos sincronizados eram os sugeridos pelo
+   * tipo de processo e deixam de fazer sentido sem a troca de tipo.
+   * Descricao e interessados nao lancam andamento.
+   */
+  private function sincronizarMetadadosProcedimento($parNumIdProcedimento, $parObjProtocolo)
     {
       $objProtocoloDTO = new ProtocoloDTO();
       $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
       $objProtocoloDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100), 'ISO-8859-1', 'UTF-8'));
-
-      // Assuntos seguem a mesma regra dos interessados abaixo. A lista enviada ao
-      // nucleo e (assuntos de OUTRAS unidades, preservados) + (sugeridos do tipo de
-      // processo, acrescentados por atribuirTipoProcedimento).
-      //
-      // Comecar de uma lista vazia removia implicitamente os assuntos incluidos pela
-      // unidade que trabalha o processo - a sessao aqui esta na unidade receptora -
-      // e ProtocoloRN abortava o recebimento inteiro com
-      // "O assunto ... nao pode ser excluido porque foi adicionado por outra unidade".
-      $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO($this->listarAssuntosDeOutrasUnidades($parNumIdProcedimento));
 
       // Preserva interessados de outras unidades e os que receberam acesso externo.
       // O SEI nao permite excluir nenhum desses participantes durante a sincronizacao.
@@ -1357,45 +1339,6 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcedimentoDTO = new ProcedimentoDTO();
       $objProcedimentoDTO->setDblIdProcedimento($parNumIdProcedimento);
       $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-
-      $objDestinatario = $this->destinatarioReal ?: $parObjMetadadosProcedimento->destinatario;
-      $this->atribuirTipoProcedimento(
-          $objProcedimentoDTO,
-          $parObjMetadadosProcedimento->remetente,
-          $objDestinatario,
-          $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO'),
-          mb_convert_encoding($parObjProtocolo->processoDeNegocio, 'ISO-8859-1', 'UTF-8')
-      );
-
-      // A alteracao de tipo gera a tarefa 126 na unidade atual da sessao. Somente nesse caso a
-      // unidade precisa estar ativa; se foi excluida (exclusao logica), o recebimento e recusado.
-      $objProcedimentoAtualDTO = new ProcedimentoDTO();
-      $objProcedimentoAtualDTO->setDblIdProcedimento($parNumIdProcedimento);
-      $objProcedimentoAtualDTO->retNumIdTipoProcedimento();
-      $objProcedimentoAtualDTO = $this->objProcedimentoRN->consultarRN0201($objProcedimentoAtualDTO);
-    if ($objProcedimentoAtualDTO != null && $objProcedimentoAtualDTO->getNumIdTipoProcedimento() != $objProcedimentoDTO->getNumIdTipoProcedimento()) {
-        $this->validarUnidadeAtivaParaTramite(SessaoSEI::getInstance()->getNumIdUnidadeAtual(), $parObjProtocolo->protocolo);
-    }
-
-      $arrObjAssuntoDTO = [];
-    foreach ($objProtocoloDTO->getArrObjRelProtocoloAssuntoDTO() as $objRelProtocoloAssuntoDTO) {
-      if (!isset($arrObjAssuntoDTO[$objRelProtocoloAssuntoDTO->getNumIdAssunto()])) {
-        $arrObjAssuntoDTO[$objRelProtocoloAssuntoDTO->getNumIdAssunto()] = $objRelProtocoloAssuntoDTO;
-      }
-    }
-      $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array_values($arrObjAssuntoDTO));
-
-      $strNomeTipoPrioridade = $this->obterValorPropriedadeAdicional($parObjMetadadosProcedimento->propriedadesAdicionais ?? [], 'PEN_NOME_PRIORIDADE_PROCESSO');
-    if ($strNomeTipoPrioridade !== null) {
-        $objTipoPrioridadeDTO = new TipoPrioridadeDTO();
-        $objTipoPrioridadeDTO->retNumIdTipoPrioridade();
-        $objTipoPrioridadeDTO->setStrNome(mb_convert_encoding($strNomeTipoPrioridade, 'ISO-8859-1', 'UTF-8'));
-        $objTipoPrioridadeRN = new TipoPrioridadeRN();
-        $objTipoPrioridadeDTO = $objTipoPrioridadeRN->consultar($objTipoPrioridadeDTO);
-      if ($objTipoPrioridadeDTO != null) {
-          $objProcedimentoDTO->setNumIdTipoPrioridade($objTipoPrioridadeDTO->getNumIdTipoPrioridade());
-      }
-    }
 
       $this->objProcedimentoRN->alterarRN0202($objProcedimentoDTO);
   }
@@ -1487,39 +1430,6 @@ class ReceberProcedimentoRN extends InfraRN
       return null;
   }
 
-
-  /**
-   * Assuntos do processo incluidos por unidade diferente da unidade atual da sessao.
-   * Sao os que ProtocoloRN nao permite remover; ver sincronizarMetadadosProcedimento().
-   */
-  protected function listarAssuntosDeOutrasUnidades($numIdProtocolo)
-    {
-      $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-
-      $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
-      $objRelProtocoloAssuntoDTO->retNumIdAssunto();
-      $objRelProtocoloAssuntoDTO->retNumIdUnidade();
-      $objRelProtocoloAssuntoDTO->retNumSequencia();
-      $objRelProtocoloAssuntoDTO->setDblIdProtocolo($numIdProtocolo);
-      $objRelProtocoloAssuntoDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
-
-      $objRelProtocoloAssuntoRN = new RelProtocoloAssuntoRN();
-      $arrObjRelProtocoloAssuntoDTO = $objRelProtocoloAssuntoRN->listarRN0188($objRelProtocoloAssuntoDTO);
-
-      $arrPreservados = array();
-
-    foreach ($arrObjRelProtocoloAssuntoDTO as $objDTO) {
-      if ($objDTO->getNumIdUnidade() != $numIdUnidadeAtual) {
-          // Mesmo formato dos sugeridos em atribuirTipoProcedimento(): so assunto e sequencia.
-          $objPreservadoDTO = new RelProtocoloAssuntoDTO();
-          $objPreservadoDTO->setNumIdAssunto($objDTO->getNumIdAssunto());
-          $objPreservadoDTO->setNumSequencia($objDTO->getNumSequencia());
-          $arrPreservados[] = $objPreservadoDTO;
-      }
-    }
-
-      return $arrPreservados;
-  }
 
     /**
      * Lista interessados que o SEI impede de excluir: os de outras unidades e
@@ -2659,45 +2569,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
-    /**
-     * Indica se o processo possui andamento aberto em alguma unidade.
-     *
-     * @param  float $parDblIdProcedimento
-     * @return bool
-     */
-  private function possuiAndamentoAberto($parDblIdProcedimento)
-    {
-      $objAtividadeDTO = new AtividadeDTO();
-      $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
-      $objAtividadeDTO->setDthConclusao(null);
-
-      $objAtividadeRN = new AtividadeRN();
-      return $objAtividadeRN->contarRN0035($objAtividadeDTO) > 0;
-  }
-
-    /**
-     * Retorna a unidade geradora do processo.
-     *
-     * @param  float $parDblIdProcedimento
-     * @return int
-     */
-  private function obterUnidadeGeradoraProcesso($parDblIdProcedimento)
-    {
-      $objProtocoloDTO = new ProtocoloDTO();
-      $objProtocoloDTO->setDblIdProtocolo($parDblIdProcedimento);
-      $objProtocoloDTO->retNumIdUnidadeGeradora();
-      $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
-
-      return $objProtocoloDTO->getNumIdUnidadeGeradora();
-  }
-
-    /**
-     * Reabre o processo na unidade atual da sessão caso ele não possua andamento aberto nela.
-     * Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
-     *
-     * @param  float $parDblIdProcedimento
-     * @return bool true quando o processo precisou ser reaberto
-     */
+    //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
   private function abrirProcessoSeNaoAberto($parDblIdProcedimento)
     {
       $objAtividadeDTO = new AtividadeDTO();
@@ -2715,10 +2587,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
-        return true;
     }
-
-      return false;
   }
 
   private function atribuirComponentesDigitais(DocumentoDTO $objDocumentoDTO, $parArrObjComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados)
@@ -2942,39 +2811,6 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       $objInfraException->lancarValidacoes();
-  }
-
-    /**
-     * Recusa o recebimento quando a unidade que registrara a alteracao de tipo de processo
-     * (tarefa 126) nao existe mais ou foi desativada (exclusao logica), gravando o motivo no log.
-     *
-     * @param  int    $parNumIdUnidade
-     * @param  string $parStrProtocoloFormatado
-     * @return void
-     * @throws InfraException
-     */
-  private function validarUnidadeAtivaParaTramite($parNumIdUnidade, $parStrProtocoloFormatado)
-    {
-      $objUnidadeDTO = new UnidadeDTO();
-      $objUnidadeDTO->setNumIdUnidade($parNumIdUnidade);
-      $objUnidadeDTO->retNumIdUnidade();
-      $objUnidadeDTO->retStrSigla();
-      $objUnidadeDTO->retStrDescricao();
-      $objUnidadeDTO->retStrSinAtivo();
-
-      $objUnidadeRN = new UnidadeRN();
-      $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
-    if ($objUnidadeDTO == null || $objUnidadeDTO->getStrSinAtivo() == 'N') {
-        $strMsg = ($objUnidadeDTO == null)
-          ? sprintf('Processo %s não pode ser tramitado: a unidade de ID %s não existe mais ou foi desativada no SEI.', $parStrProtocoloFormatado, $parNumIdUnidade)
-          : sprintf('Processo %s não pode ser tramitado: a unidade %s - %s foi desativada ou excluída do SEI.', $parStrProtocoloFormatado, $objUnidadeDTO->getStrSigla(), $objUnidadeDTO->getStrDescricao());
-
-        $this->gravarLogDebug($strMsg, 2);
-        $objInfraException = new InfraException();
-        $objInfraException->adicionarValidacao($strMsg);
-        $objInfraException->lancarValidacoes();
-    }
   }
 
   private function obterNivelSigiloSEI($strNivelSigiloPEN)
