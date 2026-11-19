@@ -47,7 +47,7 @@ Para iniciar os procedimentos de configuração, será necessário registrar no 
  - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Tramita.GOV.BR - Cadastro de Comitê")
  - **Produção:** [https://gestaopen.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Tramita.GOV.BR - Cadastro de Comitê")
 
-Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.economia.gov.br/citsmart/login/login.load.
+Para maiores informações, entre em contato na Central de Serviços do PEN, endereço https://portaldeservicos.gestao.gov.br
 
 ### Procedimentos:
 
@@ -671,7 +671,7 @@ Uma forma de agendar essa rotina no crontab pode ser feita assim:
 
 ---
 
-Dúvidas com as rotinas favor abrir chamado em [https://portaldeservicos.economia.gov.br](https://portaldeservicos.economia.gov.br). Se necessário, pode solicitar ao atendente que acione algum técnico do PEN para orientações mais elaboradas.
+Dúvidas com as rotinas favor abrir chamado em [https://portaldeservicos.gestao.gov.br](https://portaldeservicos.gestao.gov.br). Se necessário, pode solicitar ao atendente que acione algum técnico do PEN para orientações mais elaboradas.
 
 ---
 
@@ -835,6 +835,5 @@ Exemplo:
 Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
 Para mais informações, contate a equipe responsável por meio dos seguintes canais:
-- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.economia.gov.br) - Módulo do Barramento
-- Telefone: 0800 978 9005
+- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.gestao.gov.br) - Módulo do Tramita
 

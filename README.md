@@ -54,5 +54,4 @@ Para maiores informações de como configurar o seu ambiente e rodar/visualizar 
 Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
 Para mais informações, contate a equipe responsável por meio dos seguintes canais:
-- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.economia.gov.br) - Módulo do Barramento
-- Telefone: 0800 978 9005
+- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.gestao.gov.br) - Módulo do Tramita

@@ -5,7 +5,7 @@ O objetivo deste documento é descrever os procedimento para ATUALIZAÇÃO do M�
 **ATENÇÃO: Caso esta seja a primeira instalação do módulo no SEI, veja as instruções detalhadas de instalação no documento INSTALACAO.md presente no arquivo de distribuição do módulo (mod-sei-pen-VERSAO.zip)**
 
  
-Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento
+Para maiores informações, entre em contato na Central de Serviços do PEN, endereço http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento
 
 
 Este documento está estruturado nas seguintes seções:
@@ -805,5 +805,4 @@ Para maiores informações sobre problemas conhecidos e os procedimentos que dev
 Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
 Para mais informações, contate a equipe responsável por meio dos seguintes canais:
-- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.economia.gov.br) - Módulo do Barramento
-- Telefone: 0800 978 9005
+- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.gestao.gov.br) - Módulo do Tramita
