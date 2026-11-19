@@ -2037,9 +2037,9 @@ class ProcessoEletronicoRN extends InfraRN
    * cuja sincronização entre remetente e destinatário ainda não foi concluída
    *
    * A situação 1 (Iniciado) representa um envio interrompido antes da transferência dos componentes
-   * digitais. Quando o trâmite é o último do NRE usado no novo envio, o próprio módulo o cancela
-   * automaticamente antes do envio (ExpedirProcedimentoRN::necessitaCancelamentoTramiteAnterior),
-   * e ele é desconsiderado em consultarTramiteEmAndamento().
+   * digitais. O envio interrompido para a unidade de destino é cancelado pelo próprio módulo antes
+   * do novo envio (ExpedirProcedimentoRN::cancelarTramitesInterrompidos) e, por isso, é desconsiderado
+   * em consultarTramiteEmAndamento() quando o destino é informado.
    *
    * @return array Códigos de situação de trâmite ainda não concluído
    */
@@ -2047,7 +2047,7 @@ class ProcessoEletronicoRN extends InfraRN
     {
       // Situacoes 0 e 1: tramite criado no Tramita GOV.BR (NRE ja gerado) cujo envio dos componentes digitais
       // nao foi concluido. Um novo envio nesse estado gera outro NRE para o mesmo processo e destino.
-      // Excecao: o tramite na situacao 1 que o proprio envio cancela automaticamente (ver consultarTramiteEmAndamento).
+      // Excecao: o envio interrompido (situacao 1) para a unidade de destino, que o proprio envio cancela.
       return [
         self::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
         self::$STA_SITUACAO_TRAMITE_INICIADO,
@@ -2070,12 +2070,12 @@ class ProcessoEletronicoRN extends InfraRN
    * @param  array  $parArrNumeroRegistro NREs ja utilizados pelo processo, tambem consultados no Tramita GOV.BR
    * @param  int|null $parNumIdUnidadeDestino Unidade de destino do novo envio. Quando informada, so conta o tramite
    *                                          que envolve essa unidade, como destinataria ou remetente (devolucao)
-   * @param  int|null $parNumIdRepositorioDestino Repositorio de estruturas da unidade de destino
-   * @param  array    $parArrNumeroRegistroEnvio NRE(s) que o novo envio vai usar. O tramite na situacao 1 que e o ultimo
-   *                                             desse NRE e cancelado automaticamente pelo envio e nao o impede
+   * @param  int|null $parNumIdRepositorioDestino Repositorio de estruturas da unidade de destino. Com o destino informado,
+   *                                            o envio interrompido (situacao 1) para ele nao conta: o envio o cancela
+   *                                            (ExpedirProcedimentoRN::cancelarTramitesInterrompidos)
    * @return object|null Dados do trâmite em andamento ou null caso a sincronização anterior esteja concluída
    */
-  public function consultarTramiteEmAndamento($parStrProtocoloFormatado, $parArrNumeroRegistro = [], $parNumIdUnidadeDestino = null, $parNumIdRepositorioDestino = null, $parArrNumeroRegistroEnvio = [])
+  public function consultarTramiteEmAndamento($parStrProtocoloFormatado, $parArrNumeroRegistro = [], $parNumIdUnidadeDestino = null, $parNumIdRepositorioDestino = null)
     {
     if(InfraString::isBolVazia($parStrProtocoloFormatado)) {
       return null;
@@ -2089,9 +2089,6 @@ class ProcessoEletronicoRN extends InfraRN
       $arrNumeroRegistro = array_values(array_unique(array_filter(array_map('strval', (array) $parArrNumeroRegistro), function ($strNumeroRegistro) {
           return !InfraString::isBolVazia($strNumeroRegistro);
       })));
-      $arrNumeroRegistroEnvio = array_values(array_filter(array_map('strval', (array) $parArrNumeroRegistroEnvio), function ($strNumeroRegistro) {
-          return !InfraString::isBolVazia($strNumeroRegistro);
-      }));
 
     try {
         $arrObjTramite = [];
@@ -2131,9 +2128,10 @@ class ProcessoEletronicoRN extends InfraRN
         continue;
       }
 
-      // Envio interrompido (situacao 1) que o proprio envio cancela automaticamente nao impede o novo envio
+      // Envio interrompido (situacao 1) para a unidade de destino nao impede o novo envio: o envio o cancela
       if(intval($objTramite->situacaoAtual) == self::$STA_SITUACAO_TRAMITE_INICIADO
-          && $this->isTramiteCanceladoAutomaticamenteNoEnvio($objTramite, $arrNumeroRegistroEnvio)) {
+          && !InfraString::isBolVazia($parNumIdUnidadeDestino)
+          && $this->isTramiteParaUnidade($objTramite, $parNumIdUnidadeDestino, $parNumIdRepositorioDestino)) {
         continue;
       }
 
@@ -2175,39 +2173,81 @@ class ProcessoEletronicoRN extends InfraRN
   }
 
   /**
-   * Indica se o tramite na situacao 1 (Iniciado) sera cancelado automaticamente pelo proprio envio
+   * Indica se a unidade e a destinataria do tramite (e, se informado, o repositorio de estruturas)
    *
-   * Segue o mesmo criterio de ExpedirProcedimentoRN::necessitaCancelamentoTramiteAnterior(): o tramite e o
-   * ultimo retornado pela consulta do NRE que o envio vai usar no cabecalho. Tramite na situacao 1 de outro NRE
-   * (ex.: primeiro envio interrompido de processo nunca recebido, cujo reenvio sai sem NRE) nao e cancelado e
-   * continua impedindo o envio, que geraria outro NRE para o mesmo processo e destino.
-   *
-   * @param  object $parObjTramite Tramite na situacao 1 retornado pelo Tramita GOV.BR
-   * @param  array  $parArrNumeroRegistro NRE(s) que o novo envio vai usar
+   * @param  object   $parObjTramite Tramite retornado pelo Tramita GOV.BR
+   * @param  int      $parNumIdUnidade Numero de identificacao da estrutura da unidade
+   * @param  int|null $parNumIdRepositorio Repositorio de estruturas da unidade (nao comparado se vazio)
    * @return bool
    */
-  protected function isTramiteCanceladoAutomaticamenteNoEnvio($parObjTramite, $parArrNumeroRegistro)
+  protected function isTramiteParaUnidade($parObjTramite, $parNumIdUnidade, $parNumIdRepositorio = null)
     {
-    if(!isset($parObjTramite->NRE) || !in_array((string) $parObjTramite->NRE, $parArrNumeroRegistro, true)) {
-      return false;
+      $objDestinatario = $parObjTramite->destinatario ?? null;
+    if (!is_object($objDestinatario) || !isset($objDestinatario->numeroDeIdentificacaoDaEstrutura)) {
+        return false;
     }
 
-    try {
-        $arrObjTramiteNRE = $this->consultarTramites(null, (string) $parObjTramite->NRE);
-    } catch (\Exception $e) {
-        //A indisponibilidade da consulta nao pode impedir o envio, que possui seu proprio tratamento de falhas
-        LogSEI::getInstance()->gravar('Falha na consulta do NRE ' . $parObjTramite->NRE . '. Detalhes: ' . $e->getMessage(), InfraLog::$ERRO);
-        return true;
+      return (string) $objDestinatario->numeroDeIdentificacaoDaEstrutura === (string) $parNumIdUnidade
+        && (InfraString::isBolVazia($parNumIdRepositorio)
+            || (string) ($objDestinatario->identificacaoDoRepositorioDeEstruturas ?? '') === (string) $parNumIdRepositorio);
+  }
+
+  /**
+   * Envios interrompidos (situacao 1) do processo, de unidades de origem para uma unidade de destino
+   *
+   * Consulta pelo numero do processo e por cada NRE informado, pois os tramites nem sempre retornam na busca pelo
+   * protocolo.
+   *
+   * @param  string $parStrProtocoloFormatado Numero do processo
+   * @param  array  $parArrNumeroRegistro NREs do processo
+   * @param  array  $parArrNumIdUnidadeOrigem Estruturas aceitas como remetente (unidades do orgao)
+   * @param  int    $parNumIdRepositorioOrigem Repositorio de estruturas do remetente
+   * @param  int    $parNumIdUnidadeDestino Estrutura da unidade destinataria
+   * @param  int    $parNumIdRepositorioDestino Repositorio de estruturas da unidade destinataria
+   * @return array Tramites na situacao 1, sem repeticao
+   */
+  public function listarTramitesInterrompidos($parStrProtocoloFormatado, $parArrNumeroRegistro, $parArrNumIdUnidadeOrigem, $parNumIdRepositorioOrigem, $parNumIdUnidadeDestino, $parNumIdRepositorioDestino)
+    {
+      $arrObjTramite = $this->consultarTramitesTodos(null, null, null, null, $parStrProtocoloFormatado, null, self::$STA_SITUACAO_TRAMITE_INICIADO);
+    foreach (array_unique(array_filter(array_map('strval', (array) $parArrNumeroRegistro))) as $strNumeroRegistro) {
+        $arrObjTramite = array_merge($arrObjTramite, $this->consultarTramitesTodos(null, $strNumeroRegistro, null, null, null, null, self::$STA_SITUACAO_TRAMITE_INICIADO));
     }
 
-    if(empty($arrObjTramiteNRE) || !is_array($arrObjTramiteNRE)) {
-      return false;
+      $arrNumIdUnidadeOrigem = array_map('strval', (array) $parArrNumIdUnidadeOrigem);
+      $arrObjInterrompido = [];
+    foreach ($arrObjTramite as $objTramite) {
+      if (!isset($objTramite->IDT) || intval($objTramite->situacaoAtual ?? -1) != self::$STA_SITUACAO_TRAMITE_INICIADO) {
+        continue;
+      }
+
+        $objRemetente = $objTramite->remetente ?? null;
+        $bolRemetente = is_object($objRemetente)
+          && in_array((string) ($objRemetente->numeroDeIdentificacaoDaEstrutura ?? ''), $arrNumIdUnidadeOrigem, true)
+          && (string) ($objRemetente->identificacaoDoRepositorioDeEstruturas ?? '') === (string) $parNumIdRepositorioOrigem;
+
+      if ($bolRemetente && $this->isTramiteParaUnidade($objTramite, $parNumIdUnidadeDestino, $parNumIdRepositorioDestino)) {
+          $arrObjInterrompido[(string) $objTramite->IDT] = $objTramite;
+      }
     }
 
-      $objUltimoTramiteNRE = $arrObjTramiteNRE[count($arrObjTramiteNRE) - 1];
-      return isset($objUltimoTramiteNRE->IDT)
-        && intval($objUltimoTramiteNRE->IDT) == intval($parObjTramite->IDT)
-        && intval($objUltimoTramiteNRE->situacaoAtual) == self::$STA_SITUACAO_TRAMITE_INICIADO;
+      return array_values($arrObjInterrompido);
+  }
+
+  /**
+   * Tramite de maior IDT da lista (o mais recente), independente da ordem devolvida pelo Tramita GOV.BR
+   *
+   * @param  array $parArrObjTramite Tramites retornados pelo Tramita GOV.BR
+   * @return object|null
+   */
+  public static function obterTramiteMaisRecente($parArrObjTramite)
+    {
+      $objMaisRecente = null;
+    foreach ((array) $parArrObjTramite as $objTramite) {
+      if (isset($objTramite->IDT) && (is_null($objMaisRecente) || intval($objTramite->IDT) > intval($objMaisRecente->IDT))) {
+          $objMaisRecente = $objTramite;
+      }
+    }
+      return $objMaisRecente;
   }
 
   protected function listarNumerosRegistroProcedimentoConectado($parDblIdProcedimento)

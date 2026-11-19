@@ -207,11 +207,8 @@ class ExpedirProcedimentoRN extends InfraRN
           $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
       }
 
-        //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
-        $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
-      if($objTramiteInconsistente = $this->necessitaCancelamentoTramiteAnterior($objTramitesAnteriores)) {
-          $this->objProcessoEletronicoRN->cancelarTramite($objTramiteInconsistente->IDT);
-      }
+        //Cancela envios interrompidos (situacao 1) deste processo para a mesma unidade de destino, de qualquer NRE
+        $this->cancelarTramitesInterrompidos($objProcedimentoDTO, $strNumeroRegistro, $objExpedirProcedimentoDTO);
 
         $param = [
         'novoTramiteDeProcesso' => [
@@ -3185,7 +3182,7 @@ class ExpedirProcedimentoRN extends InfraRN
       $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
       $arrNumeroRegistro = $this->objProcessoEletronicoRN->listarNumerosRegistroProcedimento($objProcedimentoDTO->getDblIdProcedimento());
 
-      //NRE que o envio vai usar: o tramite na situacao 1 desse NRE e cancelado automaticamente antes do envio
+      //NRE que o envio vai usar, tambem consultado no Tramita GOV.BR
     try {
         $arrNumeroRegistroEnvio = $this->listarNumerosRegistroEnvio($objProcedimentoDTO, $numIdUnidadeDestino, $bolSinMultiplosOrgaos);
     } catch (\Exception $e) {
@@ -3197,8 +3194,7 @@ class ExpedirProcedimentoRN extends InfraRN
           $strProtocoloFormatado,
           array_merge($arrNumeroRegistro, $arrNumeroRegistroEnvio),
           $numIdUnidadeDestino,
-          $numIdRepositorioDestino,
-          $arrNumeroRegistroEnvio
+          $numIdRepositorioDestino
       );
 
     if(!is_null($objTramiteEmAndamento)) {
@@ -4120,18 +4116,78 @@ class ExpedirProcedimentoRN extends InfraRN
 
   protected function consultarTramitesAnteriores($parStrNumeroRegistro)
     {
-      return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramites(null, $parStrNumeroRegistro) : null;
+      // consultarTramites() devolve apenas o primeiro (mais antigo) tramite do NRE. Para identificar o ultimo
+      // tramite e preciso consultar todos.
+      return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramitesTodos(null, $parStrNumeroRegistro) : null;
   }
 
   protected function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
     {
     if(!empty($parArrTramitesAnteriores) && is_array($parArrTramitesAnteriores)) {
-        $objUltimoTramite = $parArrTramitesAnteriores[count($parArrTramitesAnteriores) - 1];
-      if($objUltimoTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
+        $objUltimoTramite = ProcessoEletronicoRN::obterTramiteMaisRecente($parArrTramitesAnteriores);
+      if(!is_null($objUltimoTramite) && $objUltimoTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
         return $objUltimoTramite;
       }
     }
       return null;
+  }
+
+  /**
+   * Cancela, antes de um novo envio, os envios interrompidos do processo para a mesma unidade de destino
+   *
+   * Envio interrompido e o tramite na situacao 1 (Iniciado): o Tramita GOV.BR aceitou os metadados, mas os
+   * componentes digitais nao foram enviados (queda do servidor, erro fatal do PHP, falha de comunicacao em que o
+   * proprio cancelamento tambem falhou). Como a transacao local e desfeita, nao ha registro local do tramite e o
+   * "Cancelar tramite" da tela nao o alcanca. O tramite pode estar no NRE do envio (processo recebido) ou em outro
+   * (processo nunca recebido, cujo reenvio gera NRE novo). Sem o cancelamento, o novo envio no mesmo NRE e recusado
+   * (erro 0044) e, em NRE novo, o anterior fica pendurado.
+   *
+   * Somente sao cancelados tramites deste orgao (qualquer unidade mapeada no modulo, no repositorio de estruturas
+   * do orgao) para a unidade de destino do envio: o envio interrompido pode ter partido de outra unidade, antes de o
+   * processo ser tramitado internamente para a unidade que agora o envia.
+   * A falha no cancelamento nao impede o envio, que possui seu proprio tratamento de falhas.
+   *
+   * @param  ProcedimentoDTO $objProcedimentoDTO Processo a ser enviado
+   * @param  string|null $strNumeroRegistro NRE usado no envio
+   * @param  ExpedirProcedimentoDTO $objExpedirProcedimentoDTO Dados do envio (origem e destino)
+   * @return void
+   */
+  protected function cancelarTramitesInterrompidos(ProcedimentoDTO $objProcedimentoDTO, $strNumeroRegistro, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
+    {
+      $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+    try {
+        $arrNumeroRegistro = $this->objProcessoEletronicoRN->listarNumerosRegistroProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+      if(!InfraString::isBolVazia($strNumeroRegistro)) {
+          $arrNumeroRegistro[] = $strNumeroRegistro;
+      }
+
+        //Estruturas de todas as unidades deste orgao mapeadas no modulo
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->retNumIdUnidadeRH();
+        $arrNumIdEstruturaOrigem = InfraArray::converterArrInfraDTO((new GenericoBD($this->getObjInfraIBanco()))->listar($objPenUnidadeDTO), 'IdUnidadeRH');
+        $arrNumIdEstruturaOrigem[] = $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem();
+
+        $arrObjTramite = $this->objProcessoEletronicoRN->listarTramitesInterrompidos(
+            $strProtocoloFormatado,
+            $arrNumeroRegistro,
+            $arrNumIdEstruturaOrigem,
+            $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
+            $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+            $objExpedirProcedimentoDTO->getNumIdRepositorioDestino()
+        );
+    } catch (\Exception $e) {
+        LogSEI::getInstance()->gravar('Falha ao consultar envios interrompidos do processo ' . $strProtocoloFormatado . '. Detalhes: ' . $e->getMessage(), InfraLog::$AVISO);
+        return;
+    }
+
+    foreach ($arrObjTramite as $objTramite) {
+      try {
+          $this->objProcessoEletronicoRN->cancelarTramite($objTramite->IDT);
+          $this->gravarLogDebug(sprintf('Envio interrompido cancelado antes do novo envio do processo %s: IDT %s, NRE %s', $strProtocoloFormatado, $objTramite->IDT, $objTramite->NRE), 2);
+      } catch (\Exception $e) {
+          LogSEI::getInstance()->gravar('Falha ao cancelar o envio interrompido (IDT ' . $objTramite->IDT . ') do processo ' . $strProtocoloFormatado . '. Detalhes: ' . $e->getMessage(), InfraLog::$AVISO);
+      }
+    }
   }
 
 
