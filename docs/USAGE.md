@@ -66,6 +66,16 @@ Uma vez que o processo tenha sido recebido com sucesso pelo PEN, a seguinte mens
 
 ![Tela de Status de Envio do Processo - Barra de Progresso - Finalizado](imagens/confirmado_envio_externo_processo.png)
 
+### Metadados do Processo Sincronizados entre Órgãos
+
+Quando um processo que já existe no órgão é recebido novamente — na devolução, no reenvio ou na sincronização de processo compartilhado com múltiplos órgãos — o módulo atualiza no processo local apenas:
+
+* a **especificação** (descrição) do processo;
+* os **interessados**, preservando os incluídos por outras unidades e os que possuem acesso externo;
+* o **nível de acesso** e a **hipótese legal**.
+
+**O tipo de processo, a prioridade e os assuntos não são sincronizados.** Cada órgão mantém os valores definidos no seu SEI: a alteração feita em um órgão não é levada ao outro e não é desfeita quando o processo retorna. O tipo de processo recebido é usado apenas na **criação** do processo no órgão destinatário, no primeiro recebimento (com os assuntos sugeridos por esse tipo).
+
 ### Informações Registradas nos Andamentos do Processo (Histórico)
 
 O Tramita.GOV.BR atua como uma **terceiro confiável** no trâmite do processo administrativo. Em um primeiro momento, o módulo do SEI faz uma série de validações de informações constantes do processo a ser enviado. Uma vez validadas estas informações, a operação de envio é registrada no andamento do processo. **Mas isso ainda não reflete o sucesso no trâmite de fato**, pois a unidade receptora também faz uma série de validações como, por exemplo, os tamanhos de documentos que tem capacidade de receber, as espécies documentais, hipóteses legais, dentre outras. Uma vez validados, na origem, os requisitos para envio externo,** registra-se no andamento do processo a operação de envio** por meio do Barramento, conforme o seguinte exemplo:
