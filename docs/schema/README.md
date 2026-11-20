@@ -27,7 +27,6 @@
 | [md_pen_rel_hipotese_legal](md_pen_rel_hipotese_legal.md) | 5 |  | BASE TABLE |
 | [md_pen_rel_processo_apensado](md_pen_rel_processo_apensado.md) | 3 |  | BASE TABLE |
 | [md_pen_rel_tarefa_operacao](md_pen_rel_tarefa_operacao.md) | 2 |  | BASE TABLE |
-| [md_pen_rel_tipo_doc_map_rec](md_pen_rel_tipo_doc_map_rec.md) | 3 |  | BASE TABLE |
 | [md_pen_seq_bloco](md_pen_seq_bloco.md) | 2 |  | BASE TABLE |
 | [md_pen_seq_bloco_protocolo](md_pen_seq_bloco_protocolo.md) | 2 |  | BASE TABLE |
 | [md_pen_seq_envio_comp_digitais](md_pen_seq_envio_comp_digitais.md) | 2 |  | BASE TABLE |

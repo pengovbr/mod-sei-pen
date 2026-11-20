@@ -296,6 +296,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV4100();
         case '4.1.0':
           $this->instalarV4110();
+        case '4.1.1':
+          $this->instalarV4120();
           
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -509,7 +511,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objMetaBD->criarTabela(['tabela' => 'md_pen_rel_tarefa_operacao', 'cols' => ['id_tarefa' => [$objMetaBD->tipoNumero(), PenMetaBD::NNULLO], 'codigo_operacao' => [$objMetaBD->tipoTextoFixo(2), PenMetaBD::NNULLO]], 'pk' => ['cols' => ['id_tarefa', 'codigo_operacao']], 'fks' => ['tarefa' =>  ['nome' => 'fk_md_pen_rel_operacao_tarefa', 'cols' => ['id_tarefa', 'id_tarefa']]]]);
 
 
-      $objMetaBD->criarTabela(['tabela' => 'md_pen_rel_tipo_doc_map_rec', 'cols' => ['codigo_especie' => [$objMetaBD->tipoNumero(), PenMetaBD::NNULLO], 'id_serie' => [$objMetaBD->tipoNumero(), PenMetaBD::NNULLO], 'sin_padrao' => [$objMetaBD->tipoTextoFixo(2), PenMetaBD::NNULLO]], 'pk' => ['cols' => ['codigo_especie', 'id_serie']], 'fks' => ['serie' => ['nome' => 'fk_md_pen_rel_tipo_doc_serie', 'cols' => ['id_serie', 'id_serie']]]]);
 
       $objMetaBD->criarTabela(['tabela' => 'md_pen_componente_digital', 'cols' => ['numero_registro' => [$objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO], 'id_procedimento' => [$objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO], 'id_documento' => [$objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO], 'id_tramite' => [$objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO], 'id_anexo' => [$objMetaBD->tipoNumero(), PenMetaBD::SNULLO], 'protocolo' => [$objMetaBD->tipoTextoVariavel(50), PenMetaBD::NNULLO], 'nome' => [$objMetaBD->tipoTextoVariavel(100), PenMetaBD::NNULLO], 'hash_conteudo' => [$objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO], 'algoritmo_hash' => [$objMetaBD->tipoTextoVariavel(20), PenMetaBD::NNULLO], 'tipo_conteudo' => [$objMetaBD->tipoTextoFixo(3), PenMetaBD::NNULLO], 'mime_type' => [$objMetaBD->tipoTextoVariavel(100), PenMetaBD::NNULLO], 'dados_complementares' => [$objMetaBD->tipoTextoVariavel(1000), PenMetaBD::SNULLO], 'tamanho' => [$objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO], 'ordem' => [$objMetaBD->tipoNumero(), PenMetaBD::NNULLO], 'sin_enviar' => [$objMetaBD->tipoTextoFixo(1), 'N']], 'pk' => ['cols' => ['numero_registro', 'id_procedimento', 'id_documento', 'id_tramite']], 'fks' => ['anexo' => ['nome' => 'fk_md_pen_comp_dig_anexo', 'cols' => ['id_anexo', 'id_anexo']], 'documento' => ['nome' => 'fk_md_pen_comp_dig_documento', 'cols' => ['id_documento', 'id_documento']], 'procedimento' => ['nome' => 'fk_md_pen_comp_dig_procediment', 'cols' => ['id_procedimento', 'id_procedimento']], 'md_pen_processo_eletronico' => ['nome' => 'fk_md_pen_comp_dig_proc_eletr', 'cols' => ['numero_registro', 'numero_registro']], 'md_pen_tramite' => ['nome' => 'fk_md_pen_comp_dig_tramite', 'cols' => [['numero_registro', 'id_tramite'], ['numero_registro', 'id_tramite']]]]]);
 
@@ -907,6 +908,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objMetaBD->criarTabela(['tabela' => 'md_pen_rel_doc_map_recebido', 'cols' => ['id_mapeamento' => [$objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO], 'codigo_especie' => [$objMetaBD->tipoNumero(), PenMetaBD::NNULLO], 'id_serie' => [$objMetaBD->tipoNumero(), PenMetaBD::NNULLO], 'sin_padrao' => [$objMetaBD->tipoTextoFixo(1), 'S']], 'pk' => ['cols' => ['id_mapeamento']], 'fks' => ['serie' => ['nome' => 'fk_md_pen_rel_doc_map_rec_seri', 'cols' => ['id_serie', 'id_serie']], 'md_pen_especie_documental' => ['nome' => 'fk_md_pen_rel_doc_map_rec_espe', 'cols' => ['id_especie', 'codigo_especie']]]]);
 
       $objBD = new PenRelTipoDocMapRecebidoBD($objInfraBanco);
+    // Preserva a migracao do nome longo usado por instalacoes anteriores a 1.1.7.
     if ($objMetaBD->isTabelaExiste('md_pen_rel_tipo_documento_mapeamento_recebido')) {
         $objDTO = new PenRelTipoDocMapRecebidoDTO();
         $fnCadastrar = function ($numCodigoEspecie, $numIdSerie) use ($objDTO, $objBD): void {
@@ -2822,6 +2824,36 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV4110()
   {
     $this->atualizarNumeroVersao("4.1.1");
+  }
+
+  protected function instalarV4120()
+  {
+    $objMetaBD = $this->inicializarObjMetaBanco();
+    $strTabela = 'md_pen_rel_tipo_doc_map_rec';
+
+    if ($objMetaBD->isTabelaExiste($strTabela)) {
+      $arrResultado = $objMetaBD->getObjInfraIBanco()->consultarSql(
+          'SELECT COUNT(*) AS quantidade FROM ' . $strTabela
+      );
+      // O driver pode retornar o alias em maiusculas ou minusculas.
+      $numRegistros = (int) current($arrResultado[0]);
+
+      if ($numRegistros > 0) {
+        $strMensagem = sprintf(
+            'TABELA_LEGADA_V4120: %s possui %d registro(s). Atualizacao interrompida; '
+            . 'os dados foram preservados. Analise os registros manualmente antes de repetir a atualizacao.',
+            $strTabela,
+            $numRegistros
+        );
+        $this->logar($strMensagem);
+        throw new InfraException($strMensagem);
+      }
+
+      $objMetaBD->removerTabela($strTabela);
+      $this->logar('TABELA_LEGADA_V4120: tabela vazia ' . $strTabela . ' removida.');
+    }
+
+    $this->atualizarNumeroVersao("4.1.2");
   }
 
 
