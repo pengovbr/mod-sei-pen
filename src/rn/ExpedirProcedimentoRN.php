@@ -3190,11 +3190,26 @@ class ExpedirProcedimentoRN extends InfraRN
         $arrNumeroRegistroEnvio = [];
     }
 
+      //Estruturas deste orgao: o tramite remetido por elas que aguarda apenas o processamento local do recibo (situacao 5)
+      //nao impede o novo envio
+    try {
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->retNumIdUnidadeRH();
+        $arrNumIdEstruturaLocal = InfraArray::converterArrInfraDTO((new GenericoBD($this->getObjInfraIBanco()))->listar($objPenUnidadeDTO), 'IdUnidadeRH');
+        $numIdRepositorioLocal = $this->objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+    } catch (\Exception $e) {
+        LogSEI::getInstance()->gravar('Falha ao identificar as estruturas do orgao remetente do processo ' . $strProtocoloFormatado . '. Detalhes: ' . $e->getMessage(), InfraLog::$ERRO);
+        $arrNumIdEstruturaLocal = [];
+        $numIdRepositorioLocal = null;
+    }
+
       $objTramiteEmAndamento = $this->objProcessoEletronicoRN->consultarTramiteEmAndamento(
           $strProtocoloFormatado,
           array_merge($arrNumeroRegistro, $arrNumeroRegistroEnvio),
           $numIdUnidadeDestino,
-          $numIdRepositorioDestino
+          $numIdRepositorioDestino,
+          $arrNumIdEstruturaLocal,
+          $numIdRepositorioLocal
       );
 
     if(!is_null($objTramiteEmAndamento)) {
