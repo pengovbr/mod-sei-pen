@@ -2073,9 +2073,13 @@ class ProcessoEletronicoRN extends InfraRN
    * @param  int|null $parNumIdRepositorioDestino Repositorio de estruturas da unidade de destino. Com o destino informado,
    *                                            o envio interrompido (situacao 1) para ele nao conta: o envio o cancela
    *                                            (ExpedirProcedimentoRN::cancelarTramitesInterrompidos)
+   * @param  array    $parArrNumIdEstruturaLocal Estruturas mapeadas para unidades deste SEI. Quando informadas, o tramite
+   *                                             em situacao 5 remetido por uma delas nao conta: o destinatario ja recebeu
+   *                                             tudo e so falta este proprio orgao processar o recibo
+   * @param  int|null $parNumIdRepositorioLocal Repositorio de estruturas deste SEI (nao comparado se vazio)
    * @return object|null Dados do trâmite em andamento ou null caso a sincronização anterior esteja concluída
    */
-  public function consultarTramiteEmAndamento($parStrProtocoloFormatado, $parArrNumeroRegistro = [], $parNumIdUnidadeDestino = null, $parNumIdRepositorioDestino = null)
+  public function consultarTramiteEmAndamento($parStrProtocoloFormatado, $parArrNumeroRegistro = [], $parNumIdUnidadeDestino = null, $parNumIdRepositorioDestino = null, $parArrNumIdEstruturaLocal = [], $parNumIdRepositorioLocal = null)
     {
     if(InfraString::isBolVazia($parStrProtocoloFormatado)) {
       return null;
@@ -2128,6 +2132,14 @@ class ProcessoEletronicoRN extends InfraRN
         continue;
       }
 
+      // Tramite remetido por este orgao com o recibo de conclusao ja enviado pelo destinatario (situacao 5) nao impede
+      // o novo envio: o destinatario ja recebeu todos os componentes e falta apenas o processamento local do recibo
+      // pelo agendamento (ReceberReciboTramiteRN). Esse estado nao bloqueia o novo envio no Tramita GOV.BR.
+      if(intval($objTramite->situacaoAtual) == self::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
+          && $this->isTramiteRemetidoPorEstruturas($objTramite, $parArrNumIdEstruturaLocal, $parNumIdRepositorioLocal)) {
+        continue;
+      }
+
       // Envio interrompido (situacao 1) para a unidade de destino nao impede o novo envio: o envio o cancela
       if(intval($objTramite->situacaoAtual) == self::$STA_SITUACAO_TRAMITE_INICIADO
           && !InfraString::isBolVazia($parNumIdUnidadeDestino)
@@ -2141,6 +2153,30 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
       return $objUltimoTramite;
+  }
+
+  /**
+   * Indica se o remetente do tramite e uma das estruturas informadas (e, se informado, do repositorio de estruturas)
+   *
+   * @param  object   $parObjTramite Tramite retornado pelo Tramita GOV.BR
+   * @param  array    $parArrNumIdEstrutura Numeros de identificacao das estruturas
+   * @param  int|null $parNumIdRepositorio Repositorio de estruturas (nao comparado se vazio)
+   * @return bool
+   */
+  protected function isTramiteRemetidoPorEstruturas($parObjTramite, $parArrNumIdEstrutura, $parNumIdRepositorio = null)
+    {
+      $objRemetente = $parObjTramite->remetente ?? null;
+    if (empty($parArrNumIdEstrutura) || !is_object($objRemetente) || !isset($objRemetente->numeroDeIdentificacaoDaEstrutura)) {
+        return false;
+    }
+
+      $arrNumIdEstrutura = array_map('strval', array_filter((array) $parArrNumIdEstrutura, function ($numIdEstrutura) {
+          return !InfraString::isBolVazia($numIdEstrutura);
+      }));
+
+      return in_array((string) $objRemetente->numeroDeIdentificacaoDaEstrutura, $arrNumIdEstrutura, true)
+        && (InfraString::isBolVazia($parNumIdRepositorio)
+            || (string) ($objRemetente->identificacaoDoRepositorioDeEstruturas ?? '') === (string) $parNumIdRepositorio);
   }
 
   /**
