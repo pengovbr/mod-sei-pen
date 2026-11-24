@@ -63,9 +63,7 @@ try {
       $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
       $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($_POST['id_hipotese_legal']);
       $objPenRelHipoteseLegalDTO->setNumIdBarramento($_POST['id_barramento']);
-      $objPenRelHipoteseLegalDTO->setStrTipo('E');// Enviado
-
-      $numIdMapeamento = 0;
+      $objPenRelHipoteseLegalDTO->setStrTipo('E');
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
         $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
         $mapeamento = $objPenRelHipoteseLegalRN->alterar($objPenRelHipoteseLegalDTO);

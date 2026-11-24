@@ -68,7 +68,7 @@ try {
 
           $arrTiposProcessos = $_POST;
         foreach (array_keys($arrTiposProcessos) as $strKeyPost) {
-          if (substr($strKeyPost, 0, 10) == 'txtAssunto') {
+          if (str_starts_with($strKeyPost, 'txtAssunto')) {
             $objConsultaTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
             $objConsultaTipoProcedimentoDTO->setNumIdMapOrgao($_POST['idOrgaoExterno']);
             $objConsultaTipoProcedimentoDTO->setNumIdTipoProcessoOrigem(substr($strKeyPost, 10));

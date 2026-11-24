@@ -112,8 +112,6 @@ try {
       $objPenUnidadeDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
       $objPenUnidadeDTO->setStrNomeUnidadeRH($nomeUnidadeRH);
       $objPenUnidadeDTO->setStrSiglaUnidadeRH($siglaUnidadeRH);
-
-      $numIdUnidade = '';
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
         $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
         $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);

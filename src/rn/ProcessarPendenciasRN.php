@@ -447,25 +447,12 @@ class ProcessarPendenciasRN extends InfraRN
 
               $numIdTramite = $arrPendencia['idt'];
 
-              switch ((int) $arrPendencia['status']) {
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                      $this->receberProcedimento($numIdTramite);
-                      break;
-
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                      $this->receberReciboTramite($numIdTramite);
-                      break;
-
-                  case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                      $this->receberTramitesRecusados($numIdTramite);
-                      break;
-
-                  default:
-                      $this->gravarLogDebug("Situacao do tramite ({$arrPendencia['status']}) nao pode ser tratada.", 0, true);
-                      break;
-              }
+              match ((int) $arrPendencia['status']) {
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO => $this->receberProcedimento($numIdTramite),
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO => $this->receberReciboTramite($numIdTramite),
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO => $this->receberTramitesRecusados($numIdTramite),
+                  default => $this->gravarLogDebug("Situacao do tramite ({$arrPendencia['status']}) nao pode ser tratada.", 0, true),
+              };
           }, null, self::TIMEOUT_PROCESSAMENTO_JOB_MS
       );
 

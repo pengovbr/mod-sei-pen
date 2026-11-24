@@ -215,7 +215,7 @@ class ProcessoEletronicoRN extends InfraRN
     // $objAtividadeDTO->retNumIdAtividade();
     // $objAtividadeDTO->retNumIdTarefa();
     // $objAtividadeDTO->retDblIdProcedimentoProtocolo();
-  
+
     // $objAtividadeRN = new AtividadeRN();
     // $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
@@ -361,9 +361,7 @@ class ProcessoEletronicoRN extends InfraRN
         $estruturasUnidades = $this->validarRestricaoUnidadesCadastradas($idRepositorioEstrutura);
       }
 
-      if (is_null($estruturasUnidades)) {
-          $estruturasUnidades = $this->buscarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura);
-      }
+      $estruturasUnidades ??= $this->buscarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura);
 
         //Cria um array com os nomes da unidades para realizar a ordenação das mesmas
         $nomesUnidades = [];
@@ -443,9 +441,7 @@ class ProcessoEletronicoRN extends InfraRN
               $objEstruturaDTO->setNumTotalDeRegistros($arrResultado['totalDeRegistros']);
 
               $arrHerarquia = array_map(
-                  function ($nivel) {
-                      return mb_convert_encoding($nivel['sigla'], 'ISO-8859-1', 'UTF-8');
-                  }, $estrutura['hierarquia'] ?: []
+                  fn($nivel) => mb_convert_encoding($nivel['sigla'], 'ISO-8859-1', 'UTF-8'), $estrutura['hierarquia'] ?: []
               );
 
               $objEstruturaDTO->setArrHierarquia($arrHerarquia);
@@ -510,9 +506,7 @@ class ProcessoEletronicoRN extends InfraRN
           $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
 
           $arrHerarquia = array_map(
-              function ($nivel) {
-                  return mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8');
-              }, $estrutura->hierarquia ?: []
+              fn($nivel) => mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8'), $estrutura->hierarquia ?: []
           );
 
           $objEstruturaDTO->setArrHierarquia($arrHerarquia);
@@ -521,7 +515,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
         return null;
-    } catch (Exception $e) {
+    } catch (Exception) {
         throw new InfraException("Falha na obtenção de unidades externas");
     }
   }
@@ -568,9 +562,7 @@ class ProcessoEletronicoRN extends InfraRN
           if ($unidade->getNumIdUnidadeRHRestricao() != null) {
             $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = $unidade->getNumIdUnidadeRHRestricao();
             $result = $this->tentarNovamenteSobErroHTTP(
-              function ($objPenWs) use ($parametros) {
-                  return $objPenWs->consultarEstruturas($parametros);
-              }
+              fn($objPenWs) => $objPenWs->consultarEstruturas($parametros)
             );
 
             if ($result->estruturasEncontradas->totalDeRegistros == 0) {
@@ -587,7 +579,7 @@ class ProcessoEletronicoRN extends InfraRN
           }
         }
       }
-    } catch (Exception $e) {
+    } catch (Exception) {
     }
 
       return $arrEstruturasCadastradas;
@@ -612,9 +604,7 @@ class ProcessoEletronicoRN extends InfraRN
 
       $parametros->filtroDeEstruturasPorEstruturaPai->apenasAtivas = true;
       $result = $this->tentarNovamenteSobErroHTTP(
-          function ($objPenWs) use ($parametros) {
-              return $objPenWs->consultarEstruturasPorEstruturaPai($parametros);
-          }
+          fn($objPenWs) => $objPenWs->consultarEstruturasPorEstruturaPai($parametros)
       );
 
       return is_array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura)
@@ -668,9 +658,7 @@ class ProcessoEletronicoRN extends InfraRN
               $objEstruturaDTO->setNumTotalDeRegistros($arrResultado['totalDeRegistros']);
 
               $arrHerarquia = array_map(
-                  function ($nivel) {
-                      return mb_convert_encoding($nivel['sigla'], 'ISO-8859-1', 'UTF-8');
-                  }, $estrutura['hierarquia'] ?: []
+                  fn($nivel) => mb_convert_encoding($nivel['sigla'], 'ISO-8859-1', 'UTF-8'), $estrutura['hierarquia'] ?: []
               );
 
               $objEstruturaDTO->setArrHierarquia($arrHerarquia);
@@ -719,9 +707,7 @@ class ProcessoEletronicoRN extends InfraRN
         ];
           
         $parametros = array_filter(
-            $parametros, function ($value) {
-                return !is_null($value);
-            }
+            $parametros, fn($value) => !is_null($value)
         );
     
         
@@ -744,9 +730,7 @@ class ProcessoEletronicoRN extends InfraRN
             $objEstruturaDTO->setNumTotalDeRegistros($arrResultado->totalDeRegistros);
             
             $arrHerarquia = array_map(
-                function ($nivel) {
-                    return mb_convert_encoding($nivel->sigla, 'UTF-8');
-                }, $estrutura->hierarquia ?: []
+                fn($nivel) => mb_convert_encoding($nivel->sigla, 'UTF-8'), $estrutura->hierarquia ?: []
             );
                 
             $objEstruturaDTO->setArrHierarquia($arrHerarquia);
@@ -1002,7 +986,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
           $valorInput = $objRelProtocoloAssuntoDTO->getStrDescricaoAssunto() ? 
-          utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000)) 
+          mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000), 'UTF-8', 'ISO-8859-1') 
           : "NA";
 
           $arrDadosAssunto[] = [
@@ -1011,7 +995,7 @@ class ProcessoEletronicoRN extends InfraRN
           ];
         
           $valorInput = $infoAssunto->getStrCodigoEstruturado() ? 
-          utf8_encode($infoAssunto->getStrCodigoEstruturado()) 
+          mb_convert_encoding($infoAssunto->getStrCodigoEstruturado(), 'UTF-8', 'ISO-8859-1') 
           : "NA";
           $arrDadosAssunto[] = [
           'chave' => 'CLASSIFICACAO_CodigoEstruturado_' . $contagem,
@@ -1035,7 +1019,7 @@ class ProcessoEletronicoRN extends InfraRN
           ];
         
           $valorInput = $destinacao ? 
-          utf8_encode($destinacao) 
+          mb_convert_encoding($destinacao, 'UTF-8', 'ISO-8859-1') 
           : "NA";
           $arrDadosAssunto[] = [
           'chave' => 'CLASSIFICACAO_Destinacao_' . $contagem,
@@ -1589,9 +1573,7 @@ class ProcessoEletronicoRN extends InfraRN
           $arrObjItensSolicitados = $parObjComponentesDigitaisSolicitados ?? [$parObjComponentesDigitaisSolicitados];
         foreach ($arrObjItensSolicitados as $objItemSolicitado) {
           if(!is_null($objItemSolicitado)) {
-            if (!isset($arrayHashes)) {
-              $arrayHashes = $objItemSolicitado->hashes;
-            }
+            $arrayHashes ??= $objItemSolicitado->hashes;
             if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $arrayHashes) && !$objDocumento->retirado) {
               $objComponenteDigitalDTO->setStrSinEnviar("S");
               unset($arrayHashes[array_search($strHashConteudo, $arrayHashes)]);
@@ -1616,9 +1598,7 @@ class ProcessoEletronicoRN extends InfraRN
       //Monta dados dos componentes digitais
       $arrObjComponenteDigitalDTO = [];
       $arrObjDocumento = self::obterDocumentosProtocolo($parObjProtocolo, true);
-      usort($arrObjDocumento, function($a, $b) {
-          return $b->ordem <=> $a->ordem;
-      }); // ordena $arrObjDocumento de forma decrescente de acordo com o atributo ordem
+      usort($arrObjDocumento, fn($a, $b) => $b->ordem <=> $a->ordem); // ordena $arrObjDocumento de forma decrescente de acordo com o atributo ordem
       $arrObjComponenteDigitalDTOAux = [];
     foreach ($arrObjDocumento as $objDocumento) {
         $quantidadeDeComponentesDigitais = count($objDocumento->componentesDigitais);
@@ -1652,16 +1632,16 @@ class ProcessoEletronicoRN extends InfraRN
           
           $arrComponenteDigital = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais[0] : $objDocumento->componentesDigitais;
           $objComponenteDigital = (object) $arrComponenteDigital;
-          $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
+          $objComponenteDigitalDTO->setStrNome(mb_convert_encoding($objComponenteDigital->nome, 'ISO-8859-1'));
 
         if(isset($objDocumento->especie)) {
           if (is_array($objDocumento->especie)) {  
               $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie['codigo']));
-              $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie['nomeNoProdutor']));
+              $objComponenteDigitalDTO->setStrNomeEspecieProdutor(mb_convert_encoding($objDocumento->especie['nomeNoProdutor'], 'ISO-8859-1'));
           }
           else{
               $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
-              $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie->nomeNoProdutor));
+              $objComponenteDigitalDTO->setStrNomeEspecieProdutor(mb_convert_encoding($objDocumento->especie->nomeNoProdutor, 'ISO-8859-1'));
           }
         }
 
@@ -1677,9 +1657,7 @@ class ProcessoEletronicoRN extends InfraRN
             $arrObjItensSolicitados = $parObjComponentesDigitaisSolicitados ?? [$parObjComponentesDigitaisSolicitados];
           foreach ($arrObjItensSolicitados as $objItemSolicitado) {
             if(!is_null($objItemSolicitado)) {
-              if (!isset($arrayHashes)) {
-                $arrayHashes = $objItemSolicitado->hashes;
-              }
+              $arrayHashes ??= $objItemSolicitado->hashes;
               if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $arrayHashes) && !$objDocumento->retirado) {
                 $objComponenteDigitalDTO->setStrSinEnviar("S");
                 unset($arrayHashes[array_search($strHashConteudo, $arrayHashes)]);
@@ -1780,9 +1758,7 @@ class ProcessoEletronicoRN extends InfraRN
           }
 
             $arrResultado->tramites[0] = array_filter(
-              get_object_vars($arrResultado->tramites[0]), function ($value) {
-                    return !is_null($value);
-              }
+              get_object_vars($arrResultado->tramites[0]), fn($value) => !is_null($value)
             );
 
             $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado->tramites[0]);
@@ -1861,9 +1837,7 @@ class ProcessoEletronicoRN extends InfraRN
 
             $arrResultado->tramites[$key] = array_filter(
               get_object_vars($arrResultado->tramites[$key]),
-              function ($value) {
-                return !is_null($value);
-              }
+              fn($value) => !is_null($value)
             );
 
             $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado->tramites[$key]);
@@ -2130,63 +2104,26 @@ class ProcessoEletronicoRN extends InfraRN
       $strNomePessoa =  ($objOperacaoPEN->pessoa->nome) ?: null;
       $objOperacaoDTO->setStrNomePessoaOrigem(mb_convert_encoding($strNomePessoa, 'ISO-8859-1', 'UTF-8'));
 
-    switch ($objOperacaoPEN->codigo) {
-      case "01":
-      default:
-          $objOperacaoDTO->setStrNome("Registro");
-          break;
-      case "02":
-          $objOperacaoDTO->setStrNome("Envio de documento avulso/processo");
-          break;
-      case "03":
-          $objOperacaoDTO->setStrNome("Cancelamento/exclusão ou envio de documento");
-          break;
-      case "04":
-          $objOperacaoDTO->setStrNome("Recebimento de documento");
-          break;
-      case "05":
-          $objOperacaoDTO->setStrNome("Autuação");
-          break;
-      case "06":
-          $objOperacaoDTO->setStrNome("Juntada por anexação");
-          break;
-      case "07":
-          $objOperacaoDTO->setStrNome("Juntada por apensação");
-          break;
-      case "08":
-          $objOperacaoDTO->setStrNome("Desapensação");
-          break;
-      case "09":
-          $objOperacaoDTO->setStrNome("Arquivamento");
-          break;
-      case "10":
-          $objOperacaoDTO->setStrNome("Arquivamento no Arquivo Nacional");
-          break;
-      case "11":
-          $objOperacaoDTO->setStrNome("Eliminação");
-          break;
-      case "12":
-          $objOperacaoDTO->setStrNome("Sinistro");
-          break;
-      case "13":
-          $objOperacaoDTO->setStrNome("Reconstituição de processo");
-          break;
-      case "14":
-          $objOperacaoDTO->setStrNome("Desarquivamento");
-          break;
-      case "15":
-          $objOperacaoDTO->setStrNome("Desmembramento");
-          break;
-      case "16":
-          $objOperacaoDTO->setStrNome("Desentranhamento");
-          break;
-      case "17":
-          $objOperacaoDTO->setStrNome("Encerramento/abertura de volume no processo");
-          break;
-      case "18":
-          $objOperacaoDTO->setStrNome("Registro de extravio");
-          break;
-    }
+    match ($objOperacaoPEN->codigo) {
+        "02" => $objOperacaoDTO->setStrNome("Envio de documento avulso/processo"),
+        "03" => $objOperacaoDTO->setStrNome("Cancelamento/exclusão ou envio de documento"),
+        "04" => $objOperacaoDTO->setStrNome("Recebimento de documento"),
+        "05" => $objOperacaoDTO->setStrNome("Autuação"),
+        "06" => $objOperacaoDTO->setStrNome("Juntada por anexação"),
+        "07" => $objOperacaoDTO->setStrNome("Juntada por apensação"),
+        "08" => $objOperacaoDTO->setStrNome("Desapensação"),
+        "09" => $objOperacaoDTO->setStrNome("Arquivamento"),
+        "10" => $objOperacaoDTO->setStrNome("Arquivamento no Arquivo Nacional"),
+        "11" => $objOperacaoDTO->setStrNome("Eliminação"),
+        "12" => $objOperacaoDTO->setStrNome("Sinistro"),
+        "13" => $objOperacaoDTO->setStrNome("Reconstituição de processo"),
+        "14" => $objOperacaoDTO->setStrNome("Desarquivamento"),
+        "15" => $objOperacaoDTO->setStrNome("Desmembramento"),
+        "16" => $objOperacaoDTO->setStrNome("Desentranhamento"),
+        "17" => $objOperacaoDTO->setStrNome("Encerramento/abertura de volume no processo"),
+        "18" => $objOperacaoDTO->setStrNome("Registro de extravio"),
+        default => $objOperacaoDTO->setStrNome("Registro"),
+    };
 
       return $objOperacaoDTO;
   }
@@ -2257,7 +2194,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         
         $parametros = [
-        'justificativa' => utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000)),
+        'justificativa' => mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000), 'UTF-8', 'ISO-8859-1'),
         'motivo' => $motivo
         ];
 
@@ -2331,9 +2268,7 @@ class ProcessoEletronicoRN extends InfraRN
         $parametros->filtroDeConsultaDeTramites->remetente->numeroDeIdentificacaoDaEstrutura = $objPenUnidadeDTO->getNumIdUnidadeRH();
 
         $objMeta = $this->tentarNovamenteSobErroHTTP(
-            function ($objPenWs) use ($parametros) {
-                return $objPenWs->consultarTramites($parametros);
-            }
+            fn($objPenWs) => $objPenWs->consultarTramites($parametros)
         );
 
       if($objMeta->tramitesEncontrados) {
@@ -2349,7 +2284,7 @@ class ProcessoEletronicoRN extends InfraRN
 
         return false;
     }
-    catch(SoapFault|Exception $e) {
+    catch(SoapFault|Exception) {
         return false;
     }
   }
@@ -2627,9 +2562,7 @@ class ProcessoEletronicoRN extends InfraRN
 
       // Verifica se existe algum processo anexado, retornando a referência original do processo caso não exista
       $bolExisteProcessoAnexado = array_reduce(
-          $arrObjDocumentos, function ($bolExiste, $objDoc) {
-              return $bolExiste || ProcessoEletronicoRN::documentoFoiAnexado($parObjProtocolo, $objDoc);
-          }
+          $arrObjDocumentos, fn($bolExiste, $objDoc) => $bolExiste || ProcessoEletronicoRN::documentoFoiAnexado($parObjProtocolo, $objDoc)
       );
 
       return $bolExisteProcessoAnexado;
@@ -2857,7 +2790,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $object;
       } else {
           // Para arrays indexados, manter como está
-          return array_map([self::class, 'converterArrayParaObjeto'], $array);
+          return array_map(self::converterArrayParaObjeto(...), $array);
       }
     }
     
@@ -3023,7 +2956,7 @@ class ProcessoEletronicoRN extends InfraRN
           }
 
         }
-      } catch (Exception $e) {
+      } catch (Exception) {
         // Não faz nada, pois a mensagem já está definida
       }
 

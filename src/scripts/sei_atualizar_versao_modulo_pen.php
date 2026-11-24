@@ -818,7 +818,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $objDTO = new InfraAgendamentoTarefaDTO();
 
-      $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD, $objRN): void {
+      $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD): void {
 
           $objDTO->unSetTodos();
           $objDTO->setStrComando($strComando);
@@ -963,7 +963,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     try {
         $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
     } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+      if (!str_contains($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.')) {
           throw $e;
       }
     }
@@ -973,7 +973,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     try {
         $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
     } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+      if (!str_contains($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.')) {
           throw $e;
       }
     }
@@ -1110,7 +1110,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       //Agendamento
       $objDTO = new InfraAgendamentoTarefaDTO();
 
-      $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD, $objRN): void {
+      $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD): void {
 
           $objDTO->unSetTodos();
           $objDTO->setStrComando($strComando);
@@ -1887,7 +1887,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS TRAMITA GOV.BR");
         $objPENAgendamentoRN = new PENAgendamentoRN();
         $objPENAgendamentoRN->atualizarHipotesesLegais();
-    } catch (\Exception $th) {
+    } catch (\Exception) {
         $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do TRAMITA GOV.BR pois serviço encontra-se inacessível\n";
         $strMensagemErroMapeamentoAutomatico .= "A atualização poderá ser realizada posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
         $this->logar($strMensagemErroMapeamentoAutomatico);
@@ -1896,7 +1896,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     try {
         $objPENAgendamentoRN = new PENAgendamentoRN();
         $objPENAgendamentoRN->atualizarEspeciesDocumentais();
-    } catch (\Exception $th) {
+    } catch (\Exception) {
         $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do TRAMITA GOV.BR pois serviço encontra-se inacessível\n";
         $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderá ser realizado posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
         $this->logar($strMensagemErroMapeamentoAutomatico);
@@ -2342,7 +2342,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       //Inserir Componentes Digitais no Banco de acordo com os parâmetros do ConfiguracaoModPEN.php
       $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes", false);
-      $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
+      $objParamEnviarDocumentosPendentes = $arrObjEnviarDocumentosPendentes ?? false;
       SessaoSEI::getInstance();
       $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
       $objRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
@@ -2365,7 +2365,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                 }
               }
             }
-          } catch (Exception $e) {
+          } catch (Exception) {
             throw new InfraException("Módulo do Tramita: Erro na parametrização EnviarApenasComponentesDigitaisPendentes em ConfiguraçãoModPEN.php");
           }
         }
@@ -2442,7 +2442,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     try {
         $objMetaBD->renomearColuna("md_pen_expedir_lote", "id_lote", "id_bloco_processo", $objMetaBD->tipoNumero());
     } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+      if (!str_contains($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.')) {
           throw $e;
       }
     }
@@ -2453,7 +2453,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     try {
         $objMetaBD->novoRenomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
     } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+      if (!str_contains($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.')) {
           throw $e;
       }
     }
@@ -2542,7 +2542,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       try {
           $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', 'str_estrutura', $objMetaBD->tipoTextoVariavel(255));
       } catch (Exception $e) {
-        if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        if (!str_contains($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.')) {
             throw $e;
         }
       }
@@ -2553,7 +2553,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       try {
           $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', 'str_unidade_pen', $objMetaBD->tipoTextoVariavel(255));
       } catch (Exception $e) {
-        if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        if (!str_contains($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.')) {
             throw $e;
         }
       }
@@ -2591,7 +2591,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objDTO = new TarefaDTO();
       $objBD = new TarefaBD(BancoSEI::getInstance());
 
-      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
+      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD): void {
 
         $objDTO->unSetTodos();
         $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
@@ -2834,11 +2834,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   const TAMANHO_LOTE_MIGRACAO_ANEXOS_V4100 = 5000;
 
   /** Ids dos anexos que a migracao ignorou por problema no arquivo. */
-  private $arrAnexosIgnoradosV4100 = array();
+  private $arrAnexosIgnoradosV4100 = [];
 
   /** Arquivo com as linhas IGNORADO, criado so quando o primeiro anexo e ignorado. */
-  private $strArquivoIgnoradosV4100 = null;
-  private $resArquivoIgnoradosV4100 = null;
+  private $strArquivoIgnoradosV4100;
+  private $resArquivoIgnoradosV4100;
 
   /**
    * Migra um lote de anexos, em transacao propria.
@@ -2943,7 +2943,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       }
     }
 
-      return array('banco' => $numTempoBanco, 'arquivos' => $numTempoArquivos, 'ignorados' => $numIgnorados);
+      return ['banco' => $numTempoBanco, 'arquivos' => $numTempoArquivos, 'ignorados' => $numIgnorados];
   }
 
 
@@ -3019,7 +3019,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
    */
   private function descreverExcecaoV4100($objExcecao)
     {
-      $arrMensagens = array();
+      $arrMensagens = [];
     while ($objExcecao !== null && count($arrMensagens) < 5) {
         $arrMensagens[] = $objExcecao->getMessage();
         $objExcecao = $objExcecao->getPrevious();
@@ -3036,7 +3036,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->arrAnexosIgnoradosV4100[] = $numIdAnexo;
       $strLinha = sprintf(
           'MIGRACAO_ANEXOS_V4100 IGNORADO id_anexo=%s caminho=%s motivo=%s',
-          $numIdAnexo, $strCaminho, str_replace(array("\r", "\n"), ' ', $strMotivo)
+          $numIdAnexo, $strCaminho, str_replace(["\r", "\n"], ' ', $strMotivo)
       );
       $this->logar($strLinha);
       $this->gravarLinhaIgnoradosV4100($strLinha);
@@ -3061,7 +3061,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
               . '/migracao-anexos-ignorados-' . date('Ymd-His') . '-' . getmypid() . '.log';
           try {
               $this->resArquivoIgnoradosV4100 = @fopen($this->strArquivoIgnoradosV4100, 'w');
-          } catch (Throwable $e) {
+          } catch (Throwable) {
               $this->resArquivoIgnoradosV4100 = false;
           }
 
@@ -3126,7 +3126,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $strTabela = 'md_pen_rel_doc_map_enviado';
       $strIndice = 'ak1_rel_doc_map_enviado';
       $strIndiceTemporario = 'ak1_rel_doc_map_env_tmp';
-      $arrColunas = array('id_serie');
+      $arrColunas = ['id_serie'];
 
       $strIndiceUnicoExistente = $this->obterNomeIndiceIdSerieV4100($objMetaBanco, $strTabela, true);
 
@@ -3235,7 +3235,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $arrObjMapDTO = $objMapBD->listar($objMapDTO);
 
-      $arrUltimoPorSerie = array();
+      $arrUltimoPorSerie = [];
     foreach ($arrObjMapDTO as $objDTO) {
         $arrUltimoPorSerie[$objDTO->getNumIdSerie()] = $objDTO->getDblIdMap();
     }
@@ -3333,7 +3333,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         throw new InfraException('Módulo do Tramita: dth_inclusao vazia na migração de anexos.');
     }
 
-      $arrFormatos = array('Y-m-d H:i:s', 'Y-m-d H:i:s.u', 'd/m/Y H:i:s', 'd/m/Y H:i:s.u');
+      $arrFormatos = ['Y-m-d H:i:s', 'Y-m-d H:i:s.u', 'd/m/Y H:i:s', 'd/m/Y H:i:s.u'];
 
     foreach ($arrFormatos as $strFormato) {
         $objData = DateTime::createFromFormat($strFormato, $mixDataHora);
@@ -3488,7 +3488,7 @@ try {
     echo (InfraException::inspecionar($e));
   try {
       LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-  } catch (Exception $e) {
+  } catch (Exception) {
   }
 
     exit(1);

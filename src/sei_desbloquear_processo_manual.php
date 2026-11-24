@@ -31,7 +31,7 @@ catch(Exception $e) {
 
   try {
       LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-  } catch (Exception $e) {
+  } catch (Exception) {
 
   }
 

@@ -124,7 +124,7 @@ class ProcessoEletronicoINT extends InfraINT
       $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
       $arrayRepositorioEstruturas = [];
     foreach ($arrObjRepositorioDTO as $value) {
-      if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
+      if (str_contains(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa))) {
         $arrayRepositorioEstruturas[] = $value;
       }
     }
@@ -223,22 +223,16 @@ class ProcessoEletronicoINT extends InfraINT
     {
     if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && InfraUtil::compararVersoes(SEI_VERSAO, "<=", "4.0.1")) {
 
-      switch ($arquivo) {
-        case 'pen_procedimento_expedir.css':
-            return 'pen_procedimento_expedir_sei4.css';
-
-        default:
-            return $arquivo;
-      }
+      return match ($arquivo) {
+          'pen_procedimento_expedir.css' => 'pen_procedimento_expedir_sei4.css',
+          default => $arquivo,
+      };
     }elseif (InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1")) {
 
-      switch ($arquivo) {
-        case 'pen_procedimento_expedir.css':
-            return 'pen_procedimento_expedir_sei402.css';
-
-        default:
-            return $arquivo;
-      }
+      return match ($arquivo) {
+          'pen_procedimento_expedir.css' => 'pen_procedimento_expedir_sei402.css',
+          default => $arquivo,
+      };
     }
 
       return $arquivo;
@@ -417,7 +411,7 @@ class ProcessoEletronicoINT extends InfraINT
         . ' <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="' . $arrUnidadesSelecionadas . '" />'
         . ' ' . $strHtmlRepoEstruturasUnidades . ''
         . ' </div>';
-    } catch (Exception $e) {
+    } catch (Exception) {
         // não grava nada e não retorna objeto restrição mapeamento de unidades
     }
   }

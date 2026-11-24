@@ -796,7 +796,7 @@ class ReceberProcedimentoRN extends InfraRN
 
         // Não achou, ou seja, não esta cadastrado na tabela, então não é aceito nesta unidade como válido
         if($numContador <= 0) {
-            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', mb_convert_encoding($objDocument->especie->nomeNoProdutor, 'ISO-8859-1')), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
             throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
         }
       }
@@ -1000,7 +1000,7 @@ class ReceberProcedimentoRN extends InfraRN
 
       try{
           ProcessoEletronicoRN::desbloquearProcesso($parDblIdProcedimento);
-      } catch (Exception $e){
+      } catch (Exception){
           $this->gravarLogDebug("Processo $parDblIdProcedimento não pode ser desbloqueado", 2);
       }
         
@@ -1874,20 +1874,20 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
 
           //Recusa o trâmite, com mensagem amigável, quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante
-          $arrObjComponentesDigitaisAssinatura = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais : array($objDocumento->componentesDigitais);
+          $arrObjComponentesDigitaisAssinatura = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais : [$objDocumento->componentesDigitais];
           foreach ($arrObjComponentesDigitaisAssinatura as $objComponenteDigitalAssinatura) {
             $arrObjComponenteDigitalAssinatura = (array) $objComponenteDigitalAssinatura;
-            $arrObjAssinaturasDigitais = isset($arrObjComponenteDigitalAssinatura['assinaturasDigitais']) ? $arrObjComponenteDigitalAssinatura['assinaturasDigitais'] : array();
+            $arrObjAssinaturasDigitais = $arrObjComponenteDigitalAssinatura['assinaturasDigitais'] ?? [];
             if (!is_array($arrObjAssinaturasDigitais)) {
-              $arrObjAssinaturasDigitais = array($arrObjAssinaturasDigitais);
+              $arrObjAssinaturasDigitais = [$arrObjAssinaturasDigitais];
             }
             foreach ($arrObjAssinaturasDigitais as $objAssinaturaDigital) {
               $arrAssinaturaDigital = (array) $objAssinaturaDigital;
               //Issue #1178: quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante,
               //preenche o dado com o texto padrão "Informação inexistente" ao invés de recusar o trâmite, mantendo o
               //mesmo tratamento tolerante adotado na expedição (evita recusa entre órgãos com SEI 5.1.0 ou superior).
-              $strNomeAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao(isset($arrAssinaturaDigital['nome']) ? $arrAssinaturaDigital['nome'] : null);
-              $strTratamentoAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao(isset($arrAssinaturaDigital['cargo']) ? $arrAssinaturaDigital['cargo'] : null);
+              $strNomeAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($arrAssinaturaDigital['nome'] ?? null);
+              $strTratamentoAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($arrAssinaturaDigital['cargo'] ?? null);
               if (is_object($objAssinaturaDigital)) {
                 $objAssinaturaDigital->nome = $strNomeAssinante;
                 $objAssinaturaDigital->cargo = $strTratamentoAssinante;
@@ -2226,7 +2226,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objHipoteseLegalDTO = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
         
           if ($objHipoteseLegalDTO==null) {
-            $this->objProcessoEletronicoRN->recusarTramite($parNumIdTramite, sprintf('O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado.'), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdTramite, 'O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado.', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
           }
         }
       }

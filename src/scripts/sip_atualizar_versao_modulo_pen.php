@@ -1460,7 +1460,7 @@ class PenAtualizarSipRN extends InfraRN
         // Remove item de menu anterior e seus submenus configurados de forma errada
         $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, 'Mapeamento de Tipos de Documento');
         ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuMapTipDoc);
-    } catch (\Exception $e) {
+    } catch (\Exception) {
         $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
 
@@ -1975,7 +1975,7 @@ class PenAtualizarSipRN extends InfraRN
 
         $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados em Lote');
         ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenuMapTipDoc);
-    } catch (\Exception $e) {
+    } catch (\Exception) {
         $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
 
@@ -2086,7 +2086,7 @@ class PenAtualizarSipRN extends InfraRN
         $numIdMenu = ScriptSip::obterIdMenu($numIdSistema, 'Principal');
         $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados em Bloco');
         ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenuMapTipDoc);
-    } catch (\Exception $e) {
+    } catch (\Exception) {
         $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
       $this->atualizarNumeroVersao("3.6.1");
@@ -2115,7 +2115,7 @@ class PenAtualizarSipRN extends InfraRN
 
         $numIdItemMenu = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados em Bloco');
         ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenu);
-    } catch (\Exception $e) {
+    } catch (\Exception) {
         $this->logar("Item de menu 'Processos Tramitados em Bloco' e/ou 'Processos Tramitados Externamente' não localizado(s)");
     }
 
@@ -2307,7 +2307,7 @@ try {
     echo (InfraException::inspecionar($e));
   try {
       LogSip::getInstance()->gravar(InfraException::inspecionar($e));
-  } catch (Exception $e) {
+  } catch (Exception) {
   }
 
     exit(1);

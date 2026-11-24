@@ -316,8 +316,7 @@ class PendenciasTramiteRN extends InfraRN
             $objGearmanClient = new GearmanClient();
             $objGearmanClient->addServer($this->strGearmanServidor, $this->strGearmanPorta);
             $bolAtivo = $objGearmanClient->ping("health");
-        } catch (\Exception $e) {
-            $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
+        } catch (\Exception) {
             $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
             LogSEI::getInstance()->gravar($strMensagem, LogSEI::$AVISO);
         }
@@ -420,18 +419,18 @@ class PendenciasTramiteRN extends InfraRN
       // da mesma funcao. Com tres nomes, o mesmo tramite podia entrar por dois
       // deles -- quando a situacao avanca durante um recebimento demorado -- e
       // ser processado em paralelo.
-        $arrSituacoesProcessaveis = array(
+        $arrSituacoesProcessaveis = [
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-        );
+        ];
 
     if (in_array((int) $numStatus, $arrSituacoesProcessaveis, true)) {
         $client->addTaskBackground(
             'processarPendencia',
-            json_encode(array('idt' => $numIDT, 'status' => $numStatus)),
+            json_encode(['idt' => $numIDT, 'status' => $numStatus]),
             null,
             $numIDT
         );

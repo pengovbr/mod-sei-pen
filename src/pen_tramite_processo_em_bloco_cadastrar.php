@@ -213,7 +213,7 @@ try {
                 $arrMensagensErros[] = $mensagemDeErro;
               }
   
-              $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($idItensSelecionados), true);
+              $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, [$idItensSelecionados], true);
               $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
               if (!is_null($mensagemDeErro)) {
                   $bolInclusaoErro = true;

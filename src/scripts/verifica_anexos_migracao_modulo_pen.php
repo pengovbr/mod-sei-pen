@@ -73,17 +73,17 @@ class VerificadorAnexosMigracaoV4100
     private $numTotal = 0;
     private $numOk = 0;
     private $numProblemas = 0;
-    private $arrAmostra = array();
-    private $resCsv = null;
+    private $arrAmostra = [];
+    private $resCsv;
     private $numMaxProblemas;
     private $bolInterrompido = false;
-    private $arrContagem = array(
+    private $arrContagem = [
         'ausente'    => 0,
         'ilegivel'   => 0,
         'tamanho'    => 0,
         'hash'       => 0,
         'data'       => 0,
-    );
+    ];
 
     public function __construct()
     {
@@ -182,7 +182,7 @@ class VerificadorAnexosMigracaoV4100
             // Sem problemas o CSV so teria o cabecalho, e um arquivo vazio nao
             // distingue "base integra" de "script nao rodou". Registra o veredito.
             if ($this->numProblemas === 0) {
-                fputcsv($this->resCsv, array(
+                fputcsv($this->resCsv, [
                     '',
                     '',
                     '',
@@ -190,7 +190,7 @@ class VerificadorAnexosMigracaoV4100
                     'ok',
                     '',
                     sprintf('nenhum problema: %d anexos verificados', $this->numTotal),
-                ));
+                ]);
             }
             fclose($this->resCsv);
             $this->resCsv = null;
@@ -250,11 +250,11 @@ class VerificadorAnexosMigracaoV4100
         $this->numTotal++;
 
         $numIdAnexo  = $arrAnexo['id_anexo'];
-        $arrProtocolo = array(
-            isset($arrAnexo['processo']) ? $arrAnexo['processo'] : '',
-            isset($arrAnexo['documento']) ? $arrAnexo['documento'] : '',
-            isset($arrAnexo['id_protocolo']) ? $arrAnexo['id_protocolo'] : '',
-        );
+        $arrProtocolo = [
+            $arrAnexo['processo'] ?? '',
+            $arrAnexo['documento'] ?? '',
+            $arrAnexo['id_protocolo'] ?? '',
+        ];
 
         try {
             $strDataHora = $this->normalizarDataHora($arrAnexo['dth_inclusao']);
@@ -319,7 +319,7 @@ class VerificadorAnexosMigracaoV4100
             throw new InfraException('dth_inclusao vazia');
         }
 
-        $arrFormatos = array('Y-m-d H:i:s', 'Y-m-d H:i:s.u', 'd/m/Y H:i:s', 'd/m/Y H:i:s.u');
+        $arrFormatos = ['Y-m-d H:i:s', 'Y-m-d H:i:s.u', 'd/m/Y H:i:s', 'd/m/Y H:i:s.u'];
         foreach ($arrFormatos as $strFormato) {
             $objData = DateTime::createFromFormat($strFormato, $mixDataHora);
             if ($objData !== false) {
@@ -340,16 +340,16 @@ class VerificadorAnexosMigracaoV4100
         $this->arrContagem[$strTipo]++;
         $this->numProblemas++;
 
-        list($strProcesso, $strDocumento, $numIdProtocolo) = $arrProtocolo;
+        [$strProcesso, $strDocumento, $numIdProtocolo] = $arrProtocolo;
 
         if (count($this->arrAmostra) < self::QTD_AMOSTRA) {
-            $this->arrAmostra[] = array($numIdAnexo, $strProcesso, $strTipo, $strCaminho, $strDetalhe, $strDocumento);
+            $this->arrAmostra[] = [$numIdAnexo, $strProcesso, $strTipo, $strCaminho, $strDetalhe, $strDocumento];
         }
 
         if ($this->resCsv !== null) {
-            fputcsv($this->resCsv, array(
+            fputcsv($this->resCsv, [
                 $numIdAnexo, $strProcesso, $strDocumento, $numIdProtocolo, $strTipo, $strCaminho, $strDetalhe,
-            ));
+            ]);
         }
     }
 
@@ -362,7 +362,7 @@ class VerificadorAnexosMigracaoV4100
     {
         try {
             $this->resCsv = @fopen($this->strArquivoSaida, 'w');
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             $this->resCsv = false;
         }
 
@@ -376,7 +376,7 @@ class VerificadorAnexosMigracaoV4100
         // nasceria 644, legivel por qualquer usuario local do servidor.
         @chmod($this->strArquivoSaida, 0600);
 
-        fputcsv($this->resCsv, array('id_anexo', 'processo', 'documento', 'id_protocolo', 'tipo', 'caminho', 'detalhe'));
+        fputcsv($this->resCsv, ['id_anexo', 'processo', 'documento', 'id_protocolo', 'tipo', 'caminho', 'detalhe']);
     }
 
     private function relatar($numSegundos)
@@ -460,26 +460,26 @@ class VerificadorAnexosMigracaoV4100
      */
     private function verificarIndices()
     {
-        $arrIndices = array();
+        $arrIndices = [];
         $objMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        foreach (array('md_pen_componente_digital', 'md_pen_processo_eletronico') as $strTabela) {
-            $arrIndices[$strTabela] = array();
+        foreach (['md_pen_componente_digital', 'md_pen_processo_eletronico'] as $strTabela) {
+            $arrIndices[$strTabela] = [];
             foreach ((array) $objMetaBD->obterIndices(null, $strTabela) as $arrPorTabela) {
                 foreach ((array) $arrPorTabela as $arrColunas) {
-                    $arrIndices[$strTabela][] = array_map('strtolower', (array) $arrColunas);
+                    $arrIndices[$strTabela][] = array_map(strtolower(...), (array) $arrColunas);
                 }
             }
         }
 
-        $arrFaltando = array();
-        $arrNecessarios = array(
+        $arrFaltando = [];
+        $arrNecessarios = [
             'md_pen_componente_digital|id_anexo_imutavel' => 'i01_md_pen_comp_dig_anexo_imut',
             'md_pen_componente_digital|id_anexo'          => 'i02_md_pen_comp_dig_anexo',
             'md_pen_processo_eletronico|id_procedimento'  => 'i03_md_pen_proc_eletr_proced',
-        );
+        ];
         foreach ($arrNecessarios as $strChave => $strIndice) {
-            list($strTabela, $strColuna) = explode('|', $strChave);
-            if (!in_array(array($strColuna), $arrIndices[$strTabela], true)) {
+            [$strTabela, $strColuna] = explode('|', $strChave);
+            if (!in_array([$strColuna], $arrIndices[$strTabela], true)) {
                 $arrFaltando[$strChave] = $strIndice;
             }
         }
@@ -493,7 +493,7 @@ class VerificadorAnexosMigracaoV4100
         $this->imprimir('Peca ao DBA para criar, fora do horario de pico (igual nos quatro bancos):');
         $this->imprimir('');
         foreach ($arrFaltando as $strChave => $strIndice) {
-            list($strTabela, $strColuna) = explode('|', $strChave);
+            [$strTabela, $strColuna] = explode('|', $strChave);
             $this->imprimir(sprintf('  CREATE INDEX %s ON %s (%s);', $strIndice, $strTabela, $strColuna));
         }
         $this->imprimir('');

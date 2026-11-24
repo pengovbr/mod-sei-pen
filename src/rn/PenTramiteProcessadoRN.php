@@ -12,12 +12,10 @@ class PenTramiteProcessadoRN extends InfraRN
     const PARAM_NUMERO_TENTATIVAS = 'PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO';
 
     protected $objInfraBanco;
-    private $strTipo;
 
-  public function __construct($strTipo = self::STR_TIPO_PROCESSO)
+  public function __construct(private $strTipo = self::STR_TIPO_PROCESSO)
     {
       parent::__construct();
-      $this->strTipo = $strTipo;
   }
 
     /**

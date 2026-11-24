@@ -67,7 +67,7 @@ class PenAtividadeRN extends AtividadeRN
                 $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
                 $objReciboTramiteDTO->retNumIdTramite();
                 $objReciboTramiteBD = new ReciboTramiteRecebidoBD($objBancoSEI);
-                $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false;
+                $objReturn->bolReciboExiste = $objReciboTramiteBD->contar($objReciboTramiteDTO) > 0;
               break;
 
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
@@ -77,7 +77,7 @@ class PenAtividadeRN extends AtividadeRN
                   $objReciboTramiteDTO = new ReciboTramiteRecebidoDTO();
                   $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
                   $objReciboTramiteBD = new ReciboTramiteBD($objBancoSEI);
-                  $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false;
+                  $objReturn->bolReciboExiste = $objReciboTramiteBD->contar($objReciboTramiteDTO) > 0;
               break;
 
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
@@ -88,7 +88,7 @@ class PenAtividadeRN extends AtividadeRN
             $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
 
             $objReciboTramiteBD = new ReciboTramiteRecebidoBD($objBancoSEI);
-            $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false;
+            $objReturn->bolReciboExiste = $objReciboTramiteBD->contar($objReciboTramiteDTO) > 0;
               break;
 
           default:

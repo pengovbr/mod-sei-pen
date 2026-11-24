@@ -309,7 +309,7 @@ class PENAgendamentoRN extends InfraRN
       $objAnexoRN = new PenAnexoDocumentoRN();
 
       $diretorioAno = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/');
-      $arrAno = array();
+      $arrAno = [];
       while($ano = $diretorioAno -> read()){
         if (is_numeric($ano)){
           $arrAno[] = $ano;
@@ -325,7 +325,7 @@ class PENAgendamentoRN extends InfraRN
 
         foreach($arrAno as $ano){
 
-          $arrMes = array();
+          $arrMes = [];
           $diretorioMes = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano);
           while($mes = $diretorioMes -> read()){
             if (is_numeric($mes)){
@@ -338,7 +338,7 @@ class PENAgendamentoRN extends InfraRN
             sort($arrMes);
 
             foreach($arrMes as $mes){
-              $arrDia = array();
+              $arrDia = [];
               $diretorioDia = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes);
               while($dia = $diretorioDia -> read()){
                 if (is_numeric($dia)){
@@ -353,9 +353,9 @@ class PENAgendamentoRN extends InfraRN
 
                 $objAnexoDTO = new PenAnexoDocumentoDTO();
                 $objAnexoDTO->retNumIdAnexo();
-                $objAnexoDTO->adicionarCriterio(array('Inclusao','Inclusao'),
-                    array(InfraDTO::$OPER_MAIOR_IGUAL,InfraDTO::$OPER_MENOR_IGUAL),
-                    array($arrDia[0].'/'.$mes.'/'.$ano.' 00:00:00',$arrDia[count($arrDia)-1].'/'.$mes.'/'.$ano.' 23:59:59'),
+                $objAnexoDTO->adicionarCriterio(['Inclusao','Inclusao'],
+                    [InfraDTO::$OPER_MAIOR_IGUAL,InfraDTO::$OPER_MENOR_IGUAL],
+                    [$arrDia[0].'/'.$mes.'/'.$ano.' 00:00:00',$arrDia[count($arrDia)-1].'/'.$mes.'/'.$ano.' 23:59:59'],
                     InfraDTO::$OPER_LOGICO_AND);
                 $objAnexoDTO->setOrdNumIdAnexo(InfraDTO::$TIPO_ORDENACAO_ASC);
 
@@ -436,19 +436,19 @@ class PENAgendamentoRN extends InfraRN
       $objAnexoDTO->retNumIdAnexo();
       $objAnexoDTO->retDthInclusao();
 
-      $objAnexoDTO->adicionarCriterio(array('IdProtocolo','IdBaseConhecimento','IdProjeto'),
-                                     array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL),
-                                     array(null,null,null),
-                                     array(InfraDTO::$OPER_LOGICO_AND,InfraDTO::$OPER_LOGICO_AND),
+      $objAnexoDTO->adicionarCriterio(['IdProtocolo','IdBaseConhecimento','IdProjeto'],
+                                     [InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL],
+                                     [null,null,null],
+                                     [InfraDTO::$OPER_LOGICO_AND,InfraDTO::$OPER_LOGICO_AND],
                                      'cIsolado');
 
-      $objAnexoDTO->adicionarCriterio(array('SinAtivo'),
-                                       array(InfraDTO::$OPER_IGUAL),
-                                       array('N'),
+      $objAnexoDTO->adicionarCriterio(['SinAtivo'],
+                                       [InfraDTO::$OPER_IGUAL],
+                                       ['N'],
                                        null,
                                        'cDesativado');
 
-      $objAnexoDTO->agruparCriterios(array('cIsolado','cDesativado'),InfraDTO::$OPER_LOGICO_OR);
+      $objAnexoDTO->agruparCriterios(['cIsolado','cDesativado'],InfraDTO::$OPER_LOGICO_OR);
 
       $objAnexoDTO->setDthInclusao(InfraData::calcularData(1, InfraData::$UNIDADE_DIAS, InfraData::$SENTIDO_ATRAS, InfraData::getStrDataHoraAtual()),InfraDTO::$OPER_MENOR_IGUAL);
 

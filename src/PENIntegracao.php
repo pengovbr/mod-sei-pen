@@ -805,7 +805,7 @@ class PENIntegracao extends SeiIntegracao
       $bolArvore = in_array($strAcao, ['pen_procedimento_estado']);
       PaginaSEI::getInstance()->setBolArvore($bolArvore);
 
-    if (strpos($strAcao, 'pen_') === false) {
+    if (!str_contains($strAcao, 'pen_')) {
         return false;
     }
 
@@ -1003,7 +1003,7 @@ class PENIntegracao extends SeiIntegracao
           break;
 
       case 'pen_reproduzir_ultimo_tramite':
-          require_once dirname(__FILE__) . '/pen_reproduzir_ultimo_tramite.php';
+          require_once __DIR__ . '/pen_reproduzir_ultimo_tramite.php';
           break;
 
       default:
@@ -1072,7 +1072,7 @@ class PENIntegracao extends SeiIntegracao
               }
             }
           }
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
       }
 
@@ -1298,17 +1298,13 @@ class PENIntegracao extends SeiIntegracao
     {
       $numVersao1 = explode('.', $strVersao1);
       $numVersao1 = array_map(
-          function ($item) {
-              return str_pad($item, 2, '0', STR_PAD_LEFT);
-          }, $numVersao1
+          fn($item) => str_pad($item, 2, '0', STR_PAD_LEFT), $numVersao1
       );
       $numVersao1 = intval(join('', $numVersao1));
 
       $numVersao2 = explode('.', $strVersao2);
       $numVersao2 = array_map(
-          function ($item) {
-              return str_pad($item, 2, '0', STR_PAD_LEFT);
-          }, $numVersao2
+          fn($item) => str_pad($item, 2, '0', STR_PAD_LEFT), $numVersao2
       );
       $numVersao2 = intval(join('', $numVersao2));
 
@@ -1448,8 +1444,6 @@ class PENIntegracao extends SeiIntegracao
   /**
    * Retorna o status do último trâmite do processo pai após a anexação.
    *
-   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
-   * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return int|null
    */
   private function retornarUltimoStatusTramiteProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
@@ -1501,8 +1495,6 @@ class PENIntegracao extends SeiIntegracao
    * A busca e feita no historico do processo pai pela tarefa de anexacao e pelo atributo
    * PROCESSO contendo o numero do protocolo do processo filho.
    *
-   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
-   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
    * @return AtividadeDTO|null
    */
   private function retornarAtividadeAnexacaoProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
@@ -1557,8 +1549,6 @@ class PENIntegracao extends SeiIntegracao
    * Esta validacao usa a atividade "Processo em tramitacao externa para ..." e garante que ela
    * ocorreu depois da atividade de anexacao do processo filho no historico do pai.
    *
-   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
-   * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return int|null
    */
   private function retornarIdAtividadeTramitacaoExternaProcessoPai(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)
@@ -1601,8 +1591,6 @@ class PENIntegracao extends SeiIntegracao
    * cancelados automaticamente (10) NAO sao considerados, pois nao consolidam a tramitacao.
    * Os tramites avaliados devem ter ocorrido apos a anexacao do processo (comparando a dataHora das suboperacoes e a dataHora da atividade de anexacao).
    *
-   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
-   * @param AtividadeDTO $objAtividadeAnexacaoDTO
    * @return bool
    */
   private function processoPaiPossuiTramiteValidoAposAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, AtividadeDTO $objAtividadeAnexacaoDTO)

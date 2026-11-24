@@ -93,7 +93,7 @@ class ProcedimentoAndamentoRN extends InfraRN
 
         return true;
 
-    } catch(InfraException $e){
+    } catch(InfraException){
         // Erros de lock significam que outro processo concorrente já está processando a requisição
         return false;
     }

@@ -82,7 +82,7 @@ class AssinaturaHashRN extends AssinaturaRN
         if ($objTarjaAssinaturaDTO != null) {
 
             $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false) {
+          if (str_contains($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')) {
                 $objEditorRN = new EditorRN();
                 $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }
@@ -200,7 +200,7 @@ class AssinaturaHashRN extends AssinaturaRN
           if ($objTarjaAssinaturaDTO != null) {
 
                 $strLinkAcessoExterno = '';
-            if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@') !== false) {
+            if (str_contains($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')) {
               $objEditorRN = new EditorRN();
               $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
             }
@@ -304,7 +304,7 @@ class AssinaturaHashRN extends AssinaturaRN
           if ($objTarjaAssinaturaDTO != null) {
 
                 $strLinkAcessoExterno = '';
-            if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@') !== false) {
+            if (str_contains($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')) {
               $objEditorRN = new EditorRN();
               $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
             }
@@ -394,7 +394,7 @@ class AssinaturaHashRN extends AssinaturaRN
         if ($objTarjaAssinaturaDTO != null) {
 
             $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false) {
+          if (str_contains($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')) {
                 $objEditorRN = new EditorRN();
                 $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }

@@ -62,7 +62,7 @@ class PenConsoleRN extends InfraRN
             
         $strAction = array_shift($arguments);
         
-      if(substr($strAction, 0, 2) == '--') {
+      if(str_starts_with($strAction, '--')) {
           throw new InfraException('Módulo do Tramita: O primeiro paramêtro deve ser uma action da RN');
       }
         
@@ -71,7 +71,7 @@ class PenConsoleRN extends InfraRN
         
     foreach($arguments as $key => $argument) {
 
-      if(substr($argument, 0, 2) === '--') {
+      if(str_starts_with($argument, '--')) {
 
           $string = preg_replace('/^--/', '', $argument);
           $array = explode('=', $string);
@@ -101,7 +101,7 @@ class PenConsoleRN extends InfraRN
         
     if(!method_exists($this->objRN, $this->strAction)) {
             
-        throw new InfraException(sprintf('Nenhuma ação "%s" foi encontrada em %s '.PHP_EOL.$this->objRN->ajuda(), $this->strAction, get_class($this->objRN)));
+        throw new InfraException(sprintf('Nenhuma ação "%s" foi encontrada em %s '.PHP_EOL.$this->objRN->ajuda(), $this->strAction, $this->objRN::class));
     }
         
     if(array_key_exists('ajuda', $this->arrTokens)) {

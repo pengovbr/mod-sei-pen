@@ -129,11 +129,10 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
   }
 
       /**
-     * Lista mapeamentos de tipos de documentos para recebimento de processos pelo Barramento PEN
-     *
-     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
-     * @return array
-     */
+   * Lista mapeamentos de tipos de documentos para recebimento de processos pelo Barramento PEN
+   *
+   * @return array
+   */
   protected function alterarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
     {
     try {

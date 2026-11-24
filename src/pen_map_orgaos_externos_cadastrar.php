@@ -131,7 +131,6 @@ try {
         $objPenOrgaoExternoDTO->setStrOrgaoDestino($strNomeOrgaoDestino);
 
         $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-        $numId = '';
       if (!is_null($id)) {
           $objPenOrgaoExternoDTO->setDblId($id);
           $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);

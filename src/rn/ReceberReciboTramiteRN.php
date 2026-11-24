@@ -183,7 +183,7 @@ class ReceberReciboTramiteRN extends InfraRN
       $bolReproducaoUltimoTramite = false;
     try {
         $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
-    } catch (Exception $e) {
+    } catch (Exception) {
         //Registra falha em log de debug mas não gera rollback na transação.
         //O rollback da transação poderia deixar a situação do processo inconsistênte já que o Barramento registrou anteriormente que o
         //recibo já havia sido obtido. O erro no fechamento não provoca impacto no andamento do processo

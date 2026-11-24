@@ -10,7 +10,7 @@ try {
     $objSessaoSEI = SessaoSEI::getInstance();
 
     $strActionPadrao = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . '&id_documento=' . $_GET['id_documento']);
-    PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos'));
+    PaginaSEI::getInstance()->salvarCamposPost(['txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos']);
 
 
     $strTitulo = 'Blocos de Trâmite Externo';
@@ -19,8 +19,8 @@ try {
     case 'md_pen_tramita_em_bloco_excluir':
       try {
           $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
-          $arrObjTramiteEmBlocoDTO = array();
-          $arrIds = array();
+          $arrObjTramiteEmBlocoDTO = [];
+          $arrIds = [];
 
         if (count($arrStrIds) > 0) {
           for ($i = 0; $i < count($arrStrIds); $i++) {

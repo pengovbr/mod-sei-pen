@@ -7,16 +7,16 @@ try {
     $objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao($_GET['acao']);
 
-    $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado'));
+    $objPaginaSEI->salvarCamposPost(['txtProcedimentoFormatado']);
 
   switch ($_GET['acao']) {
     case 'pen_tramita_em_bloco_protocolo_excluir':
-        $arrExcluidos = array();
+        $arrExcluidos = [];
       try {
           $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
 
           $arrStrIds = $objPaginaSEI->getArrStrItensSelecionados();
-          $arrObjTramiteBlocoProtocoloDTO = array();
+          $arrObjTramiteBlocoProtocoloDTO = [];
         if (count($arrStrIds) > 0) {
           for ($i = 0; $i < count($arrStrIds); $i++) {
             $arrStrIdComposto = explode('-', $arrStrIds[$i]);
@@ -81,7 +81,7 @@ try {
     default:
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
-    $arrComandos = array();
+    $arrComandos = [];
     $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';
     $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
@@ -108,7 +108,7 @@ try {
     $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
     $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listarProtocolosBloco($objPenBlocoProcessoDTO);
 
-    $arrComandos = array();
+    $arrComandos = [];
 
     $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
     $arrComandos[] = '<button type="submit" accesskey="P" onclick="onClickBtnPesquisar()" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
@@ -149,11 +149,11 @@ try {
       $strResultado .= '</thead>' . "\n";
       $strCssTr = '';
 
-      $situacaoPodeExcluir = array(
+      $situacaoPodeExcluir = [
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-      );
+      ];
     
       foreach ($arrPenBlocoProcessoDTO as $i => $objPenBlocoProcessoDTO) {
           $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';

@@ -290,7 +290,7 @@ class ExpedirProcedimentoRN extends InfraRN
           catch (\Exception $e) {
               //Realiza o desbloqueio do processo
             try{ $this->desbloquearProcessoExpedicao($arrProcesso['idProcedimentoSEI']); 
-            } catch (Exception $ex) { 
+            } catch (Exception) { 
             }
 
               //Realiza o cancelamento do tramite
@@ -880,7 +880,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $documento['descricao'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($strDescricaoDocumento, 100), 'UTF-8', 'ISO-8859-1');
         
         
-        $documento['retirado'] = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
+        $documento['retirado'] = $documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO;
         $documento['nivelDeSigilo'] = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
         
 
@@ -940,7 +940,7 @@ class ExpedirProcedimentoRN extends InfraRN
         if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
             $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
             foreach ($arrobjComponenteDigitalDTO as $key => $componenteDigital) {
-              $objComponenteDigital = array();
+              $objComponenteDigital = [];
               $objComponenteDigital['ordem'] = $key + 1;
               $objComponenteDigital['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
               $objComponenteDigital['hash'] = [
@@ -1885,9 +1885,7 @@ class ExpedirProcedimentoRN extends InfraRN
   public function listarDocumentos($idProcedimento)
     {
       return array_map(
-          function ($item) {
-              return $item["Documento"];
-          },
+          fn($item) => $item["Documento"],
           $this->listarDocumentosRelacionados($idProcedimento)
       );
   }
@@ -1902,9 +1900,7 @@ class ExpedirProcedimentoRN extends InfraRN
       $arrObjDocumentoDTO = [];
       $arrAssociacaoDocumentos = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($idProcedimento);
       $arrIdDocumentos = array_map(
-          function ($item) {
-              return $item["IdProtocolo"];
-          }, $arrAssociacaoDocumentos
+          fn($item) => $item["IdProtocolo"], $arrAssociacaoDocumentos
       );
 
     if(!empty($arrIdDocumentos)) {
@@ -2464,7 +2460,7 @@ class ExpedirProcedimentoRN extends InfraRN
       }
     }
 
-    if($bolAssinaturaCorretas !== true) {
+    if(!$bolAssinaturaCorretas) {
       if ($sinProcessoEmBloco) {
         $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
         $mensagem = "Prezado(a) usuário(a), o processo $strProtocoloFormatado possui documentos gerados não assinados. "

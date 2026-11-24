@@ -91,7 +91,7 @@ try {
         $idRepositorioSelecionado = $numIdRepositorio ?? '';
         $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
-        $idMotivosUrgenciaSelecionado = $idMotivosUrgenciaSelecionado ?? '';
+        $idMotivosUrgenciaSelecionado ??= '';
         $strItensSelMotivosUrgencia = InfraINT::montarSelectArray('', 'Selecione', $idMotivosUrgenciaSelecionado, $motivosDeUrgencia);
 
         $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);

@@ -130,7 +130,7 @@ class PenExpedirBlocoRN extends InfraRN
                 //Realiza o desbloqueio do processo
             try {
               $this->objExpedirProcedimentoRN->desbloquearProcessoExpedicao($objPenBlocoProcessoDTO->getDblIdProcedimento());
-            } catch (InfraException $ex) {
+            } catch (InfraException) {
             }
                 throw $e;
           }

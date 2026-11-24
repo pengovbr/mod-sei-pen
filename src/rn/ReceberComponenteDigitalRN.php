@@ -325,7 +325,7 @@ class ReceberComponenteDigitalRN extends InfraRN
 
       // Complementa informações do componente digital
       $parObjAnexoDTO->setStrNome($parObjComponenteDigitalDTO->getStrNome());
-      $arrStrNome = explode('.', $parObjComponenteDigitalDTO->getStrNome());
+      explode('.', $parObjComponenteDigitalDTO->getStrNome());
       $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
       $objProtocoloDTO->setArrObjAnexoDTO([$parObjAnexoDTO]);
       $objDocumentoRN->alterarRN0004($objDocumentoDTO);

@@ -9,7 +9,18 @@ return RectorConfig::configure()
     ->withPaths([
         __DIR__ . '/src',
     ])
- 
+    ->withSkip([
+        __DIR__ . '/src/vendor',
+        __DIR__ . '/node_modules',
+    ]) 
     ->withPreparedSets(deadCode: true)
     ->withSets([LevelSetList::UP_TO_PHP_82])
+        // PHP 8.5 feature adoption (typed constants, #[\Override], etc.)
+    ->withPhpSets(
+        php82: true,
+    )
+    // Optional: tighten code quality
+    ->withPreparedSets(
+        deadCode: true,
+    )
     ->withTypeCoverageLevel(0);

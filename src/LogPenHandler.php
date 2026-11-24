@@ -8,15 +8,10 @@ use Solarium\Client as SolrClient;
 
 class LogPenHandler
 {
-    private $handler;
-    private Logger $logger;
-    private SolrClient $solr;
+    private readonly SolrClient $solr;
 
-    public function __construct($handler, Logger $logger)
+    public function __construct(private $handler, private readonly Logger $logger)
     {
-        $this->handler = $handler;
-        $this->logger = $logger;
-
         $parts = parse_url(ConfiguracaoSEI::getInstance()->getValor('Solr', 'Servidor', false));
 
         $host = $parts['host'] ?? 'solr';
@@ -76,7 +71,7 @@ class LogPenHandler
 
                     return $response;
                 },
-                function ($reason) use ($request, $start) {
+                function ($reason) use ($request, $start): void {
 
                     $duration = (microtime(true) - $start) * 1000;
 

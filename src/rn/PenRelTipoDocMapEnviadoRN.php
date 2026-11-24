@@ -325,7 +325,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecieDocumental);
     $objEspecieDocumentalRN = new EspecieDocumentalRN();
 
-    $objEspecieDocumentalDTO = $objEspecieDocumentalRN->cadastrar($objEspecieDocumentalDTO);
+    $objEspecieDocumentalRN->cadastrar($objEspecieDocumentalDTO);
   }
 
   protected function atualizarMapRecebido($numEspeciePadraoAtual, $numEspeciePadraoNovo)

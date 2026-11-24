@@ -54,8 +54,9 @@ class ProcessoExpedidoRN extends InfraRN
 
   public function listarProcessoExpedido(ProtocoloDTO &$objProtocoloDTO)
     {
-      $numLimit = $objProtocoloDTO->getNumMaxRegistrosRetorno();
-      $numOffset = $objProtocoloDTO->getNumPaginaAtual() * $objProtocoloDTO->getNumMaxRegistrosRetorno();
+      $objProtocoloDTO->getNumMaxRegistrosRetorno();
+      $objProtocoloDTO->getNumMaxRegistrosRetorno();
+      $objProtocoloDTO->getNumPaginaAtual();
       $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
 
