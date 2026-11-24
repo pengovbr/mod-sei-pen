@@ -1546,8 +1546,7 @@ class ExpedirProcedimentoRN extends InfraRN
     } catch(Exception $e) {
         throw new InfraException("Módulo do Tramita: Erro obtendo informações do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
     }
-    finally{
-        finfo_close($finfo);
+    finally {
     }
 
       return [$strDadosComplementaresDoTipoDeArquivo, $strMimeType];

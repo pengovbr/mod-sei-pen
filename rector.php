@@ -14,10 +14,10 @@ return RectorConfig::configure()
         __DIR__ . '/node_modules',
     ]) 
     ->withPreparedSets(deadCode: true)
-    ->withSets([LevelSetList::UP_TO_PHP_82])
+    ->withSets([LevelSetList::UP_TO_PHP_85])
         // PHP 8.5 feature adoption (typed constants, #[\Override], etc.)
     ->withPhpSets(
-        php82: true,
+        php85: true,
     )
     // Optional: tighten code quality
     ->withPreparedSets(

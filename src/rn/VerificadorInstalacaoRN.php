@@ -260,8 +260,7 @@ class VerificadorInstalacaoRN extends InfraRN
           throw new Exception("Erro no CURL para $strEnderecoBarramento. Erro detalhado: $strErrorMsg.");
         }
 
-      } finally{
-        curl_close($curl);
+      } finally {
       }
 
       return true;

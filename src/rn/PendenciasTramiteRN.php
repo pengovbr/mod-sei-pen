@@ -288,7 +288,6 @@ class PendenciasTramiteRN extends InfraRN
             $bolEncontrouPendencia = false;
             throw new InfraException("Módulo do Tramita: Erro processando monitoramento de pendências de trâmite de processos", $e);
         } finally {
-            curl_close($curl);
         }
       } while ($bolEncontrouPendencia);
     }
