@@ -2176,9 +2176,9 @@ class PenAtualizarSipRN extends InfraRN
       $this->atualizarNumeroVersao("4.0.0");
   }
 
-    protected function instalarV4010()
+  protected function instalarV4010()
     {
-      $this->atualizarNumeroVersao("4.0.1");
+    $this->atualizarNumeroVersao("4.0.1");
   }
 
   protected function instalarV4020()

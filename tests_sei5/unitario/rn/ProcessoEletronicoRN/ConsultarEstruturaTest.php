@@ -25,84 +25,84 @@ class ConsultarEstruturaTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get'])
+                                ->getMock();
+  }
 
-    public function testConsultarEstruturaListaSucesso()
+  public function testConsultarEstruturaListaSucesso()
     {
-        $mockResponse = [
-          "numeroDeIdentificacaoDaEstrutura" => "159098",
-          "nome" => "Mauro ORG1 Filha",
-          "sigla" => "Mauro ORG1 Filha",
-          "ativo" => true,
-          "unidadeReceptora" => false,
-          "aptoParaReceberTramites" => true,
-          "codigoNoOrgaoEntidade" => "",
-          "codigoUnidadeReceptora" => "",
-          "tipoDeTramitacao" => 0,
-          "hierarquia" => [
-              [
-                  "numeroDeIdentificacaoDaEstrutura" => "152254",
-                  "nome" => "Órgão de Desenvolvimento ABC (FIRST) - ORGABC",
-                  "sigla" => "ORGABC"
-              ]
-          ]
-        ];
+      $mockResponse = [
+        "numeroDeIdentificacaoDaEstrutura" => "159098",
+        "nome" => "Mauro ORG1 Filha",
+        "sigla" => "Mauro ORG1 Filha",
+        "ativo" => true,
+        "unidadeReceptora" => false,
+        "aptoParaReceberTramites" => true,
+        "codigoNoOrgaoEntidade" => "",
+        "codigoUnidadeReceptora" => "",
+        "tipoDeTramitacao" => 0,
+        "hierarquia" => [
+            [
+                "numeroDeIdentificacaoDaEstrutura" => "152254",
+                "nome" => "Órgão de Desenvolvimento ABC (FIRST) - ORGABC",
+                "sigla" => "ORGABC"
+            ]
+        ]
+      ];
 
-        // Configura o mock para retornar a resposta
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willReturn($mockResponse);
+      // Configura o mock para retornar a resposta
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willReturn($mockResponse);
 
-        $resultado = $this->mockService->consultarEstrutura(159098, 152254, false);
+      $resultado = $this->mockService->consultarEstrutura(159098, 152254, false);
 
-        $this->assertInstanceOf(EstruturaDTO::class, $resultado, 'O retorno deve ser uma instância da classe EstruturaDTO.');
-    }
+      $this->assertInstanceOf(EstruturaDTO::class, $resultado, 'O retorno deve ser uma instância da classe EstruturaDTO.');
+  }
 
-    public function testConsultarEstruturaListaBolRetornoRawTrueSucesso()
+  public function testConsultarEstruturaListaBolRetornoRawTrueSucesso()
     {
-        $mockResponse = [
-          "numeroDeIdentificacaoDaEstrutura" => "159098",
-          "nome" => "Mauro ORG1 Filha",
-          "sigla" => "Mauro ORG1 Filha",
-          "ativo" => true,
-          "unidadeReceptora" => false,
-          "aptoParaReceberTramites" => true,
-          "codigoNoOrgaoEntidade" => "",
-          "codigoUnidadeReceptora" => "",
-          "tipoDeTramitacao" => 0,
-          "hierarquia" => [
-              [
-                  "numeroDeIdentificacaoDaEstrutura" => "152254",
-                  "nome" => "Órgão de Desenvolvimento ABC (FIRST) - ORGABC",
-                  "sigla" => "ORGABC"
-              ]
-          ]
-        ];
+      $mockResponse = [
+        "numeroDeIdentificacaoDaEstrutura" => "159098",
+        "nome" => "Mauro ORG1 Filha",
+        "sigla" => "Mauro ORG1 Filha",
+        "ativo" => true,
+        "unidadeReceptora" => false,
+        "aptoParaReceberTramites" => true,
+        "codigoNoOrgaoEntidade" => "",
+        "codigoUnidadeReceptora" => "",
+        "tipoDeTramitacao" => 0,
+        "hierarquia" => [
+            [
+                "numeroDeIdentificacaoDaEstrutura" => "152254",
+                "nome" => "Órgão de Desenvolvimento ABC (FIRST) - ORGABC",
+                "sigla" => "ORGABC"
+            ]
+        ]
+      ];
 
-        // Configura o mock para retornar a resposta
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willReturn($mockResponse);
+      // Configura o mock para retornar a resposta
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willReturn($mockResponse);
 
-        $resultado = $this->mockService->consultarEstrutura(159098, 152254, true);
+      $resultado = $this->mockService->consultarEstrutura(159098, 152254, true);
 
-        $this->assertInstanceOf(stdClass::class, $resultado, 'O retorno deve ser uma instância da classe EstruturaDTO.');
-    }
+      $this->assertInstanceOf(stdClass::class, $resultado, 'O retorno deve ser uma instância da classe EstruturaDTO.');
+  }
 
-    public function testConsultarEstruturaListaLancaExcecao()
+  public function testConsultarEstruturaListaLancaExcecao()
     {
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willThrowException(new Exception('Erro na requisição'));
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willThrowException(new Exception('Erro na requisição'));
 
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na obtenção de unidades externas');
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na obtenção de unidades externas');
 
-        $this->mockService->consultarEstrutura(159098, 152254, false);
-    }
+      $this->mockService->consultarEstrutura(159098, 152254, false);
+  }
 }

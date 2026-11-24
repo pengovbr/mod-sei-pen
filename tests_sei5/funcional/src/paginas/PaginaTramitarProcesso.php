@@ -20,12 +20,12 @@ class PaginaTramitarProcesso extends PaginaTeste
     {
       // Aguarda o select de repositório estar disponível
       $this->waitUntil(function() {
-          try {
-              $this->elById('selRepositorioEstruturas');
-              return true;
-          } catch (\Exception $e) {
-              return false;
-          }
+        try {
+            $this->elById('selRepositorioEstruturas');
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
       }, PEN_WAIT_TIMEOUT);
 
       $select = new WebDriverSelect(

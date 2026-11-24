@@ -68,7 +68,7 @@ class PenOrgaoExternoFixture extends \FixtureBase
 
     $objPenOrgaoExternoBD = new \PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
     return $objPenOrgaoExternoBD->consultar($objPenOrgaoExternoDTO);
-}
+  }
 
   public function excluir($dados = [])
     {

@@ -35,12 +35,12 @@ class CienciaRecusaTest extends TestCase
      * Métodos simulados:
      * - `get`
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get'])
+                                ->getMock();
+  }
 
     /**
      * Testa o método `cienciaRecusa` com retorno bem-sucedido.
@@ -49,28 +49,28 @@ class CienciaRecusaTest extends TestCase
      * - Retorna um array com as chaves `status` e `mensagem`.
      * - Contém os valores esperados no retorno.
      */
-    public function testCienciaRecusaComSucesso()
+  public function testCienciaRecusaComSucesso()
     {
-        // Mock do retorno esperado do método get
-        $resultadoMock = [
-            'status' => 'sucesso',
-            'mensagem' => 'Ciência registrada com sucesso.'
-        ];
+      // Mock do retorno esperado do método get
+      $resultadoMock = [
+          'status' => 'sucesso',
+          'mensagem' => 'Ciência registrada com sucesso.'
+      ];
 
-        $this->mockService->expects($this->once())
-            ->method('get')
-            ->with('tramites/123/ciencia', ['IDT' => 123])
-            ->willReturn($resultadoMock);
+      $this->mockService->expects($this->once())
+          ->method('get')
+          ->with('tramites/123/ciencia', ['IDT' => 123])
+          ->willReturn($resultadoMock);
 
-        // Chamada do método
-        $resultado = $this->mockService->cienciaRecusa(123);
+      // Chamada do método
+      $resultado = $this->mockService->cienciaRecusa(123);
 
-        // Validações
-        $this->assertIsArray($resultado);
-        $this->assertArrayHasKey('status', $resultado);
-        $this->assertEquals('sucesso', $resultado['status']);
-        $this->assertEquals('Ciência registrada com sucesso.', $resultado['mensagem']);
-    }
+      // Validações
+      $this->assertIsArray($resultado);
+      $this->assertArrayHasKey('status', $resultado);
+      $this->assertEquals('sucesso', $resultado['status']);
+      $this->assertEquals('Ciência registrada com sucesso.', $resultado['mensagem']);
+  }
 
     /**
      * Testa o método `cienciaRecusa` quando ocorre um erro.
@@ -79,18 +79,18 @@ class CienciaRecusaTest extends TestCase
      * - Lança a exceção esperada (`InfraException`).
      * - Contém a mensagem correta de erro.
      */
-    public function testCienciaRecusaComErro()
+  public function testCienciaRecusaComErro()
     {
-        // Configuração do mock para lançar uma exceção
-        $this->mockService->expects($this->once())
-            ->method('get')
-            ->willThrowException(new Exception('Erro simulado'));
+      // Configuração do mock para lançar uma exceção
+      $this->mockService->expects($this->once())
+          ->method('get')
+          ->willThrowException(new Exception('Erro simulado'));
 
-        // Expectativa de exceção
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha no registro de ciência da recusa de trâmite');
+      // Expectativa de exceção
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha no registro de ciência da recusa de trâmite');
 
-        // Chamada do método (deve lançar exceção)
-        $this->mockService->cienciaRecusa(123);
-    }
+      // Chamada do método (deve lançar exceção)
+      $this->mockService->cienciaRecusa(123);
+  }
 }

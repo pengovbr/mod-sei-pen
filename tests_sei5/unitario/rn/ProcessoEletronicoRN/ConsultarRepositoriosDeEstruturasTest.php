@@ -35,12 +35,12 @@ class ConsultarRepositoriosDeEstruturasTest extends TestCase
      * Métodos simulados:
      * - `get`
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get'])
+                                ->getMock();
+  }
 
     /**
      * Testa o método `consultarRepositoriosDeEstruturas` com retorno bem-sucedido.
@@ -49,34 +49,34 @@ class ConsultarRepositoriosDeEstruturasTest extends TestCase
      * - Retorna uma instância de `RepositorioDTO`.
      * - Preenche os atributos da instância com os valores corretos.
      */
-    public function testConsultarRepositoriosDeEstruturasComSucesso()
+  public function testConsultarRepositoriosDeEstruturasComSucesso()
     {
-        // Mock do retorno esperado do método get
-        $resultadoMock = [
-            [
-                'id' => 5,
-                'nome' => 'Repositório 1',
-                'ativo' => true
-            ]
-        ];
+      // Mock do retorno esperado do método get
+      $resultadoMock = [
+          [
+              'id' => 5,
+              'nome' => 'Repositório 1',
+              'ativo' => true
+          ]
+      ];
 
-        $this->mockService->expects($this->once())
-            ->method('get')
-            ->with('repositorios-de-estruturas', ['ativo' => true])
-            ->willReturn($resultadoMock);
+      $this->mockService->expects($this->once())
+          ->method('get')
+          ->with('repositorios-de-estruturas', ['ativo' => true])
+          ->willReturn($resultadoMock);
 
-        // Chamada do método
-        $resultado = $this->mockService->consultarRepositoriosDeEstruturas(5);
+      // Chamada do método
+      $resultado = $this->mockService->consultarRepositoriosDeEstruturas(5);
 
-        // Validações
-        $this->assertInstanceOf(RepositorioDTO::class, $resultado);
-        $this->assertEquals(5, $resultado->getNumId());
-        $this->assertEquals(
-            mb_convert_encoding('Repositório 1', 'ISO-8859-1', 'UTF-8'),
-            $resultado->getStrNome()
-        );
-        $this->assertTrue($resultado->getBolAtivo());
-    }
+      // Validações
+      $this->assertInstanceOf(RepositorioDTO::class, $resultado);
+      $this->assertEquals(5, $resultado->getNumId());
+      $this->assertEquals(
+          mb_convert_encoding('Repositório 1', 'ISO-8859-1', 'UTF-8'),
+          $resultado->getStrNome()
+      );
+      $this->assertTrue($resultado->getBolAtivo());
+  }
 
     /**
      * Testa o método `consultarRepositoriosDeEstruturas` quando não há resultados.
@@ -84,22 +84,22 @@ class ConsultarRepositoriosDeEstruturasTest extends TestCase
      * Verifica se o método:
      * - Retorna `null` quando não há repositórios disponíveis.
      */
-    public function testConsultarRepositoriosDeEstruturasSemResultados()
+  public function testConsultarRepositoriosDeEstruturasSemResultados()
     {
-        // Mock do retorno esperado do método get
-        $resultadoMock = [];
+      // Mock do retorno esperado do método get
+      $resultadoMock = [];
 
-        $this->mockService->expects($this->once())
-            ->method('get')
-            ->with('repositorios-de-estruturas', ['ativo' => true])
-            ->willReturn($resultadoMock);
+      $this->mockService->expects($this->once())
+          ->method('get')
+          ->with('repositorios-de-estruturas', ['ativo' => true])
+          ->willReturn($resultadoMock);
 
-        // Chamada do método
-        $resultado = $this->mockService->consultarRepositoriosDeEstruturas(123);
+      // Chamada do método
+      $resultado = $this->mockService->consultarRepositoriosDeEstruturas(123);
 
-        // Validações
-        $this->assertNull($resultado);
-    }
+      // Validações
+      $this->assertNull($resultado);
+  }
 
     /**
      * Testa o método `consultarRepositoriosDeEstruturas` quando ocorre um erro.
@@ -108,18 +108,18 @@ class ConsultarRepositoriosDeEstruturasTest extends TestCase
      * - Lança a exceção esperada (`InfraException`).
      * - Contém a mensagem correta de erro.
      */
-    public function testConsultarRepositoriosDeEstruturasComErro()
+  public function testConsultarRepositoriosDeEstruturasComErro()
     {
-        // Configuração do mock para lançar uma exceção
-        $this->mockService->expects($this->once())
-            ->method('get')
-            ->willThrowException(new Exception('Erro simulado'));
+      // Configuração do mock para lançar uma exceção
+      $this->mockService->expects($this->once())
+          ->method('get')
+          ->willThrowException(new Exception('Erro simulado'));
 
-        // Expectativa de exceção
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na obtenção dos Repositórios de Estruturas Organizacionais');
+      // Expectativa de exceção
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na obtenção dos Repositórios de Estruturas Organizacionais');
 
-        // Chamada do método (deve lançar exceção)
-        $this->mockService->consultarRepositoriosDeEstruturas(123);
-    }
+      // Chamada do método (deve lançar exceção)
+      $this->mockService->consultarRepositoriosDeEstruturas(123);
+  }
 }

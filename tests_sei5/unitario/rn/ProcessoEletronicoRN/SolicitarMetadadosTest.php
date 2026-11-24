@@ -27,12 +27,12 @@ class SolicitarMetadadosTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                    ->onlyMethods(['get', 'converterArrayParaObjeto'])
-                    ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                  ->onlyMethods(['get', 'converterArrayParaObjeto'])
+                  ->getMock();
+  }
 
     /**
      * Testa o método solicitarMetadados para um caso de sucesso.
@@ -42,54 +42,54 @@ class SolicitarMetadadosTest extends TestCase
      * 
      * @return void
      */
-    public function testSolicitarMetadadosRetornaObjetoCorreto()
+  public function testSolicitarMetadadosRetornaObjetoCorreto()
     {
-        $parNumIdentificacaoTramite = 123;
+      $parNumIdentificacaoTramite = 123;
 
-        // Simular a resposta do método get
-        $mockResponse = [
-            'propriedadesAdicionais' => ['algum_valor'],
-            'processo' => [
-                'documentos' => [
-                    [
-                        'componentesDigitais' => [
-                            [
-                                'assinaturasDigitais' => [
-                                    ['alguma_assinatura']
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
+      // Simular a resposta do método get
+      $mockResponse = [
+          'propriedadesAdicionais' => ['algum_valor'],
+          'processo' => [
+              'documentos' => [
+                  [
+                      'componentesDigitais' => [
+                          [
+                              'assinaturasDigitais' => [
+                                  ['alguma_assinatura']
+                              ]
+                          ]
+                      ]
+                  ]
+              ]
+          ]
+      ];
 
-        $mockConvertedObject = (object) [
-            'NRE' => '123456',
-            'processo' => (object) [
-                'documentos' => [(object) ['algum_valor']],
-                'interessados' => [(object) ['algum_interessado']]
-            ]
-        ];
+      $mockConvertedObject = (object) [
+          'NRE' => '123456',
+          'processo' => (object) [
+              'documentos' => [(object) ['algum_valor']],
+              'interessados' => [(object) ['algum_interessado']]
+          ]
+      ];
 
-        // Configura o mock para o método get
-        $this->mockService->expects($this->once())
-                        ->method('get')
-                        ->willReturn($mockResponse);
+      // Configura o mock para o método get
+      $this->mockService->expects($this->once())
+                      ->method('get')
+                      ->willReturn($mockResponse);
 
-        // Configura o mock para o método converterArrayParaObjeto
-        $this->mockService->expects($this->once())
-                        ->method('converterArrayParaObjeto')
-                        ->willReturn($mockConvertedObject);
+      // Configura o mock para o método converterArrayParaObjeto
+      $this->mockService->expects($this->once())
+                      ->method('converterArrayParaObjeto')
+                      ->willReturn($mockConvertedObject);
 
-        // Chama o método a ser testado
-        $resultado = $this->mockService->solicitarMetadados($parNumIdentificacaoTramite);
+      // Chama o método a ser testado
+      $resultado = $this->mockService->solicitarMetadados($parNumIdentificacaoTramite);
 
-        // Verifica o retorno
-        $this->assertInstanceOf(stdClass::class, $resultado);
-        $this->assertEquals($parNumIdentificacaoTramite, $resultado->IDT);
-        $this->assertEquals('123456', $resultado->metadados->NRE);
-    }
+      // Verifica o retorno
+      $this->assertInstanceOf(stdClass::class, $resultado);
+      $this->assertEquals($parNumIdentificacaoTramite, $resultado->IDT);
+      $this->assertEquals('123456', $resultado->metadados->NRE);
+  }
 
     /**
      * Testa o método solicitarMetadados para um caso de falha.
@@ -99,19 +99,19 @@ class SolicitarMetadadosTest extends TestCase
      * 
      * @return void
      */
-    public function testSolicitarMetadadosLancaExcecao()
+  public function testSolicitarMetadadosLancaExcecao()
     {
-        $parNumIdentificacaoTramite = 123;
+      $parNumIdentificacaoTramite = 123;
 
-        // Configura o mock para o método get para lançar uma exceção
-        $this->mockService->expects($this->once())
-                        ->method('get')
-                        ->willThrowException(new Exception('Erro no web service'));
+      // Configura o mock para o método get para lançar uma exceção
+      $this->mockService->expects($this->once())
+                      ->method('get')
+                      ->willThrowException(new Exception('Erro no web service'));
 
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na solicitação de metadados do processo');
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na solicitação de metadados do processo');
 
-        // Chama o método e espera uma exceção
-        $this->mockService->solicitarMetadados($parNumIdentificacaoTramite);
-    }
+      // Chama o método e espera uma exceção
+      $this->mockService->solicitarMetadados($parNumIdentificacaoTramite);
+  }
 }

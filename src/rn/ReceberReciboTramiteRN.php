@@ -265,9 +265,9 @@ class ReceberReciboTramiteRN extends InfraRN
       $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($numIdProcedimento, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
 
       $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO);
-      if ($bolProcessoExpedido && $bolReproducaoUltimoTramite) { // Reprodução último trâmite
-        $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO);
-      }
+    if ($bolProcessoExpedido && $bolReproducaoUltimoTramite) { // Reprodução último trâmite
+      $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO);
+    }
       $objAtividadeDTO = new AtividadeDTO();
       $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
       $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());

@@ -2929,36 +2929,36 @@ class ProcessoEletronicoRN extends InfraRN
         $msg_esperada = "NRE, '$nre', já possui trâmite em andamento para este destinatário";
         // Expressão regular para buscar o texto com o número do processo como coringa
         $regex = '/Não é possível executar o serviço de reprodução de trâmite do processo \d{5}\.\d{6}\/\d{4}-\d{2}, pois não há componentes digitais válidos a serem reproduzidos/';
-        if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
-          return $arrayException;
-        } else {
-          $detalhes = $this->tratarFalhaWebService($e);
-          throw new InfraException($mensagem, $e, $detalhes);
-        }
+      if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
+        return $arrayException;
+      } else {
+        $detalhes = $this->tratarFalhaWebService($e);
+        throw new InfraException($mensagem, $e, $detalhes);
+      }
     }
   }
   
   public function tratarCodigoErro($idRepositorioEstrutura, $stringJson, $mensagem)
     {
-      try {
-        // Agora volta para UTF-8
-        $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
-        // Decodifica para array
-        $json = json_decode($messageUtf8, true);
-        if (isset($json['codigoErro']) && isset($json['message'])) {
-          switch ($json['codigoErro']) {
-            case '0055':
-              $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
-              $nome = $objRepositorioDTO->getStrNome();
-              $mensagem = "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: "
-                . $nome . ". Por favor, verifique se a unidade pertence a outra estrutura.";
+    try {
+      // Agora volta para UTF-8
+      $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
+      // Decodifica para array
+      $json = json_decode($messageUtf8, true);
+      if (isset($json['codigoErro']) && isset($json['message'])) {
+        switch ($json['codigoErro']) {
+          case '0055':
+            $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
+            $nome = $objRepositorioDTO->getStrNome();
+            $mensagem = "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: "
+              . $nome . ". Por favor, verifique se a unidade pertence a outra estrutura.";
               break;
-          }
-
         }
-      } catch (Exception) {
-        // Não faz nada, pois a mensagem já está definida
+
       }
+    } catch (Exception) {
+      // Não faz nada, pois a mensagem já está definida
+    }
 
       return $mensagem;
   }
@@ -2983,7 +2983,7 @@ class ProcessoEletronicoRN extends InfraRN
       return $this->getArrPenWsRest('DELETE', $endpoint, ['query' => $params]);
   }
 
-  private function getStackParaLog() : HandlerStack {
+  private function getStackParaLog(): HandlerStack {
       // Monolog
       $logger = new Logger('mod_sei_pen_logger');
       $logger->pushHandler(new StreamHandler('php://stdout'));
@@ -3008,10 +3008,10 @@ class ProcessoEletronicoRN extends InfraRN
    */
   public function obterDadoAssinaturaOuPadrao($strValor)
     {
-      if (InfraString::isBolVazia($strValor)) {
-          //Texto padrão da fonte (ISO-8859-1) convertido para UTF-8, mantendo o padrão dos dados recebidos do barramento.
-          return mb_convert_encoding('Informação inexistente', 'UTF-8', 'ISO-8859-1');
-      }
+    if (InfraString::isBolVazia($strValor)) {
+        //Texto padrão da fonte (ISO-8859-1) convertido para UTF-8, mantendo o padrão dos dados recebidos do barramento.
+        return mb_convert_encoding('Informação inexistente', 'UTF-8', 'ISO-8859-1');
+    }
 
       return mb_convert_encoding($strValor, 'UTF-8', 'ISO-8859-1');
   }

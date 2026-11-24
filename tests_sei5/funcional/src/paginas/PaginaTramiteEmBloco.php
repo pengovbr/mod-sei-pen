@@ -96,12 +96,12 @@ class PaginaTramiteEmBloco extends PaginaTeste
   
   public function verificarTituloDaPagina(string $tituloEsperado): bool
   {
-      try {
-          $this->elByXPath("//*[contains(text(), '{$tituloEsperado}')]");
-          return true;
-      } catch (\Exception $e) {
-          return false;
-      }
+    try {
+        $this->elByXPath("//*[contains(text(), '{$tituloEsperado}')]");
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
   }
 
 

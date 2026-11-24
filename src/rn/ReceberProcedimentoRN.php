@@ -186,9 +186,9 @@ class ReceberProcedimentoRN extends InfraRN
 
         $this->enviarProcedimentoUnidade($objProcedimentoDTO, null, $bolProcedimentoExistente);
 
-        if ($bolReproducaoUltimoTramite) {
-          $this->adicionarAtividadeReproducaoUltimoTramite($objProcedimentoDTO);
-        }
+      if ($bolReproducaoUltimoTramite) {
+        $this->adicionarAtividadeReproducaoUltimoTramite($objProcedimentoDTO);
+      }
 
         $this->validarPosCondicoesTramite($parObjMetadadosProcedimento, $objProcedimentoDTO);
 
@@ -255,9 +255,9 @@ class ReceberProcedimentoRN extends InfraRN
 
       $arrComponentesDigitaisPresentes = array_diff_key($arrHashComponentesProtocolo, $arrHashPendentesRecebimento);
       $numQtdComponentesPresentes = count($arrComponentesDigitaisPresentes);
-      if ($numQtdComponentesPresentes > 0) {
-        $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
-      }
+    if ($numQtdComponentesPresentes > 0) {
+      $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
+    }
   
       $qtdComponentesEnviadosRecebidos = $numQtdComponentes - $numQtdComponentesPresentes;
       $this->gravarLogDebug("Serão enviado(s)/recebido(s) {$qtdComponentesEnviadosRecebidos} Componente(s) digital(is)", 2);
@@ -1875,25 +1875,25 @@ class ReceberProcedimentoRN extends InfraRN
 
           //Recusa o trâmite, com mensagem amigável, quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante
           $arrObjComponentesDigitaisAssinatura = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais : [$objDocumento->componentesDigitais];
-          foreach ($arrObjComponentesDigitaisAssinatura as $objComponenteDigitalAssinatura) {
-            $arrObjComponenteDigitalAssinatura = (array) $objComponenteDigitalAssinatura;
-            $arrObjAssinaturasDigitais = $arrObjComponenteDigitalAssinatura['assinaturasDigitais'] ?? [];
-            if (!is_array($arrObjAssinaturasDigitais)) {
-              $arrObjAssinaturasDigitais = [$arrObjAssinaturasDigitais];
-            }
-            foreach ($arrObjAssinaturasDigitais as $objAssinaturaDigital) {
-              $arrAssinaturaDigital = (array) $objAssinaturaDigital;
-              //Issue #1178: quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante,
-              //preenche o dado com o texto padrão "Informação inexistente" ao invés de recusar o trâmite, mantendo o
-              //mesmo tratamento tolerante adotado na expedição (evita recusa entre órgãos com SEI 5.1.0 ou superior).
-              $strNomeAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($arrAssinaturaDigital['nome'] ?? null);
-              $strTratamentoAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($arrAssinaturaDigital['cargo'] ?? null);
-              if (is_object($objAssinaturaDigital)) {
-                $objAssinaturaDigital->nome = $strNomeAssinante;
-                $objAssinaturaDigital->cargo = $strTratamentoAssinante;
-              }
+        foreach ($arrObjComponentesDigitaisAssinatura as $objComponenteDigitalAssinatura) {
+          $arrObjComponenteDigitalAssinatura = (array) $objComponenteDigitalAssinatura;
+          $arrObjAssinaturasDigitais = $arrObjComponenteDigitalAssinatura['assinaturasDigitais'] ?? [];
+          if (!is_array($arrObjAssinaturasDigitais)) {
+            $arrObjAssinaturasDigitais = [$arrObjAssinaturasDigitais];
+          }
+          foreach ($arrObjAssinaturasDigitais as $objAssinaturaDigital) {
+            $arrAssinaturaDigital = (array) $objAssinaturaDigital;
+            //Issue #1178: quando um componente assinado é recebido sem o nome e/ou o cargo/tratamento do assinante,
+            //preenche o dado com o texto padrão "Informação inexistente" ao invés de recusar o trâmite, mantendo o
+            //mesmo tratamento tolerante adotado na expedição (evita recusa entre órgãos com SEI 5.1.0 ou superior).
+            $strNomeAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($arrAssinaturaDigital['nome'] ?? null);
+            $strTratamentoAssinante = $this->objProcessoEletronicoRN->obterDadoAssinaturaOuPadrao($arrAssinaturaDigital['cargo'] ?? null);
+            if (is_object($objAssinaturaDigital)) {
+              $objAssinaturaDigital->nome = $strNomeAssinante;
+              $objAssinaturaDigital->cargo = $strTratamentoAssinante;
             }
           }
+        }
 
           $objAtividadeDTOVisualizacao = new AtividadeDTO();
           $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());

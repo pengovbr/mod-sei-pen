@@ -83,19 +83,19 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
     /**
      * Trata o alerta padrão e confirma via ENTER se houver texto.
      */
-    private function handleAlert(): void
+  private function handleAlert(): void
     {
-      try {
-          $this->test->waitUntil(function() {
-              try {
-                  $this->driver->switchTo()->alert()->accept();
-                  return true;
-              } catch (\Exception $e) {
-                  return false;
-              }
-          }, PEN_WAIT_TIMEOUT);
-      } catch (\Exception $e) {
-          // sem alert, segue em frente
-      }
+    try {
+        $this->test->waitUntil(function() {
+          try {
+              $this->driver->switchTo()->alert()->accept();
+              return true;
+          } catch (\Exception $e) {
+              return false;
+          }
+        }, PEN_WAIT_TIMEOUT);
+    } catch (\Exception $e) {
+        // sem alert, segue em frente
     }
+  }
 }

@@ -383,9 +383,9 @@ class PendenciasTramiteRN extends InfraRN
             $objProcessarPendenciaRN->receberTramitesRecusados($numIDT);
             break;
 
-          case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-              $strStatus = $objPendencia->getStrStatus();
-            $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+            $strStatus = $objPendencia->getStrStatus();
+          $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
             break;
             
         default:
@@ -426,16 +426,16 @@ class PendenciasTramiteRN extends InfraRN
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
         ];
 
-    if (in_array((int) $numStatus, $arrSituacoesProcessaveis, true)) {
-        $client->addTaskBackground(
+        if (in_array((int) $numStatus, $arrSituacoesProcessaveis, true)) {
+            $client->addTaskBackground(
             'processarPendencia',
             json_encode(['idt' => $numIDT, 'status' => $numStatus]),
             null,
             $numIDT
-        );
-    } else {
-        $this->gravarLogDebug("Situação do trâmite ($numStatus ) não pode ser tratada.");
-    }
+            );
+        } else {
+            $this->gravarLogDebug("Situação do trâmite ($numStatus ) não pode ser tratada.");
+        }
 
         $client->runTasks();
     }

@@ -25,43 +25,43 @@ class ListarPendenciasTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get'])
+                                ->getMock();
+  }
 
-    public function testListarPendenciasSucesso()
+  public function testListarPendenciasSucesso()
     {
-        $mockResponse = [
-            [
-                'status' => 2,
-                'IDT' => 999
-            ]
-        ];
+      $mockResponse = [
+          [
+              'status' => 2,
+              'IDT' => 999
+          ]
+      ];
 
-        // Configura o mock para retornar a resposta
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willReturn($mockResponse);
+      // Configura o mock para retornar a resposta
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willReturn($mockResponse);
 
-        $resultado = $this->mockService->listarPendencias(true);
+      $resultado = $this->mockService->listarPendencias(true);
 
-        $this->assertIsArray($resultado, 'O retorno deve ser um array.');
-        $this->assertCount(count($mockResponse), $resultado, 'A quantidade de objetos no retorno está incorreta.');
-        $this->assertInstanceOf(PendenciaDTO::class, $resultado[0], 'O primeiro objeto na lista deve ser uma instância da classe RepositorioDTO.');
-    }
+      $this->assertIsArray($resultado, 'O retorno deve ser um array.');
+      $this->assertCount(count($mockResponse), $resultado, 'A quantidade de objetos no retorno está incorreta.');
+      $this->assertInstanceOf(PendenciaDTO::class, $resultado[0], 'O primeiro objeto na lista deve ser uma instância da classe RepositorioDTO.');
+  }
 
-    public function testListarPendenciasLancaExcecao()
+  public function testListarPendenciasLancaExcecao()
     {
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willThrowException(new Exception('Erro na requisição'));
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willThrowException(new Exception('Erro na requisição'));
 
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na listagem de pendências de trâmite de processos');
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na listagem de pendências de trâmite de processos');
 
-        $this->mockService->listarPendencias(true);
-    }
+      $this->mockService->listarPendencias(true);
+  }
 }

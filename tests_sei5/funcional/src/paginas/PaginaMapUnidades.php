@@ -329,5 +329,5 @@ class PaginaMapUnidades extends PaginaTeste
       $this->repoUnidadeInput->clear();
       $this->repoUnidadeInput->sendKeys($textoUnidade);
       $this->repoUnidadeInput->sendKeys(WebDriverKeys::ENTER);
-    }
+  }
 }

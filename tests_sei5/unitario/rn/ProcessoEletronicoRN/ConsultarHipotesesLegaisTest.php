@@ -23,12 +23,12 @@ class ConsultarHipotesesLegaisTest extends TestCase
      * Inicializa o mock do serviço ProcessoEletronicoRN, substituindo o método 'get'
      * para controlar o comportamento do teste.
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get'])
+                                ->getMock();
+  }
 
     /**
      * Testa o sucesso da consulta de hipóteses legais.
@@ -38,26 +38,26 @@ class ConsultarHipotesesLegaisTest extends TestCase
      *
      * @return void
      */
-    public function testConsultarHipotesesLegaisSucesso()
+  public function testConsultarHipotesesLegaisSucesso()
     {
-        // Define o valor retornado pelo método 'get' mockado
-        $mockResponse = [
-            'hipoteseslegais' => [
-            ]
-        ];
+      // Define o valor retornado pelo método 'get' mockado
+      $mockResponse = [
+          'hipoteseslegais' => [
+          ]
+      ];
 
-        // Configura o mock para esperar que o método 'get' seja chamado uma vez e retorne $mockResponse
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willReturn($mockResponse);
+      // Configura o mock para esperar que o método 'get' seja chamado uma vez e retorne $mockResponse
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willReturn($mockResponse);
 
-        // Chama o método que está sendo testado
-        $resultado = $this->mockService->consultarHipotesesLegais(true);
+      // Chama o método que está sendo testado
+      $resultado = $this->mockService->consultarHipotesesLegais(true);
 
-        // Verifica se o resultado é nulo, conforme esperado
-        $this->assertIsArray($resultado);
-        $this->assertArrayHasKey('hipoteseslegais', $resultado);
-    }
+      // Verifica se o resultado é nulo, conforme esperado
+      $this->assertIsArray($resultado);
+      $this->assertArrayHasKey('hipoteseslegais', $resultado);
+  }
 
     /**
      * Testa o sucesso da consulta de hipóteses legais com retorno vazio.
@@ -67,23 +67,23 @@ class ConsultarHipotesesLegaisTest extends TestCase
      *
      * @return void
      */
-    public function testConsultarHipotesesLegaisRetornoVazioSucesso()
+  public function testConsultarHipotesesLegaisRetornoVazioSucesso()
     {
-        // Define o valor retornado pelo método 'get' mockado
-        $mockResponse = [];
+      // Define o valor retornado pelo método 'get' mockado
+      $mockResponse = [];
 
-        // Configura o mock para esperar que o método 'get' seja chamado uma vez e retorne $mockResponse
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willReturn($mockResponse);
+      // Configura o mock para esperar que o método 'get' seja chamado uma vez e retorne $mockResponse
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willReturn($mockResponse);
 
-        // Chama o método que está sendo testado
-        $resultado = $this->mockService->consultarHipotesesLegais(true);
+      // Chama o método que está sendo testado
+      $resultado = $this->mockService->consultarHipotesesLegais(true);
 
-        // Verifica se o resultado é nulo, conforme esperado
-        $this->assertIsArray($resultado);
-        $this->assertEquals(0, count($resultado));
-    }
+      // Verifica se o resultado é nulo, conforme esperado
+      $this->assertIsArray($resultado);
+      $this->assertEquals(0, count($resultado));
+  }
 
     /**
      * Testa o lançamento de exceção ao tentar consultar as hipóteses legais.
@@ -94,18 +94,18 @@ class ConsultarHipotesesLegaisTest extends TestCase
      * @return void
      * @throws InfraException Se a exceção de infra-estrutura for gerada.
      */
-    public function testConsultarHipotesesLegaisLancaExcecao()
+  public function testConsultarHipotesesLegaisLancaExcecao()
     {
-        // Configura o mock para lançar uma exceção quando o método 'get' for chamado
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willThrowException(new Exception('Erro na requisição'));
+      // Configura o mock para lançar uma exceção quando o método 'get' for chamado
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willThrowException(new Exception('Erro na requisição'));
 
-        // Define a expectativa de que a exceção InfraException será lançada
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na obtenção de hipóteses legais');
+      // Define a expectativa de que a exceção InfraException será lançada
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na obtenção de hipóteses legais');
 
-        // Chama o método que deve lançar a exceção
-        $this->mockService->consultarHipotesesLegais(true);
-    }
+      // Chama o método que deve lançar a exceção
+      $this->mockService->consultarHipotesesLegais(true);
+  }
 }

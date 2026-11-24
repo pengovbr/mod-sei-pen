@@ -25,12 +25,12 @@ class ListarRepositorioTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get'])
+                                ->getMock();
+  }
 
     /**
      * Testa o método listarRepositoriosDeEstruturas para garantir que ele
@@ -47,26 +47,26 @@ class ListarRepositorioTest extends TestCase
      * 
      * @return void
      */
-    public function testListarRepositoriosDeEstruturasRetornaListaSucesso()
+  public function testListarRepositoriosDeEstruturasRetornaListaSucesso()
     {
-        $mockResponse = [
-            ["id" => 49, "nome" => "Acre - AC", "ativo" => true],
-            ["id" => 2, "nome" => "Advocacia-Geral da União", "ativo" => true],
-            ["id" => 7, "nome" => "Alagoas( Estado)", "ativo" => true],
-            ["id" => 20, "nome" => "Banco Central do Brasil 2", "ativo" => true],
-        ];
+      $mockResponse = [
+          ["id" => 49, "nome" => "Acre - AC", "ativo" => true],
+          ["id" => 2, "nome" => "Advocacia-Geral da União", "ativo" => true],
+          ["id" => 7, "nome" => "Alagoas( Estado)", "ativo" => true],
+          ["id" => 20, "nome" => "Banco Central do Brasil 2", "ativo" => true],
+      ];
 
-        // Configura o mock para retornar a resposta
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willReturn($mockResponse);
+      // Configura o mock para retornar a resposta
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willReturn($mockResponse);
 
-        $resultado = $this->mockService->listarRepositoriosDeEstruturas();
+      $resultado = $this->mockService->listarRepositoriosDeEstruturas();
 
-        $this->assertIsArray($resultado, 'O retorno deve ser um array.');
-        $this->assertCount(count($mockResponse), $resultado, 'A quantidade de objetos no retorno está incorreta.');
-        $this->assertInstanceOf(RepositorioDTO::class, $resultado[0], 'O primeiro objeto na lista deve ser uma instância da classe RepositorioDTO.');
-    }
+      $this->assertIsArray($resultado, 'O retorno deve ser um array.');
+      $this->assertCount(count($mockResponse), $resultado, 'A quantidade de objetos no retorno está incorreta.');
+      $this->assertInstanceOf(RepositorioDTO::class, $resultado[0], 'O primeiro objeto na lista deve ser uma instância da classe RepositorioDTO.');
+  }
 
     /**
      * Testa o método listarRepositoriosDeEstruturas para garantir que ele lança
@@ -83,15 +83,15 @@ class ListarRepositorioTest extends TestCase
      * 
      * @return void
      */
-    public function testListarRepositoriosDeEstruturasLancaExcecao()
+  public function testListarRepositoriosDeEstruturasLancaExcecao()
     {
-        $this->mockService->expects($this->once())
-                          ->method('get')
-                          ->willThrowException(new Exception('Erro na requisição'));
+      $this->mockService->expects($this->once())
+                        ->method('get')
+                        ->willThrowException(new Exception('Erro na requisição'));
 
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na obtenção dos Repositórios de Estruturas Organizacionais');
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na obtenção dos Repositórios de Estruturas Organizacionais');
 
-        $this->mockService->listarRepositoriosDeEstruturas();
-    }
+      $this->mockService->listarRepositoriosDeEstruturas();
+  }
 }

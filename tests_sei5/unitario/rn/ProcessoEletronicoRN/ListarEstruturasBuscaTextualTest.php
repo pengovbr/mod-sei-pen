@@ -26,12 +26,12 @@ class ListarEstruturasBuscaTextualTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void
+  protected function setUp(): void
     {
-        $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
-                                  ->onlyMethods(['get', 'consultarEstruturas'])
-                                  ->getMock();
-    }
+      $this->mockService = $this->getMockBuilder(ProcessoEletronicoRN::class)
+                                ->onlyMethods(['get', 'consultarEstruturas'])
+                                ->getMock();
+  }
 
     /**
      * Testa o método listarEstruturasBuscaTextual para um caso de sucesso.
@@ -41,47 +41,47 @@ class ListarEstruturasBuscaTextualTest extends TestCase
      *
      * @return void
      */
-    public function testListarEstruturasBuscaTextualRetornaEstruturas()
+  public function testListarEstruturasBuscaTextualRetornaEstruturas()
     {
-        $idRepositorioEstrutura = 1;
-        $nome = 'Estrutura Raiz';
-        $mockResponse = [
-            'totalDeRegistros' => 2,
-            'estruturas' => [
-                [
-                    'numeroDeIdentificacaoDaEstrutura' => '123',
-                    'nome' => 'Estrutura 1',
-                    'sigla' => 'E1',
-                    'ativo' => true,
-                    'aptoParaReceberTramites' => true,
-                    'codigoNoOrgaoEntidade' => '001',
-                    'hierarquia' => [['sigla' => 'H1'], ['sigla' => 'H2']],
-                ],
-                [
-                    'numeroDeIdentificacaoDaEstrutura' => '456',
-                    'nome' => 'Estrutura 2',
-                    'sigla' => 'E2',
-                    'ativo' => false,
-                    'aptoParaReceberTramites' => false,
-                    'codigoNoOrgaoEntidade' => '002',
-                    'hierarquia' => [['sigla' => 'H3']],
-                ]
-            ]
-        ];
+      $idRepositorioEstrutura = 1;
+      $nome = 'Estrutura Raiz';
+      $mockResponse = [
+          'totalDeRegistros' => 2,
+          'estruturas' => [
+              [
+                  'numeroDeIdentificacaoDaEstrutura' => '123',
+                  'nome' => 'Estrutura 1',
+                  'sigla' => 'E1',
+                  'ativo' => true,
+                  'aptoParaReceberTramites' => true,
+                  'codigoNoOrgaoEntidade' => '001',
+                  'hierarquia' => [['sigla' => 'H1'], ['sigla' => 'H2']],
+              ],
+              [
+                  'numeroDeIdentificacaoDaEstrutura' => '456',
+                  'nome' => 'Estrutura 2',
+                  'sigla' => 'E2',
+                  'ativo' => false,
+                  'aptoParaReceberTramites' => false,
+                  'codigoNoOrgaoEntidade' => '002',
+                  'hierarquia' => [['sigla' => 'H3']],
+              ]
+          ]
+      ];
 
-        $this->mockService->expects($this->once())
-                          ->method('consultarEstruturas')
-                          ->with($idRepositorioEstrutura, $this->arrayHasKey('identificacaoDoRepositorioDeEstruturas'))
-                          ->willReturn($mockResponse);
+      $this->mockService->expects($this->once())
+                        ->method('consultarEstruturas')
+                        ->with($idRepositorioEstrutura, $this->arrayHasKey('identificacaoDoRepositorioDeEstruturas'))
+                        ->willReturn($mockResponse);
 
-        $resultado = $this->mockService->listarEstruturasBuscaTextual($idRepositorioEstrutura, $nome);
+      $resultado = $this->mockService->listarEstruturasBuscaTextual($idRepositorioEstrutura, $nome);
 
-        $this->assertCount(2, $resultado);
-        $this->assertInstanceOf(EstruturaDTO::class, $resultado[0]);
-        $this->assertEquals('123', $resultado[0]->getNumNumeroDeIdentificacaoDaEstrutura());
-        $this->assertEquals('Estrutura 1', $resultado[0]->getStrNome());
-        $this->assertEquals(['H1', 'H2'], $resultado[0]->getArrHierarquia());
-    }
+      $this->assertCount(2, $resultado);
+      $this->assertInstanceOf(EstruturaDTO::class, $resultado[0]);
+      $this->assertEquals('123', $resultado[0]->getNumNumeroDeIdentificacaoDaEstrutura());
+      $this->assertEquals('Estrutura 1', $resultado[0]->getStrNome());
+      $this->assertEquals(['H1', 'H2'], $resultado[0]->getArrHierarquia());
+  }
 
     /**
      * Testa o método listarEstruturasBuscaTextual para um repositório inválido.
@@ -90,15 +90,15 @@ class ListarEstruturasBuscaTextualTest extends TestCase
      *
      * @return void
      */
-    public function testListarEstruturasBuscaTextualLancaExcecaoParaRepositorioInvalido()
+  public function testListarEstruturasBuscaTextualLancaExcecaoParaRepositorioInvalido()
     {
-        $idRepositorioEstrutura = null;
+      $idRepositorioEstrutura = null;
 
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Repositório de Estruturas inválido');
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Repositório de Estruturas inválido');
 
-        $this->mockService->listarEstruturasBuscaTextual($idRepositorioEstrutura);
-    }
+      $this->mockService->listarEstruturasBuscaTextual($idRepositorioEstrutura);
+  }
 
     /**
      * Testa o método listarEstruturasBuscaTextual para falhas no web service.
@@ -108,17 +108,17 @@ class ListarEstruturasBuscaTextualTest extends TestCase
      *
      * @return void
      */
-    public function testListarEstruturasBuscaTextualLancaExcecaoParaErroWebService()
+  public function testListarEstruturasBuscaTextualLancaExcecaoParaErroWebService()
     {
-        $idRepositorioEstrutura = 1;
+      $idRepositorioEstrutura = 1;
 
-        $this->mockService->expects($this->once())
-                          ->method('consultarEstruturas')
-                          ->willThrowException(new Exception('Erro no web service'));
+      $this->mockService->expects($this->once())
+                        ->method('consultarEstruturas')
+                        ->willThrowException(new Exception('Erro no web service'));
 
-        $this->expectException(InfraException::class);
-        $this->expectExceptionMessage('Falha na obtenção de unidades externas');
+      $this->expectException(InfraException::class);
+      $this->expectExceptionMessage('Falha na obtenção de unidades externas');
 
-        $this->mockService->listarEstruturasBuscaTextual($idRepositorioEstrutura);
-    }
+      $this->mockService->listarEstruturasBuscaTextual($idRepositorioEstrutura);
+  }
 }

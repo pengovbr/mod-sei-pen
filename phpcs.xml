@@ -9,7 +9,7 @@
     <config name="testVersion" value="8.2-" />
 
     <file>src</file>
-    <file>tests</file>
+    <file>tests_sei5</file>
 
     <exclude-pattern>*/tests/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>

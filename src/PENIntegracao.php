@@ -65,19 +65,19 @@ class PENIntegracao extends SeiIntegracao
 
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
       $bolBlocoAbertoUnidade = false; 
-      if ($bolAcaoAcessarTramiteEmBloco) {
-        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objTramiteEmBlocoDTO->retNumId();
-        $objTramiteEmBlocoDTO->retNumIdUnidade();
-        $objTramiteEmBlocoDTO->retStrDescricao();
+    if ($bolAcaoAcessarTramiteEmBloco) {
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+      $objTramiteEmBlocoDTO->retNumId();
+      $objTramiteEmBlocoDTO->retNumIdUnidade();
+      $objTramiteEmBlocoDTO->retStrDescricao();
     
-        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-            $bolBlocoAbertoUnidade = true;
-        }
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+      if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+          $bolBlocoAbertoUnidade = true;
       }
+    }
 
     if ($bolAcaoIncluirProcessoEmBloco && $bolBlocoAbertoUnidade) {
         $objPaginaSEI = PaginaSEI::getInstance();
@@ -146,40 +146,40 @@ class PENIntegracao extends SeiIntegracao
       $bolAcaoAcessarTramiteEmBloco = $objSessaoSEI->verificarPermissao('md_pen_tramita_em_bloco');
       $bolBlocoAbertoUnidade = false;
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-      if ($bolAcaoAcessarTramiteEmBloco) {
-        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objTramiteEmBlocoDTO->retNumId();
-        $objTramiteEmBlocoDTO->retNumIdUnidade();
-        $objTramiteEmBlocoDTO->retStrDescricao();
-        PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+    if ($bolAcaoAcessarTramiteEmBloco) {
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+      $objTramiteEmBlocoDTO->retNumId();
+      $objTramiteEmBlocoDTO->retNumIdUnidade();
+      $objTramiteEmBlocoDTO->retStrDescricao();
+      PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
     
-        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-            $bolBlocoAbertoUnidade = true;
-        }
+      if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+          $bolBlocoAbertoUnidade = true;
       }
+    }
 
       $bolAcaoAcessarTramiteEmBlocoProtocoloListar = $objSessaoSEI->verificarPermissao('pen_tramita_em_bloco_protocolo_listar');
       $bolProcessoEmBloco = false;
-      if ($bolAcaoAcessarTramiteEmBlocoProtocoloListar) {
-        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
-        $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objPenBlocoProcessoDTO->retNumIdAndamento();
-        $objPenBlocoProcessoDTO->retNumIdBloco();
+    if ($bolAcaoAcessarTramiteEmBlocoProtocoloListar) {
+      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+      $objPenBlocoProcessoDTO->retNumIdAndamento();
+      $objPenBlocoProcessoDTO->retNumIdBloco();
 
-        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-        $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-        if (count($arrObjPenBlocoProcessoDTO) > 0) {
-            $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
-          foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
-            if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
-              $bolProcessoEmBloco = true;
-            }
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+      if (count($arrObjPenBlocoProcessoDTO) > 0) {
+          $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
+        foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
+          if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+            $bolProcessoEmBloco = true;
           }
         }
       }
+    }
 
       // Verifica se existe uma unidade mapeada
       $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
@@ -648,7 +648,7 @@ class PENIntegracao extends SeiIntegracao
     $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI, 'excluir');
   }
 
-  protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI,  $strDesativarExcluir)
+  protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI, $strDesativarExcluir)
   {
     $excecao = new InfraException();
     foreach ($arrObjSerieAPI as $objSerieAPI) {
@@ -1359,7 +1359,7 @@ class PENIntegracao extends SeiIntegracao
    * @return void
    * @throws InfraException - Exceção lançada quando o processo anexado já tiver sido tramitado via Tramita GOV.BR, impossibilitando o desanexar
    */
-   public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+  public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
     $numUltimoStatusTramite = null;
 
@@ -1404,10 +1404,10 @@ class PENIntegracao extends SeiIntegracao
     }
     $nomeModulo = $this->getNome();
     $mensagem = $nomeModulo . ': Prezado(a) usuário(a), não é possível desanexar o processo '
-      . $objProcedimentoAPIAnexado->getNumeroProtocolo()
-      . ' do processo '
-      . $objProcedimentoAPIPrincipal->getNumeroProtocolo()
-      . ', pois já houve tramitação via Tramita GOV.BR.';
+     . $objProcedimentoAPIAnexado->getNumeroProtocolo()
+     . ' do processo '
+     . $objProcedimentoAPIPrincipal->getNumeroProtocolo()
+     . ', pois já houve tramitação via Tramita GOV.BR.';
 
     if ($numUltimoStatusTramite !== null && in_array((int) $numUltimoStatusTramite, [0, 1, 2, 3, 4, 5, 8], true)) {
       $mensagem = $nomeModulo . ': Não é possível desanexar o processo '

@@ -305,5 +305,5 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
   public function btnEnviar(): void
     {
       $this->elByXPath("//button[@type='button' and @value='Enviar']")->click();
-    }
+  }
 }
