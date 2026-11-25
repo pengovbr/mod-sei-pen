@@ -2824,6 +2824,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("4.1.1");
   }
 
+  protected function instalarV4120()
+  {
+    $this->atualizarNumeroVersao("4.1.2");
+  }
 
    /**
    * Tamanho padrao do lote de migracao de anexos, cada um em transacao propria.
